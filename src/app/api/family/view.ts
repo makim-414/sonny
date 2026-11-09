@@ -17,12 +17,15 @@ function effectiveVisibility(e: ActivityEvent): NonNullable<ActivityEvent["visib
 
 // The agent echoes inbox items as "엄마 → TV: ..."; our own route already logged them.
 const INBOX_ECHO = /^\S+\s*(→|->)\s*TV:/;
+// Agent bookkeeping that means nothing to mom: memory lookups and brain errors.
+const NOISE = /^(기억 찾기|기억 꺼냄)|두뇌 오류/;
 
 export function familyView(events: ActivityEvent[]): FamilyView {
   const out: ActivityEvent[] = [];
   let hiddenCount = 0;
   for (const e of events) {
     if (e.kind === "family" && INBOX_ECHO.test(e.text)) continue;
+    if ((e.kind === "memory" || e.kind === "alert") && NOISE.test(e.text)) continue;
     const v = effectiveVisibility(e);
     if (v === "private") {
       hiddenCount++;
