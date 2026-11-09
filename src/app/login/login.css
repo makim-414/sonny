@@ -4,6 +4,9 @@
   padding: var(--sp-6) var(--sp-4);
 }
 .lg-card {
+  width: 100%;
+  max-width: var(--max-w);
+  margin-inline: auto;
   background: var(--bg-elev);
   border: 1px solid var(--border);
   border-radius: var(--r-xl);
@@ -58,6 +61,12 @@
   font-size: var(--t-title);
   font-weight: var(--w-semi);
   cursor: pointer;
+}
+.lg-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 .lg-submit:disabled {
   opacity: 0.6;
