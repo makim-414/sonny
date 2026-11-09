@@ -1,4 +1,4 @@
-# Hyodo TV architecture
+# Sonny architecture
 
 A full AI assistant that lives inside grandma's TV. It talks, speaks first, remembers, keeps her schedule, reads her the world, and keeps the family in the loop.
 Its character is a student that grandma teaches: what she teaches it becomes its long-term memory.
