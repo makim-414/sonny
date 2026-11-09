@@ -68,6 +68,7 @@ Pickle covers your workday through Zoom. Sonny covers grandma's whole day. Scan 
 ## Family admin
 
 - Mom signs in once; taps "Connect grandma's phone"; scans one QR with grandma's phone. Done.
+- Family can tune voice speed, wait time and text size from a hidden setup screen on grandma's phone (hold the top-left corner for 2 seconds, then the family PIN).
 - Tabs: Today (what got done, "No need to call today", approvals), Taught (her lessons and the real counter), Routines (pills, outings, doctor, saved into her memory), Allowance (balance, history, limit, approve or decline, top up), Privacy, Device.
 - Judges skip sign-in with the demo QR codes (`?demo=1`).
 
