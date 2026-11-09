@@ -6,6 +6,7 @@ import { isListenSupported, listenOnce, type Listener } from "@/lib/voice/listen
 import { splitSentences, unlockSpeech } from "@/lib/voice/speak";
 import { speakSentences, stopVoice, unlockAudio, voiceLevel, warmTts } from "@/lib/tts/player";
 import { createVad, type Vad } from "@/lib/voice/vad";
+import { transcribe } from "@/lib/voice/stt";
 import { APP_LANG } from "@/lib/brand";
 import { callAgent } from "@/components/tv/agent-client";
 import { formatTime, useDemoClock } from "@/components/tv/use-demo-clock";
@@ -93,6 +94,10 @@ export function OrbApp() {
   const startedRef = useRef(false);
   const timersRef = useRef<Timer[]>([]);
   const vadRef = useRef<Vad | null>(null);
+  // Web Speech works here (false on e.g. iPhone home-screen apps) and the server STT answers.
+  const webSpeechOkRef = useRef(!hasFlag("stt")); // ?stt forces the server path
+  const sttOkRef = useRef(true);
+  const serverListeningRef = useRef(false);
   const cardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -178,25 +183,60 @@ export function OrbApp() {
     [stopListening],
   );
 
-  const turn = useCallback(
-    (req: Omit<AgentRequest, "now">) => {
+  const runTurn = useCallback(
+    async (req: Omit<AgentRequest, "now">) => {
+      setMode("thinking");
+      const { reply } = await callAgent({ ...req, now: getNow().toISOString() });
+      if (req.source === "voice" && reply.heardEn) setLine({ who: "user", text: req.text, en: reply.heardEn });
+      runActions(reply.actions);
+      if (reply.private) showToast(COPY.private);
+      await say(reply.say, reply.sayEn);
+    },
+    [getNow, runActions, say, setMode, showToast],
+  );
+
+  const turn = useCallback((req: Omit<AgentRequest, "now">) => enqueue(() => runTurn(req)), [enqueue, runTurn]);
+
+  // Server path: the VAD caught a whole utterance; whisper writes it down, then the agent answers.
+  const onUtterance = useCallback(
+    (audio: Float32Array) => {
+      if (!serverListeningRef.current) return;
+      serverListeningRef.current = false;
       enqueue(async () => {
         setMode("thinking");
-        const { reply } = await callAgent({ ...req, now: getNow().toISOString() });
-        if (req.source === "voice" && reply.heardEn) setLine({ who: "user", text: req.text, en: reply.heardEn });
-        runActions(reply.actions);
-        if (reply.private) showToast(COPY.private);
-        await say(reply.say, reply.sayEn);
+        const r = await transcribe(audio);
+        if (!r.ok) {
+          if (r.unavailable) {
+            sttOkRef.current = false;
+            setTyping(true);
+          }
+          return;
+        }
+        if (!r.text) return;
+        setLine({ who: "user", text: r.text });
+        await runTurn({ text: r.text, source: "voice" });
       });
     },
-    [enqueue, getNow, runActions, say, setMode, showToast],
+    [enqueue, runTurn, setMode],
   );
 
   const listen = useCallback(() => {
-    if (!startedRef.current || pendingRef.current > 0 || listenerRef.current) return;
-    if (!listenOkRef.current || !isListenSupported()) {
+    if (!startedRef.current || pendingRef.current > 0 || listenerRef.current || serverListeningRef.current) return;
+    if (!listenOkRef.current) {
       setMode("idle");
       setTyping(true);
+      return;
+    }
+    if (!webSpeechOkRef.current || !isListenSupported()) {
+      // No Web Speech: let the VAD catch the utterance and send it to the server STT.
+      if (vadRef.current && sttOkRef.current) {
+        serverListeningRef.current = true;
+        setMode("listening");
+        vadRef.current.start();
+      } else {
+        setMode("idle");
+        if (!sttOkRef.current || hasFlag("novad")) setTyping(true);
+      }
       return;
     }
     setMode("listening");
@@ -212,10 +252,13 @@ export function OrbApp() {
         turn({ text: t, source: "voice" });
       },
       onError: (code) => {
-        if (code === "not-allowed" || code === "service-not-allowed" || code === "audio-capture") {
+        if (code === "not-allowed" || code === "audio-capture") {
           listenOkRef.current = false;
           setNotice(COPY.micBlocked);
           setTyping(true);
+        } else if (code === "service-not-allowed" || code === "network" || code === "language-not-supported") {
+          // The recognizer itself is unavailable (iPhone home-screen app, offline): use the server STT.
+          webSpeechOkRef.current = false;
         }
       },
       onEnd: () => {
@@ -249,16 +292,21 @@ export function OrbApp() {
         onSpeechStart: () => {
           signal.current.pulse = 1;
         },
-        onSpeechEnd: () => listenerRef.current?.stop(),
+        onSpeechEnd: (audio) => {
+          if (serverListeningRef.current) onUtterance(audio);
+          else listenerRef.current?.stop();
+        },
         onLevel: (lv) => {
           if (signal.current.mode === "listening") signal.current.pulse = Math.max(signal.current.pulse, lv);
         },
       }).then((v) => {
         vadRef.current = v;
-        if (v && pendingRef.current === 0 && listenerRef.current) v.start();
+        if (!v || pendingRef.current > 0) return;
+        if (listenerRef.current) v.start();
+        else listenRef.current(); // was waiting for the VAD to use the server STT
       });
     }
-  }, [turn]);
+  }, [turn, onUtterance]);
 
   // A tap after start interrupts the voice, closes a card and goes back to listening.
   const onTap = () => {
@@ -281,7 +329,9 @@ export function OrbApp() {
 
   useEffect(() => {
     // Dev-only probe so headless checks can read the live voice level.
-    if (process.env.NODE_ENV !== "production") (window as unknown as { __orbVoiceLevel?: () => number | null }).__orbVoiceLevel = voiceLevel;
+    if (process.env.NODE_ENV !== "production") {
+      Object.assign(window, { __orbVoiceLevel: voiceLevel, __orbTranscribe: transcribe });
+    }
     warmTts();
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
   }, []);
@@ -345,11 +395,19 @@ export function OrbApp() {
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (e.target instanceof HTMLInputElement || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+    // TV remotes: Back closes a card and is otherwise ignored, so it never leaves the app.
+    const back = e.key === "Escape" || e.key === "Backspace" || e.key === "BrowserBack" || e.key === "GoBack";
+    if (back || e.keyCode === 461 || e.keyCode === 10009) {
+      e.preventDefault();
+      if (card) showCard(null);
+      return;
+    }
     switch (e.code) {
       case "Enter":
+      case "NumpadEnter":
       case "Space":
         e.preventDefault();
-        onTap();
+        onTap(); // remote OK: start, or interrupt the voice and listen
         break;
       case "KeyE":
         setEnglish((v) => !v);
