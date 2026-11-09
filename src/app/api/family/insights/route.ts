@@ -1,6 +1,6 @@
 import { syncShared } from "@/lib/shared-state";
 import { connection } from "next/server";
-import { wellness } from "@/lib/agent/wellness";
+import { signals, wellness } from "@/lib/agent/wellness";
 import { currentGuardian } from "@/lib/auth/server";
 import { store } from "@/lib/store";
 
@@ -115,5 +115,7 @@ export async function GET() {
     },
     gettingOut: { thisWeek: demoOut ? 4 : outThis.length, lastWeek: demoOut ? 2 : outLast.length, demo: demoOut },
     talks: { perDay: Math.round(totalTalks / 7), busiest: { from: best, to: best + 2 }, demo: demoTalks },
+    // Slips counted by simple rules (forgot a name, asked the same thing again, missed a check-in).
+    signals: signals(new Date(now)),
   });
 }

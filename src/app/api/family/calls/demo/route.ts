@@ -2,6 +2,7 @@ import { syncShared } from "@/lib/shared-state";
 import { randomUUID } from "node:crypto";
 import { logEvent, store } from "@/lib/store";
 import type { GuardianCall, WalletEntry } from "@/lib/types";
+import { ringNoAnswer } from "@/lib/agent/wellness";
 
 // POST /api/family/calls/demo { script?, amount?, label? } -> rings mom's phone with a test call.
 // For rehearsals and the video fallback when the agent does not place the call itself.
@@ -14,6 +15,16 @@ export async function POST(request: Request) {
   // button twice never leaves a stale call that rings again after this one is handled.
   if (body.reason === "struggle" || body.reason === "nudge") {
     for (const c of store.calls) if (c.status === "ringing" && (c.reason === "struggle" || c.reason === "nudge")) c.status = "missed";
+  }
+
+  // { reason: "no_answer" }: two check-ins (9 AM and 9:15) went unanswered; Sonny asks mom.
+  if (body.reason === "no_answer") {
+    const now = new Date();
+    const script =
+      body.script?.trim().slice(0, 400) ||
+      "Hi, it's Sonny. June hasn't answered her 9 AM check-in, or the one at 9:15. Will you call her, or should I call her neighbor?";
+    const call = ringNoAnswer(new Date(now.getTime() - 15 * 60_000), now, now, script);
+    return Response.json({ ok: true, call }, { status: 201 });
   }
 
   // { reason: "struggle" }: grandma has been stuck on a task for a while; Sonny quietly asks mom.

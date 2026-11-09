@@ -68,7 +68,7 @@ export type GuardianCall = {
   // "nudge": Sonny calls mom to suggest she checks in on grandma (no money involved).
   // "struggle": grandma has been stuck on a task (for example booking a ride) for a while.
   // "health": a wellness check reading was out of range (for example blood pressure).
-  reason: "over_limit" | "unusual_quantity" | "low_balance" | "nudge" | "struggle" | "health";
+  reason: "over_limit" | "unusual_quantity" | "low_balance" | "nudge" | "struggle" | "health" | "no_answer";
   status: "ringing" | "approved" | "declined" | "missed" | "done";
 };
 
@@ -105,6 +105,7 @@ export type ServiceConnection = {
 export type HealthPlan = {
   bp: { on: boolean; time: string }; // "09:00"
   mind: { on: boolean; day: string; time: string }; // "Mon", "10:00"
+  noAnswerMin?: number; // minutes before Sonny tries a check-in again, then calls mom (demo default 2)
 };
 
 export type BpReading = { at: string; systolic: number; diastolic: number; pulse?: number; inRange: boolean; demo?: boolean };
