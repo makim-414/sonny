@@ -18,7 +18,7 @@ type FamilyData = {
 
 const EMPTY: FamilyData = { events: [], hiddenCount: 0, summary: null, approvedIds: [] };
 
-export default function FamilyApp() {
+export default function FamilyApp({ embedded = false }: { embedded?: boolean }) {
   const [data, setData] = useState<FamilyData>(EMPTY);
   const [online, setOnline] = useState(true);
   const [draft, setDraft] = useState("");
@@ -111,7 +111,7 @@ export default function FamilyApp() {
   const medLabel = !s ? "·" : s.medicine === "taken" ? T.medsTaken : s.medicine === "asked" ? T.medsAsked : T.medsUnknown;
 
   return (
-    <div className="fa">
+    <div className={embedded ? "fa fa-embedded" : "fa"}>
       <header className="fa-header">
         <div>
           <h1 className="fa-title">{T.title}</h1>

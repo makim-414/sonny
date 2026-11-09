@@ -1,0 +1,190 @@
+/* Family admin. Tokens come from the .fa scope in family.css. */
+.ad {
+  --max-w: 560px;
+}
+.ad-header {
+  align-items: flex-start;
+}
+.ad-link {
+  min-height: var(--hit);
+  padding: 0 var(--sp-2);
+  border: 0;
+  background: none;
+  color: var(--brand);
+  font-weight: var(--w-semi);
+  cursor: pointer;
+}
+.ad-link:disabled {
+  opacity: 0.5;
+}
+.ad-tabs {
+  display: flex;
+  gap: var(--sp-1);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0 var(--sp-4);
+  border-bottom: 1px solid var(--border);
+}
+.ad-tabs::-webkit-scrollbar {
+  display: none;
+}
+.ad-tab {
+  flex: none;
+  min-height: var(--hit);
+  padding: 0 var(--sp-3);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--text-muted);
+  font-weight: var(--w-med);
+  cursor: pointer;
+}
+.ad-tab.is-on {
+  color: var(--text);
+  border-bottom-color: var(--brand);
+  font-weight: var(--w-semi);
+}
+.ad-notice {
+  padding: var(--sp-2) var(--sp-4) 0;
+}
+.ad-section {
+  padding: var(--sp-4);
+  display: grid;
+  gap: var(--sp-3);
+  align-content: start;
+}
+.ad-section .fa-section-title {
+  margin-bottom: 0;
+}
+.ad-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: var(--sp-4);
+  display: grid;
+  gap: var(--sp-3);
+}
+.ad-hero {
+  display: grid;
+  gap: var(--sp-1);
+  padding: var(--sp-4);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+}
+.ad-hero-num {
+  font-size: var(--t-display);
+  font-weight: var(--w-semi);
+  line-height: var(--lh-snug);
+  font-variant-numeric: tabular-nums;
+}
+.ad-hero-text {
+  color: var(--text-muted);
+  font-size: var(--t-sm);
+}
+.ad-caption {
+  font-size: var(--t-xs);
+  color: var(--text-subtle);
+}
+.ad-center {
+  text-align: center;
+}
+.ad-form {
+  gap: var(--sp-3);
+}
+.ad-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  grid-auto-flow: column;
+  gap: var(--sp-2);
+}
+.ad-field {
+  display: grid;
+  gap: var(--sp-1);
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+  min-width: 0;
+}
+.ad-field input {
+  min-height: var(--hit);
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-card);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: var(--t-input);
+  color: var(--text);
+  min-width: 0;
+  width: 100%;
+}
+.ad-field input:focus {
+  outline: 2px solid var(--brand);
+  outline-offset: -1px;
+}
+.ad-seg {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-1);
+  background: var(--bg-sunken);
+  border-radius: var(--r-card);
+  padding: var(--sp-1);
+}
+.ad-seg-btn {
+  min-height: var(--hit);
+  border: 0;
+  border-radius: var(--r-md);
+  background: none;
+  color: var(--text-muted);
+  font-weight: var(--w-med);
+  cursor: pointer;
+}
+.ad-seg-btn.is-on {
+  background: var(--bg-elev);
+  color: var(--text);
+  font-weight: var(--w-semi);
+  box-shadow: var(--sh-card);
+}
+.ad-routine,
+.ad-ledger {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+.ad-amount {
+  font-weight: var(--w-semi);
+  font-variant-numeric: tabular-nums;
+}
+.ad-amount.is-in {
+  color: var(--success);
+}
+.ad-waiting {
+  display: grid;
+  gap: var(--sp-2);
+}
+.ad-wide {
+  width: 100%;
+}
+.ad-pair {
+  justify-items: center;
+}
+.ad-qr {
+  width: 220px;
+  height: 220px;
+  max-width: 100%;
+}
+.ad-qr-bg {
+  fill: var(--bg-elev);
+}
+.ad-qr-fg {
+  fill: var(--text);
+}
+
+/* Today tab reuses the family app without its own header */
+.fa-embedded {
+  min-height: 0;
+}
+.fa-embedded > .fa-header {
+  display: none;
+}
+.ad-url {
+  overflow-wrap: anywhere;
+  text-align: center;
+}
