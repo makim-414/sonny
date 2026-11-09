@@ -6,6 +6,7 @@ import { clock, toFeedItem, type FeedItem, type Summary } from "./derive";
 import { switchMember } from "@/app/family/actions";
 import AllowanceCard, { type Me, type WalletSummary } from "./AllowanceCard";
 import HealthCard from "./HealthCard";
+import WeekDashboard from "./WeekDashboard";
 import IncomingCall from "./IncomingCall";
 import LightPage from "./LightPage";
 import { T } from "./strings";
@@ -176,6 +177,8 @@ export default function FamilyApp({ embedded = false }: { embedded?: boolean }) 
       </section>
 
       <AllowanceCard wallet={data.wallet ?? null} onChanged={() => void refresh()} />
+
+      <WeekDashboard />
 
       <HealthCard />
 

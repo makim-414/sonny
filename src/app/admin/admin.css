@@ -2,6 +2,11 @@
 .ad {
   --max-w: calc(var(--sp-16) * 8.75); /* 560px */
 }
+@media (min-width: 1024px) {
+  .ad {
+    --max-w: calc(var(--sp-16) * 15); /* 960px: room for the dashboard */
+  }
+}
 .ad-header {
   align-items: flex-start;
 }
