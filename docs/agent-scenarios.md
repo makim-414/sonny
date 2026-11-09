@@ -84,6 +84,21 @@
 - 고친 버그: Haiku 가 한 단계에서 `errand_order` 를 두 번 병렬로 불러 전화가 두 통 걸렸다. 지금은 주문, 택시, 기억 저장이 턴당 한 번만 실행된다.
 - 이름과 장소는 공개 전에 모두 가명으로 바꿨다(Grandma June, 할머니, 수진, 햇살시).
 
+## 헤맴, 늘 켜짐, 안부 넛지 (11:55 실행)
+
+모두 규칙으로 판단하고 모델을 부르지 않는다(0s). 전화는 `store.calls` 에 `ringing` 으로 생기고 kind `call`, visibility `family` 로 남는다. 승인과 거절은 가족 앱의 `POST /api/family/calls` 를 실제로 거쳤다.
+
+| 시나리오 | 결과 |
+|---|---|
+| 헤맴 (혼란 3번): "I need a taxi" → "uh, I don't remember the name..." → "what?" | 세 번째에 "No rush, June. I'll ask Sarah to help." 라고 말하고 struggle 전화를 건다. script: "Hi Sarah, it's Sonny. June has been trying to book a taxi for 2 minutes and seems stuck on where to go. Want me to book it to Riverside Family Clinic, or will you call her?" |
+| 엄마 승인 (Book it for her) | 기억의 병원으로 택시를 부르고 용돈에서 결제한다. 말은 "Sarah asked me to book it. A white Toyota Camry comes in 6 minutes." 이고 택시 카드가 뜬다 |
+| 헤맴 (시간): "I need a taxi" 뒤 데모 시계 12분 빨리감기 | 다음 요청에서 struggle 전화를 건다. 엄마가 거절하면 "Sarah is calling you now." |
+| `routine:pills` / `routine:bingo` / `routine:evening` | 1.0~1.3s, Haiku 로 한 문장씩 답한다. 예: "Bingo day at Maple Grove, June! Shall I call you a taxi, or is it warm enough to walk?" |
+| `idle-checkin` 두 번, 그 사이 할머니 말 없음 | 첫 번째는 부드러운 안부다. 두 번째는 할머니께 아무 말도 하지 않고, 가족에게 `alert` "[warn] No answer from grandma since 1:00 PM" 을 보낸다 |
+| `family-nudge` | nudge 전화를 건다. script: "Hi Sarah, it's Sonny. June mentioned you twice, and it's been a couple of days since your last message. She'd love a quick call tonight. She taught me her salt in coffee cuts bitterness trick today, ask her about it." 엄마가 받으면 할머니께 "Sarah's going to call you tonight." |
+
+- 넛지 이유는 오늘 기록에서만 고른다: 조용한 하루, 딸을 언급한 횟수, 엄마 메시지가 이틀째 없음, 오늘 배운 lesson. 할머니가 비밀로 하라고 한 말은 세지 않고, 내용도 쓰지 않는다. 이유가 없으면 전화하지 않는다.
+
 ## 안전장치
 
 - Haiku 가 도구를 부르지 않고 행동을 말하면 같은 턴을 Sonnet 으로 다시 돌린다(`meta.rerun`). 예: "ordered", "on the way", "I'll remember", "turned it on".
