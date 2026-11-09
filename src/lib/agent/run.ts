@@ -70,7 +70,7 @@ const L = EN
       tz: "local time +09:00",
       tv: "TV now",
       tvOff: "off or unknown",
-      chan: (n: number, name: string) => `channel ${n} ${name}`,
+      chan: (n: number, name: string) => (n ? `channel ${n} ${name}` : `${name} (live US listing, no channel number: never say a channel, just remind her)`),
       meds: "Today's pill",
       medsTaken: "already taken (recorded). Do not ask again.",
       medsNot: "not recorded yet",
