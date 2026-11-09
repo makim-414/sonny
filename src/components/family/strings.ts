@@ -130,6 +130,27 @@ const ko = {
   chartTalk: "하루 대화 수 (점: 외출한 날)",
   demoTag: "데모 데이터",
   trendNote: "건강 흐름을 보는 용도이며 진단이 아니에요. 담당 의사와 함께 보세요.",
+  // join card and shared ringing (every family phone rings; first answer wins)
+  grandmaName: "June",
+  joinTitle: "이제 할머니의 가족이에요.",
+  joinBody: "할머니가 도움이 필요하면 Sonny가 이 폰으로 전화해요. 먼저 받는 사람이 처리해요.",
+  joinName: "이름 (선택)",
+  joinGuest: "손님",
+  joinButton: "Sonny 전화 받기 켜기",
+  handledText: (by: string, status: string, reason: string): string =>
+    reason === "struggle"
+      ? status === "approved"
+        ? `${by}님이 예약했어요. 할머니의 택시가 가는 중이에요.`
+        : `${by}님이 할머니에게 전화하고 있어요.`
+      : reason === "nudge"
+        ? status === "approved"
+          ? `${by}님이 지금 할머니에게 전화해요.`
+          : `${by}님이 저녁 7시에 전화하기로 했어요.`
+        : status === "approved"
+          ? `${by}님이 승인했어요.`
+          : status === "declined"
+            ? `${by}님이 거절했어요.`
+            : `${by}님이 나중에 처리할게요.`,
   // what the family routes write
   mom: "엄마",
   approvedLog: (what: "taxi" | "order" | "other") =>
@@ -260,6 +281,26 @@ const en: Strings = {
   chartTalk: "Talks per day (dot: went out)",
   demoTag: "demo data",
   trendNote: "Wellness trends, not a diagnosis. Share with her doctor.",
+  grandmaName: "June",
+  joinTitle: "You're Grandma's family now.",
+  joinBody: "When Grandma needs a hand, Sonny calls this phone. Whoever answers first takes it.",
+  joinName: "Your name (optional)",
+  joinGuest: "Guest",
+  joinButton: "Turn on calls from Sonny",
+  handledText: (by: string, status: string, reason: string): string =>
+    reason === "struggle"
+      ? status === "approved"
+        ? `${by} booked it. Grandma's ride is on the way.`
+        : `${by} is calling Grandma.`
+      : reason === "nudge"
+        ? status === "approved"
+          ? `${by} is calling Grandma now.`
+          : `${by} will call Grandma at 7 PM.`
+        : status === "approved"
+          ? `${by} approved it.`
+          : status === "declined"
+            ? `${by} said no.`
+            : `${by} will handle it later.`,
   mom: "Mom",
   approvedLog: (what: "taxi" | "order" | "other") => `Approved the ${what === "taxi" ? "taxi" : what === "order" ? "order" : "request"}`,
   approveInbox: (from: string, text: string) => `${from} approved it. Please go ahead: ${text}`,

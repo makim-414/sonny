@@ -10,6 +10,12 @@ export async function POST(request: Request) {
   await syncShared();
   const body = (await request.json().catch(() => ({}))) as { script?: string; amount?: number; label?: string; reason?: string };
 
+  // A new demo call retires older unanswered struggle and nudge calls, so pressing the
+  // button twice never leaves a stale call that rings again after this one is handled.
+  if (body.reason === "struggle" || body.reason === "nudge") {
+    for (const c of store.calls) if (c.status === "ringing" && (c.reason === "struggle" || c.reason === "nudge")) c.status = "missed";
+  }
+
   // { reason: "struggle" }: grandma has been stuck on a task for a while; Sonny quietly asks mom.
   if (body.reason === "struggle") {
     const at = new Date().toISOString();

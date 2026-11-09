@@ -308,3 +308,15 @@
   font-size: var(--t-input);
   width: 100%;
 }
+
+/* presenter's demo trigger */
+.ad-stuck {
+  padding: var(--sp-3) var(--sp-4) 0;
+  display: grid;
+  gap: var(--sp-2);
+}
+.ad-stuck-btn {
+  width: 100%;
+  min-height: var(--hit-lg);
+  font-size: var(--t-title);
+}

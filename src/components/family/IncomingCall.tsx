@@ -4,12 +4,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { GuardianCall } from "@/lib/types";
 import { T } from "./strings";
 
-// Full-screen "Sonny is calling" for mom. Polls for ringing calls, rings, reads the
-// script in the Kokoro voice (/api/tts), then takes Approve / Decline by tap or by voice.
+// Full-screen "Sonny is calling". Every family phone polls /api/family/ring about once a
+// second, so a call rings on all of them at once. The first person to answer handles it
+// (the server keeps a lock); everyone else sees "Daniel booked it. Grandma's ride is on the way."
 
-const POLL_MS = 2000;
+const POLL_MS = 800; // visible tab
+const HIDDEN_POLL_MS = 3000; // background tab: keep the server load low
+const NAME_KEY = "sonny.familyName";
 
 type Phase = "ringing" | "speaking" | "deciding" | "done";
+type RingCall = Pick<GuardianCall, "id" | "at" | "reason" | "script" | "amount" | "status">;
+type Handled = { id: string; by: string; status: string };
 
 type Recognition = {
   lang: string;
@@ -28,39 +33,62 @@ function makeRecognition(): Recognition | null {
   return Ctor ? new Ctor() : null;
 }
 
-// A soft two-tone ring with Web Audio. Silent if the browser has not allowed sound yet.
-function startRing(): () => void {
-  let ctx: AudioContext | null = null;
+// One AudioContext for the page. iOS Safari only lets it make sound after a tap, so the
+// join card calls unlockAudio() from its button; later rings reuse the unlocked context.
+const W = typeof window === "undefined" ? null : (window as unknown as { __sonnyAudio?: AudioContext });
+
+export function unlockAudio() {
+  if (!W) return;
   try {
-    ctx = new AudioContext();
+    W.__sonnyAudio ??= new AudioContext();
+    const ctx = W.__sonnyAudio;
+    void ctx.resume().catch(() => undefined);
+    // Play one silent buffer inside the tap: this is what unlocks audio on iOS.
+    const src = ctx.createBufferSource();
+    src.buffer = ctx.createBuffer(1, 1, 22050);
+    src.connect(ctx.destination);
+    src.start(0);
+    // HTML audio and speech too, so the Kokoro voice and the fallback voice may play later.
+    const a = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
+    void a.play().catch(() => undefined);
+    if ("speechSynthesis" in window) window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
+  } catch {
+    // no audio on this device: the screen still rings visually
+  }
+}
+
+function startRing(): () => void {
+  if (!W) return () => undefined;
+  let ctx: AudioContext;
+  try {
+    ctx = W.__sonnyAudio ??= new AudioContext();
   } catch {
     return () => undefined;
   }
-  const audio = ctx;
   const beep = () => {
-    if (audio.state === "suspended") void audio.resume().catch(() => undefined);
-    const t = audio.currentTime;
+    if (ctx.state === "suspended") void ctx.resume().catch(() => undefined);
+    const t = ctx.currentTime;
     for (const [freq, start] of [
       [880, 0],
       [660, 0.18],
     ] as const) {
-      const osc = audio.createOscillator();
-      const gain = audio.createGain();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
       osc.frequency.value = freq;
       gain.gain.setValueAtTime(0.0001, t + start);
-      gain.gain.exponentialRampToValueAtTime(0.15, t + start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.2, t + start + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.0001, t + start + 0.16);
-      osc.connect(gain).connect(audio.destination);
+      osc.connect(gain).connect(ctx.destination);
       osc.start(t + start);
       osc.stop(t + start + 0.18);
     }
+    // Android buzzes; iOS has no vibration API. Only after a tap, or Chrome logs an error.
+    const active = (navigator as Navigator & { userActivation?: { hasBeenActive: boolean } }).userActivation?.hasBeenActive;
+    if (active && "vibrate" in navigator) navigator.vibrate([300, 150, 300]);
   };
   beep();
   const id = setInterval(beep, 1600);
-  return () => {
-    clearInterval(id);
-    void audio.close().catch(() => undefined);
-  };
+  return () => clearInterval(id);
 }
 
 async function speak(text: string): Promise<void> {
@@ -82,7 +110,6 @@ async function speak(text: string): Promise<void> {
     });
     URL.revokeObjectURL(url);
   } catch {
-    // Fallback: the browser's own voice.
     await new Promise<void>((resolve) => {
       if (!("speechSynthesis" in window)) return resolve();
       const u = new SpeechSynthesisUtterance(text);
@@ -94,48 +121,88 @@ async function speak(text: string): Promise<void> {
   }
 }
 
+function myName(): string {
+  try {
+    return window.localStorage.getItem(NAME_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
 export default function IncomingCall() {
-  const [call, setCall] = useState<GuardianCall | null>(null);
+  const [call, setCall] = useState<RingCall | null>(null);
   const [phase, setPhase] = useState<Phase>("ringing");
-  const [result, setResult] = useState<string>("");
+  const [result, setResult] = useState("");
   const [heard, setHeard] = useState("");
   const busy = useRef(false);
+  const callRef = useRef<RingCall | null>(null);
+  const phaseRef = useRef<Phase>("ringing");
+  const dismissed = useRef(new Set<string>());
   const stopRing = useRef<(() => void) | null>(null);
   const recog = useRef<Recognition | null>(null);
 
-  // Load the Kokoro voice early so the first call does not wait for the model.
+  useEffect(() => {
+    callRef.current = call;
+  }, [call]);
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
+
+  const close = useCallback((text: string) => {
+    recog.current?.abort();
+    stopRing.current?.();
+    setResult(text);
+    setPhase("done");
+    setTimeout(() => {
+      busy.current = false;
+      setCall(null);
+    }, 2600);
+  }, []);
+
+  // Warm the Kokoro voice so the first call does not wait for the model.
   useEffect(() => {
     void fetch("/api/tts", { cache: "no-store" }).catch(() => undefined);
   }, []);
 
-  // Poll for a ringing call while none is on screen.
+  // Fast, light poll. Rings when a new call appears; when someone else answers the call
+  // on screen, shows who did and closes.
   useEffect(() => {
-    if (call) return;
     let stopped = false;
+    let timer: ReturnType<typeof setTimeout>;
     const poll = async () => {
       try {
-        const res = await fetch("/api/family/calls", { cache: "no-store" });
-        if (res.ok) {
-          const { ringing } = (await res.json()) as { ringing: GuardianCall[] };
-          if (!stopped && ringing[0]) {
+        const res = await fetch("/api/family/ring", { cache: "no-store" });
+        if (res.ok && !stopped) {
+          const { ringing, handled } = (await res.json()) as { ringing: RingCall | null; handled: Handled[] };
+          const cur = callRef.current;
+          if (cur && !busy.current) {
+            const h = handled.find((x) => x.id === cur.id);
+            if (h) {
+              busy.current = true;
+              close(T.handledText(h.by, h.status, cur.reason));
+            } else if (phaseRef.current === "ringing" && ringing?.id !== cur.id) {
+              // Still ringing here but no longer the live call (replaced or withdrawn).
+              stopRing.current?.();
+              setCall(ringing && !dismissed.current.has(ringing.id) ? ringing : null);
+            }
+          } else if (!cur && ringing && !dismissed.current.has(ringing.id)) {
             setPhase("ringing");
             setResult("");
             setHeard("");
-            setCall(ringing[0]);
+            setCall(ringing);
           }
         }
       } catch {
         // try again next tick
       }
+      if (!stopped) timer = setTimeout(poll, document.hidden ? HIDDEN_POLL_MS : POLL_MS);
     };
-    const first = setTimeout(poll, 0);
-    const id = setInterval(poll, POLL_MS);
+    timer = setTimeout(poll, 0);
     return () => {
       stopped = true;
-      clearTimeout(first);
-      clearInterval(id);
+      clearTimeout(timer);
     };
-  }, [call]);
+  }, [close]);
 
   // Ring while ringing.
   useEffect(() => {
@@ -149,35 +216,44 @@ export default function IncomingCall() {
 
   const finish = useCallback(
     async (decision: "approve" | "decline" | "missed") => {
-      if (!call || busy.current) return;
+      const c = callRef.current;
+      if (!c || busy.current) return;
       busy.current = true;
       recog.current?.abort();
       // A nudge has nothing to decline: "no" means "remind me at 7 PM".
-      const nudge = call.reason === "nudge";
+      const nudge = c.reason === "nudge";
       const d = nudge && decision === "decline" ? "missed" : decision;
-      const done = nudge ? T.nudgeDone : call.reason === "struggle" ? T.struggleDone : T.callDone;
+      const done = nudge ? T.nudgeDone : c.reason === "struggle" ? T.struggleDone : T.callDone;
       try {
         const res = await fetch("/api/family/calls", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ id: call.id, decision: d }),
+          body: JSON.stringify({ id: c.id, decision: d, name: myName() }),
         });
-        const json = (await res.json().catch(() => ({}))) as { call?: GuardianCall };
+        const json = (await res.json().catch(() => ({}))) as { call?: GuardianCall; by?: string | null; status?: string };
+        if (res.status === 409) {
+          // Someone else got there first.
+          close(T.handledText(json.by ?? T.joinGuest, json.status ?? "approved", c.reason));
+          return;
+        }
         const status = json.call?.status ?? (d === "approve" ? "approved" : d === "decline" ? "declined" : "missed");
-        setResult(done(status));
+        close(done(status));
       } catch {
-        setResult(done("missed"));
+        close(done("missed"));
       }
-      setPhase("done");
-      setTimeout(() => {
-        busy.current = false;
-        setCall(null);
-      }, 2200);
     },
-    [call],
+    [close],
   );
 
-  // Listen for "yes" / "no" while deciding, if the browser can.
+  // Ring-screen Decline only silences this phone; the call keeps ringing for the others.
+  const silence = () => {
+    const c = callRef.current;
+    if (!c) return;
+    dismissed.current.add(c.id);
+    stopRing.current?.();
+    setCall(null);
+  };
+
   const listen = useCallback(() => {
     const r = makeRecognition();
     if (!r) return;
@@ -191,9 +267,8 @@ export default function IncomingCall() {
         .join(" ")
         .trim();
       setHeard(said);
-      // "No, don't approve" must decline, so check no first.
-      if (T.noWords.test(said)) void finish("decline");
-      else if (T.yesWords.test(said)) void finish("approve");
+      if (T.yesWords.test(said)) void finish("approve");
+      else if (T.noWords.test(said)) void finish("decline");
     };
     r.onerror = () => undefined;
     r.onend = () => {
@@ -207,10 +282,12 @@ export default function IncomingCall() {
   }, [finish]);
 
   const answer = async () => {
-    if (!call) return;
+    const c = callRef.current;
+    if (!c) return;
     stopRing.current?.();
     setPhase("speaking");
-    await speak(call.script);
+    await speak(c.script);
+    if (callRef.current?.id !== c.id || busy.current) return; // someone else answered meanwhile
     setPhase("deciding");
     listen();
   };
@@ -237,7 +314,7 @@ export default function IncomingCall() {
       <div className="fa-call-actions">
         {phase === "ringing" && (
           <>
-            <button className="fa-call-btn is-no" onClick={() => void finish("missed")}>
+            <button className="fa-call-btn is-no" onClick={silence}>
               {T.notNow}
             </button>
             <button className="fa-call-btn is-yes" onClick={() => void answer()}>
@@ -247,7 +324,6 @@ export default function IncomingCall() {
         )}
         {(phase === "deciding" || phase === "speaking") && nudge && (
           <>
-            {/* In a real deployment this is a tel: link to grandma's number; the demo leaves it out. */}
             <button className="fa-call-btn is-later" onClick={() => void finish("missed")}>
               {T.nudgeLater}
             </button>

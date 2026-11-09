@@ -8,6 +8,7 @@ import AllowanceCard, { type Me, type WalletSummary } from "./AllowanceCard";
 import HealthCard from "./HealthCard";
 import WeekDashboard from "./WeekDashboard";
 import IncomingCall from "./IncomingCall";
+import JoinCard from "./JoinCard";
 import LightPage from "./LightPage";
 import { T } from "./strings";
 import "./family.css";
@@ -127,6 +128,7 @@ export default function FamilyApp({ embedded = false }: { embedded?: boolean }) 
     <div className={embedded ? "fa fa-embedded" : "fa theme-light"}>
       {!embedded && <LightPage />}
       {!embedded && <IncomingCall />}
+      {!embedded && <JoinCard />}
       <header className="fa-header">
         <div>
           <h1 className="fa-title">{T.title}</h1>
