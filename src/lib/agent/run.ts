@@ -14,7 +14,7 @@ import { createTools, DEMO, lessonsThisMonth, shared, type AgentContext } from "
 import { settle, spend } from "./wallet";
 import { connect, connections } from "./connections";
 import { findSkill, skillsOf } from "./skills";
-import { onVoiceWellness, startCheck } from "./wellness";
+import { ensureHeadsUp, heardFromHer, noAnswerCheck, noteRepeat, onVoiceWellness, startCheck } from "./wellness";
 import { onIdle, onNudge, onVoice, struggleCheck, taskDone, type Quick } from "./watch";
 import { requestRide } from "./services/ride";
 
@@ -224,6 +224,19 @@ function answerHelpCall(reason: "struggle" | "nudge", verdict: string, text: str
   return { say, sayEn: EN ? say : undefined, actions, meta: { ms: 0, model: `none (${reason} call)`, tools: [] } };
 }
 
+/** Mom answered a no-answer call: she calls grandma (approved), or Sonny asks the neighbor. */
+function answerNoAnswer(verdict: string, text: string, now: Date): Reply {
+  const at = now.toISOString();
+  const say = verdict === "approved" ? (EN ? "June, Sarah is calling you now." : "할머니, 수진이가 지금 전화한대요.") : "";
+  if (verdict === "declined") {
+    const line = EN ? `Sonny asked June's neighbor to knock on her door (${DEMO})` : `Sonny 가 이웃분께 할머니 댁 확인을 부탁함 (${DEMO})`;
+    logEvent("family", line, at, { visibility: "family" });
+  }
+  if (say) logEvent("said", say, at, { visibility: "family" });
+  pushTurn(L.approvalTurn(text), L.doneNote(`no_answer call ${verdict}`));
+  return { say, sayEn: EN ? say : undefined, actions: [], meta: { ms: 0, model: "none (no_answer call)", tools: [] } };
+}
+
 const ASK_AGAIN = /^\s*(what|huh|pardon|sorry|eh|say (that|it) again|again|when|what time|which car|is it coming|did you( book it)?)\s*[?!.]*\s*$|^\s*(뭐|뭐라고|응\?|언제|다시)\s*[?!.]*\s*$/i;
 const RIDE_FRESH_MS = 45 * 60_000;
 function recentRide(now: Date) {
@@ -250,6 +263,7 @@ function handleCallAnswer(text: string, now: Date): Reply | null {
   const verdict = m[1].toLowerCase();
   const call = store.calls.find((c) => c.id === m[2]);
   if (call?.reason === "struggle" || call?.reason === "nudge") return answerHelpCall(call.reason, verdict, text, now);
+  if (call?.reason === "no_answer") return answerNoAnswer(verdict, text, now);
   const idx = call ? shared.requests.findIndex((r) => r.walletEntryId === call.walletEntryId) : -1;
   const req = idx >= 0 ? shared.requests[idx] : undefined;
   const at = now.toISOString();
@@ -344,6 +358,7 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   const started = Date.now();
   const now = req.now && Number.isFinite(Date.parse(req.now)) ? new Date(req.now) : new Date();
   const nowIso = now.toISOString();
+  ensureHeadsUp(now);
   const memory = await getMemory();
   const session = getSession(Date.now());
   // A new demo day (the clock was fast-forwarded overnight) starts a fresh conversation,
@@ -388,6 +403,9 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
 
   // Sonny's own watch: a stuck task, long silences, nudges for mom. Rules, no model.
   if (req.source === "voice") {
+    // Signals only count; what she said stays private. Compare before logging this one.
+    noteRepeat(req.text, now, store.events.filter((e) => e.kind === "heard"));
+    heardFromHer();
     logEvent("heard", req.text, nowIso, { visibility: "private" });
     // A wellness check in progress (blood pressure, weekly memory chat) takes the turn.
     const w = onVoiceWellness(req.text, now);
@@ -402,6 +420,9 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   } else {
     const q = struggleCheck(now);
     if (q) return quickReply(q, `[${req.source}] ${req.text}`, nowIso);
+    // A check-in she never answered: try once more, then ring mom.
+    const na = noAnswerCheck(now);
+    if (na) return quickReply(na, `[${req.source}] ${req.text}`, nowIso);
   }
   const hc = req.source === "proactive" ? req.text.trim().match(/^(?:health-check|routine):(bp|mind|blood-pressure|memory)$/) : null;
   if (hc) {

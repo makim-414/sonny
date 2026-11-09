@@ -4,7 +4,7 @@ import { resetSession } from "@/lib/agent/session";
 import { shared } from "@/lib/agent/tools";
 import { resetWatch } from "@/lib/agent/watch";
 import { resetConnections } from "@/lib/agent/connections";
-import { resetWellness } from "@/lib/agent/wellness";
+import { ensureHeadsUp, resetWellness } from "@/lib/agent/wellness";
 import { getMemory, resetMemory } from "@/lib/memory";
 import { store } from "@/lib/store";
 
@@ -29,6 +29,7 @@ export async function POST() {
   resetConnections();
   resetWellness();
   store.calls.length = 0;
+  ensureHeadsUp(); // the demo week's "forgot the clinic's name twice" note, back in mom's feed
   store.pending.length = 0;
   store.currentChannel = null;
   // Wallet back to the demo seed ($80, family OK above $30), same as store.ts.

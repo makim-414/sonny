@@ -24,7 +24,11 @@ type Flow =
   | { kind: "bp"; tries: number }
   | { kind: "mind"; stage: "day" | "season" | "chat" | "recall"; orientation: number };
 
-type State = { plan: HealthPlan; flow?: Flow; bp: BpReading[]; mind: MindCheck[] };
+/** A check-in Sonny started and is waiting on (cleared the moment grandma speaks). */
+type Pending = { kind: "bp" | "mind"; firstAt: number; lastAt: number; attempt: number; done?: boolean };
+/** A weekly signal: counted by simple rules, never what she said. */
+export type Slip = { at: string; kind: "forgot_name" | "repeat" | "missed_checkin"; what?: string; demo?: boolean };
+type State = { plan: HealthPlan; flow?: Flow; bp: BpReading[]; mind: MindCheck[]; pending?: Pending; slips?: Slip[]; headsUpAt?: number };
 const g = globalThis as unknown as { __sonnyWellness?: State };
 
 function seedState(): State {
@@ -33,7 +37,7 @@ function seedState(): State {
   // A little history so the first demo report can say "in her usual range" and
   // "same as last week". Marked demo.
   return {
-    plan: { bp: { on: true, time: "09:00" }, mind: { on: true, day: "Mon", time: "10:00" } },
+    plan: { bp: { on: true, time: "09:00" }, mind: { on: true, day: "Mon", time: "10:00" }, noAnswerMin: 2 },
     bp: [3, 2, 1].map((d, i) => ({
       at: new Date(now - d * 86_400_000).toISOString(),
       systolic: [126, 130, 124][i],
@@ -43,7 +47,18 @@ function seedState(): State {
       demo: true,
     })),
     mind: [{ at: new Date(now - week).toISOString(), recall: 3, orientation: 2, demo: true }],
+    slips: seedSlips(now),
   };
+}
+
+/** Demo week: forgot the clinic's name twice (none last week), one missed check-in. */
+function seedSlips(now: number): Slip[] {
+  const day = 86_400_000;
+  return [
+    { at: new Date(now - 4 * day).toISOString(), kind: "forgot_name", what: EN ? "the clinic's name" : "병원 이름", demo: true },
+    { at: new Date(now - 2 * day).toISOString(), kind: "forgot_name", what: EN ? "the clinic's name" : "병원 이름", demo: true },
+    { at: new Date(now - 3 * day).toISOString(), kind: "missed_checkin", demo: true },
+  ];
 }
 
 export const wellness: State = g.__sonnyWellness ?? (g.__sonnyWellness = seedState());
@@ -54,11 +69,15 @@ export function resetWellness() {
   wellness.bp = fresh.bp;
   wellness.mind = fresh.mind;
   wellness.plan = fresh.plan;
+  wellness.slips = fresh.slips;
+  wellness.pending = undefined;
+  wellness.headsUpAt = undefined;
 }
 
 export function setPlan(p: Partial<HealthPlan>) {
   if (p.bp) wellness.plan.bp = { ...wellness.plan.bp, ...p.bp };
   if (p.mind) wellness.plan.mind = { ...wellness.plan.mind, ...p.mind };
+  if (typeof p.noAnswerMin === "number" && p.noAnswerMin > 0 && p.noAnswerMin <= 120) wellness.plan.noAnswerMin = p.noAnswerMin;
   return wellness.plan;
 }
 
@@ -82,7 +101,9 @@ function ringHealth(script: string, at: string) {
 }
 
 /** Start a check (demo button, schedule, or proactive "health-check:bp"). */
-export function startCheck(kind: "bp" | "mind", now: Date): WellnessReply {
+export function startCheck(kind: "bp" | "mind", now: Date, retry = false): WellnessReply {
+  const on = kind === "bp" ? wellness.plan.bp.on : wellness.plan.mind.on;
+  if (on && !retry) wellness.pending = { kind, firstAt: now.getTime(), lastAt: now.getTime(), attempt: 1 };
   if (kind === "bp") {
     if (!wellness.plan.bp.on) return { say: "", actions: [], note: "bp check is off" };
     wellness.flow = { kind: "bp", tries: 0 };
@@ -247,4 +268,121 @@ export function weeklyReport(now = new Date()) {
     memory: { checks: mind, latest: lastMind ? `recalled ${lastMind.recall} of 3, orientation ${lastMind.orientation} of 2` : null },
     disclaimer: DISCLAIMER,
   };
+}
+
+// ---------- no answer: try once more, then call mom ----------
+
+export const SIGNALS_NOTE = "Wellness signals, not a diagnosis.";
+
+/** Grandma said something: whatever check-in was waiting has its answer. */
+export function heardFromHer() {
+  if (wellness.pending) wellness.pending = undefined;
+}
+
+/** "9 AM" / "9:15 AM"; short drops AM/PM ("9:15") when the minutes make it clear. */
+function clockShort(d: Date, short = false) {
+  const c = kstClock(d);
+  if (!EN) return c;
+  const whole = c.replace(/:00 /, " ");
+  return short && !/:00 /.test(c) ? whole.replace(/ (AM|PM)$/, "") : whole;
+}
+
+/** Checked on every request (and mom's phone poll). Returns the retry line when Sonny tries again. */
+export function noAnswerCheck(now: Date): WellnessReply | null {
+  const p = wellness.pending;
+  if (!p || p.done) return null;
+  const t = now.getTime();
+  const wait = (wellness.plan.noAnswerMin ?? 2) * 60_000;
+  if (t - p.lastAt < wait) return null;
+  if (t - p.firstAt > 6 * 60 * 60_000) {
+    wellness.pending = undefined; // yesterday's check-in: drop it, don't report it
+    return null;
+  }
+  if (p.attempt < 2) {
+    p.attempt = 2;
+    p.lastAt = t;
+    const r = startCheck(p.kind, now, true);
+    const say = EN ? `June, it's Sonny again. ${r.say.replace(/^Good \w+, June\. /, "")}` : `할머니, Sonny 예요. ${r.say.replace(/^할머니, /, "")}`;
+    return { ...r, say, note: `${p.kind} check-in, second try` };
+  }
+  p.done = true;
+  wellness.flow = undefined;
+  ringNoAnswer(new Date(p.firstAt), new Date(p.lastAt), now);
+  return { say: "", actions: [], note: "no answer twice, called Sarah" };
+}
+
+/** Two check-ins with no answer: ring mom. second = first when only one try is known. */
+export function ringNoAnswer(first: Date, second: Date, now: Date, script?: string): GuardianCall {
+  const at = now.toISOString();
+  recordSlip("missed_checkin", now);
+  for (const c of store.calls) if (c.status === "ringing" && c.reason === "no_answer") c.status = "missed";
+  const two = Math.abs(second.getTime() - first.getTime()) >= 60_000;
+  const line =
+    script ??
+    (EN
+      ? `Hi, it's Sonny. June hasn't answered her ${clockShort(first)} check-in${two ? `, or the one at ${clockShort(second, true)}` : ""}. Will you call her, or should I call her neighbor?`
+      : `안녕하세요, Sonny 예요. 할머니가 ${kstClock(first)} 안부 확인${two ? `에도, ${kstClock(second)} 확인에도` : "에"} 대답이 없으세요. 직접 전화하실래요, 이웃분께 부탁할까요?`);
+  const call: GuardianCall = { id: crypto.randomUUID(), at, script: line, amount: 0, reason: "no_answer", status: "ringing" };
+  store.calls.push(call);
+  const short = EN ? `Sonny called Sarah: no answer from June since ${clockShort(first)}` : `Sonny 가 따님께 전화: ${kstClock(first)} 이후로 할머니 대답이 없음`;
+  logEvent("call", `${short} (call ${call.id})`, at, { visibility: "family", familyText: short });
+  return call;
+}
+
+// ---------- this week's signals ----------
+
+export function slips(): Slip[] {
+  return (wellness.slips ??= seedSlips(Date.now()));
+}
+
+export function recordSlip(kind: Slip["kind"], now: Date, what?: string) {
+  slips().push({ at: now.toISOString(), kind, what });
+  if (kind === "forgot_name") ensureHeadsUp(now);
+}
+
+export function signals(now = new Date()) {
+  const t = now.getTime();
+  const week = 7 * 86_400_000;
+  const all = slips();
+  const count = (kind: Slip["kind"], from: number, to: number) => all.filter((s) => s.kind === kind && Date.parse(s.at) >= from && Date.parse(s.at) < to).length;
+  const thisWeek = (k: Slip["kind"]) => count(k, t - week, t + 60_000);
+  const lastWeek = (k: Slip["kind"]) => count(k, t - 2 * week, t - week);
+  return {
+    forgotNames: thisWeek("forgot_name"),
+    repeatedQuestions: thisWeek("repeat"),
+    missedCheckins: thisWeek("missed_checkin"),
+    vsLastWeek: { forgotNames: lastWeek("forgot_name"), repeatedQuestions: lastWeek("repeat"), missedCheckins: lastWeek("missed_checkin") },
+    demo: all.some((s) => s.demo && Date.parse(s.at) >= t - 2 * week),
+    note: SIGNALS_NOTE,
+  };
+}
+
+/** Once a week at most: tell mom when she forgot a name more often than last week. */
+export function ensureHeadsUp(now = new Date()) {
+  const t = now.getTime();
+  if (wellness.headsUpAt && t - wellness.headsUpAt < 7 * 86_400_000) return;
+  const s = signals(now);
+  const n = s.forgotNames;
+  const last = s.vsLastWeek.forgotNames;
+  if (n < 2 || n <= last) return;
+  const recent = slips().filter((x) => x.kind === "forgot_name" && x.what).pop();
+  const what = recent?.what ?? (EN ? "a name" : "이름");
+  wellness.headsUpAt = t;
+  const times = n === 2 ? "twice" : `${n} times`;
+  const text = EN
+    ? `Heads-up: June forgot ${what} ${times} this week (${last} last week). Worth mentioning to her doctor. ${SIGNALS_NOTE}`
+    : `알림: 할머니가 이번 주에 ${what}을 ${n}번 잊으셨어요(지난주 ${last}번). 진료 때 말씀드려 볼 만해요. 진단이 아닌 생활 신호예요.`;
+  logEvent("memory", `${text}${s.demo ? " (demo data)" : ""}`, now.toISOString(), { visibility: "family" });
+}
+
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9가-힣 ]/g, " ").replace(/\s+/g, " ").trim();
+const QUESTION = /\?\s*$|^(what|when|where|who|is|are|did|do|does|can|will|how)\b|언제|어디|뭐|누구|몇/i;
+
+/** The same question again within three hours counts once as a repeat. */
+export function noteRepeat(text: string, now: Date, earlier: { text: string; at: string }[]) {
+  const q = norm(text);
+  if (q.split(" ").length < 3 || !QUESTION.test(text)) return;
+  const since = now.getTime() - 3 * 60 * 60_000;
+  const same = earlier.filter((e) => Date.parse(e.at) >= since && norm(e.text) === q).length;
+  if (same === 1) recordSlip("repeat", now);
 }
