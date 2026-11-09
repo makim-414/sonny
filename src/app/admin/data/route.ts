@@ -1,3 +1,4 @@
+import { syncShared } from "@/lib/shared-state";
 import { connection } from "next/server";
 import { familyView } from "@/app/api/family/view";
 import { familyState } from "@/app/api/family/state";
@@ -9,6 +10,7 @@ import { stripeEnabled } from "../wallet";
 
 // GET /admin/data : everything the admin tabs need besides the Today feed (/api/family).
 export async function GET() {
+  await syncShared();
   await connection();
   const guardian = await currentGuardian();
   if (!guardian) return Response.json({ error: "sign in as family" }, { status: 401 });

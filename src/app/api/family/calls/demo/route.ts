@@ -1,3 +1,4 @@
+import { syncShared } from "@/lib/shared-state";
 import { randomUUID } from "node:crypto";
 import { logEvent, store } from "@/lib/store";
 import type { GuardianCall, WalletEntry } from "@/lib/types";
@@ -6,6 +7,7 @@ import type { GuardianCall, WalletEntry } from "@/lib/types";
 // For rehearsals and the video fallback when the agent does not place the call itself.
 // It creates the pending spend the call is about, the same shape the agent uses.
 export async function POST(request: Request) {
+  await syncShared();
   const body = (await request.json().catch(() => ({}))) as { script?: string; amount?: number; label?: string; reason?: string };
 
   // { reason: "struggle" }: grandma has been stuck on a task for a while; Sonny quietly asks mom.

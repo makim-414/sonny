@@ -1,3 +1,4 @@
+import { syncShared } from "@/lib/shared-state";
 import { randomUUID } from "node:crypto";
 import { connection } from "next/server";
 import { decide } from "@/app/admin/wallet";
@@ -7,6 +8,7 @@ import { logEvent, store } from "@/lib/store";
 
 // GET /api/family/calls -> calls from Sonny that are ringing right now, oldest first.
 export async function GET() {
+  await syncShared();
   await connection();
   return Response.json({ ringing: store.calls.filter((c) => c.status === "ringing") });
 }
@@ -18,6 +20,7 @@ type Answer = { id?: string; decision?: "approve" | "decline" | "missed" };
 //   missed: mom did not pick up, the spend stays pending in the admin.
 // Sonny hears the result through the TV inbox ("Mom approved call <id>").
 export async function POST(request: Request) {
+  await syncShared();
   const body = (await request.json().catch(() => null)) as Answer | null;
   const call = store.calls.find((c) => c.id === body?.id);
   const decision = body?.decision;

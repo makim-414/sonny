@@ -1,3 +1,4 @@
+import { syncShared } from "@/lib/shared-state";
 import { randomUUID } from "node:crypto";
 import { credit } from "@/app/admin/wallet";
 import { currentGuardian } from "@/lib/auth/server";
@@ -8,6 +9,7 @@ import { store } from "@/lib/store";
 // grandma's allowance from their card. Demo payment: no card is charged.
 // Sonny hears it through the inbox and tells grandma who added it.
 export async function POST(request: Request) {
+  await syncShared();
   const guardian = await currentGuardian();
   if (!guardian) return Response.json({ error: "sign in as family" }, { status: 401 });
   const body = (await request.json().catch(() => null)) as { amount?: unknown } | null;

@@ -1,3 +1,4 @@
+import { syncShared } from "@/lib/shared-state";
 import { connection } from "next/server";
 import { wellness } from "@/lib/agent/wellness";
 import { currentGuardian } from "@/lib/auth/server";
@@ -16,6 +17,7 @@ const OUTING = /taxi|ride|cab|doctor|clinic|hospital|grocer|market|order|택시|
 type Day = { day: string; label: string; systolic: number | null; diastolic: number | null; talks: number; outing: boolean };
 
 export async function GET() {
+  await syncShared();
   await connection();
   if (!(await currentGuardian())) return Response.json({ error: "sign in as family" }, { status: 401 });
 

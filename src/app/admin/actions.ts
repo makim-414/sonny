@@ -1,5 +1,7 @@
 "use server";
 
+import { syncShared } from "@/lib/shared-state";
+
 import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
 import { familyState, type Routine } from "@/app/api/family/state";
@@ -21,6 +23,7 @@ async function origin(): Promise<string> {
 
 // A short-lived QR link that signs grandma's phone in for good.
 export async function createPairLink(): Promise<{ url: string; exp: number }> {
+  await syncShared();
   await requireGuardian();
   const { token, exp } = pairTicket();
   return { url: `${await origin()}/?pair=${encodeURIComponent(token)}`, exp };
@@ -29,6 +32,7 @@ export async function createPairLink(): Promise<{ url: string; exp: number }> {
 const KINDS: Routine["kind"][] = ["pills", "outing", "doctor"];
 
 export async function addRoutine(input: { kind: string; label: string; time: string; days: string }): Promise<{ ok: boolean }> {
+  await syncShared();
   const g = await requireGuardian();
   const kind = KINDS.find((k) => k === input.kind);
   const label = input.label.trim().slice(0, 60);
@@ -55,6 +59,7 @@ export async function addRoutine(input: { kind: string; label: string; time: str
 }
 
 export async function removeRoutine(id: string): Promise<{ ok: boolean }> {
+  await syncShared();
   await requireGuardian();
   const i = familyState.routines.findIndex((r) => r.id === id);
   if (i < 0) return { ok: false };
@@ -63,22 +68,26 @@ export async function removeRoutine(id: string): Promise<{ ok: boolean }> {
 }
 
 export async function topUp(amount: number): Promise<TopUpResult> {
+  await syncShared();
   await requireGuardian();
   return startTopUp(amount, await origin());
 }
 
 export async function confirmTopUp(sessionId: string): Promise<{ ok: boolean }> {
+  await syncShared();
   await requireGuardian();
   return { ok: await confirmStripeTopUp(sessionId) };
 }
 
 export async function updateLimit(limit: number): Promise<{ ok: boolean }> {
+  await syncShared();
   await requireGuardian();
   return { ok: setLimit(limit) };
 }
 
 // Approve or decline a spend over the limit; grandma hears the answer on her phone.
 export async function decideSpend(id: string, approve: boolean): Promise<{ ok: boolean; message?: string }> {
+  await syncShared();
   const g = await requireGuardian();
   const r = decide(id, approve);
   if (!r.ok) return r;

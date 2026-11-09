@@ -1,3 +1,4 @@
+import { syncShared } from "@/lib/shared-state";
 import { connection, type NextRequest } from "next/server";
 import { logEvent, store } from "@/lib/store";
 import type { ActivityEvent } from "@/lib/types";
@@ -10,6 +11,7 @@ const VIS = ["family", "summary", "private"] as const;
 // GET /api/events?view=all   -> every raw event (TV and debugging, not for the phone)
 // GET /api/events?since=X    -> only events after X, where X is an event id or an ISO time
 export async function GET(request: NextRequest) {
+  await syncShared();
   await connection();
   const params = request.nextUrl.searchParams;
   const all = store.events;
@@ -32,6 +34,7 @@ export async function GET(request: NextRequest) {
 // POST /api/events { kind, text, at?, visibility?, familyText? } -> logs one event.
 // For demo seeding and for any surface that has no route of its own yet.
 export async function POST(request: Request) {
+  await syncShared();
   const body = (await request.json().catch(() => null)) as Partial<ActivityEvent> | null;
   if (!body || typeof body.text !== "string" || !body.text.trim() || !KINDS.includes(body.kind as ActivityEvent["kind"])) {
     return Response.json({ error: `need { kind: ${KINDS.join("|")}, text }` }, { status: 400 });

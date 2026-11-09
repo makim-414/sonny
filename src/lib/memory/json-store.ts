@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { APP_LANG } from "@/lib/brand";
 import { SEED_FACTS, SEED_LESSONS, SEED_PROVENANCE } from "./seed";
+import { redis, sharedEnabled } from "@/lib/shared-state";
 import { rankFacts } from "./search";
 import { bumpMemVersion, memVersion, type MemoryFact, type MemoryStore } from "./types";
 
@@ -29,7 +30,17 @@ export function seedFacts(): MemoryFact[] {
   ];
 }
 
+// On Vercel the file system is per instance, so the facts live in Redis instead.
+const REDIS_KEY = `sonny:memory:${APP_LANG}`;
+
 async function load(): Promise<MemoryFact[]> {
+  if (sharedEnabled()) {
+    const [raw] = await redis([["GET", REDIS_KEY]]);
+    if (typeof raw === "string") return (cache = JSON.parse(raw) as MemoryFact[]);
+    cache = seedFacts();
+    await save();
+    return cache;
+  }
   if (seen !== memVersion("json")) cache = null;
   seen = memVersion("json");
   if (cache) return cache;
@@ -46,6 +57,10 @@ function save(): Promise<void> {
   bumpMemVersion("json");
   seen = memVersion("json");
   const snapshot = JSON.stringify(cache ?? [], null, 2);
+  if (sharedEnabled()) {
+    writing = writing.then(() => redis([["SET", REDIS_KEY, snapshot]])).then(() => undefined);
+    return writing;
+  }
   writing = writing.then(async () => {
     await fs.mkdir(DATA_DIR, { recursive: true });
     await fs.writeFile(FILE, snapshot, "utf8");
@@ -92,6 +107,7 @@ export const jsonMemory: MemoryStore = {
 // Demo reset: back to seed facts only.
 export async function resetJsonMemory() {
   cache = null;
-  await fs.rm(FILE, { force: true });
+  if (sharedEnabled()) await redis([["DEL", REDIS_KEY]]);
+  else await fs.rm(FILE, { force: true });
   await load();
 }

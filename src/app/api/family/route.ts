@@ -1,3 +1,4 @@
+import { syncShared } from "@/lib/shared-state";
 import { connection } from "next/server";
 import { logEvent, store } from "@/lib/store";
 import { requestKind, summarize } from "@/components/family/derive";
@@ -11,6 +12,7 @@ import { familyView } from "./view";
 // The summary is computed from the raw log on the server, so it can say "약 드셨어요"
 // without sending grandma's own words to the phone.
 export async function GET() {
+  await syncShared();
   await connection();
   const me = memberByEmail((await currentGuardian())?.email);
   const view = familyView(store.events);
@@ -43,6 +45,7 @@ type FamilyPost = {
 //   { text }               -> mom's message or request goes to the TV inbox
 //   { approve, text? }     -> mom approves a pending request; the TV is told to go ahead
 export async function POST(request: Request) {
+  await syncShared();
   const body = (await request.json().catch(() => null)) as FamilyPost | null;
   // Whoever is signed in sends it; the feed and Sonny see their name ("Sarah: ...").
   const g = await currentGuardian();

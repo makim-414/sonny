@@ -1,3 +1,4 @@
+import { syncShared } from "@/lib/shared-state";
 import { store } from "@/lib/store";
 
 // POST /remote/api { text } : the phone remote drops a spoken sentence or a key press
@@ -5,6 +6,7 @@ import { store } from "@/lib/store";
 // It does not write to the family feed: what grandma says is hers, and the agent
 // logs it with the right visibility when it handles the turn.
 export async function POST(request: Request) {
+  await syncShared();
   const body = (await request.json().catch(() => null)) as { text?: unknown } | null;
   const text = typeof body?.text === "string" ? body.text.trim() : "";
   if (!text) return Response.json({ error: "need { text }" }, { status: 400 });
