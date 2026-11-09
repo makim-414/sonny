@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "ANTHROPIC_API_KEY=\"$(security find-generic-password -s anthropic-hackathon-key -w)\" next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "ANTHROPIC_API_KEY=\"$(security find-generic-password -s anthropic-hackathon-key -w)\" next start",
     "lint": "eslint"
   },
   "dependencies": {

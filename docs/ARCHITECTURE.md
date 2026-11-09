@@ -27,9 +27,10 @@ Dev ports: TV screen session 3101, agent brain session 3102, family session 3103
 - `family.notify(message, level)` / family inbox: pass messages and requests both ways, raise alerts
 - `info.weather`, `info.news`: read the world to her in plain words (seed or live)
 - `tv.show(card)`: put photos, text, family video messages on the big screen
+- `ride.request(from, to, when)`: call a taxi for her (real case: mom booked a Kakao T taxi from home to the hospital for grandma this morning). Demo uses a mock ride service; the family gets an approval or a heads-up, and the TV shows the car, plate and arrival time in big text
 - `epg.search(query, now)` and `tv.tune(channel)`: find and switch to a show (one tool among many)
 
-The model is Claude via `@ai-sdk/anthropic` (`ANTHROPIC_API_KEY`).
+The model is Claude via `@ai-sdk/anthropic`. `pnpm dev` and `pnpm start` read `ANTHROPIC_API_KEY` from the macOS keychain item `anthropic-hackathon-key`, so no key lives in files. Do not put the key in `.env` files or code.
 Voice uses the browser (Web Speech API `ko-KR` for listening, `speechSynthesis` for speaking) so the demo needs no extra keys.
 
 ## Ownership (one writer per folder)
