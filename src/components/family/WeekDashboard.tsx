@@ -13,7 +13,73 @@ type Insights = {
   memory: { recall: number; of: number; lastWeek: number; demo: boolean };
   gettingOut: { thisWeek: number; lastWeek: number; demo: boolean };
   talks: { perDay: number; busiest: { from: number; to: number }; demo: boolean };
+  signals?: unknown;
 };
+
+// "Signals this week": small slips Sonny notices in everyday calls. The agent adds
+// `signals` to /api/family/insights; until then the card shows marked demo values.
+type Count = { thisWeek: number; lastWeek?: number };
+type Signals = { forgot: Count; missed: Count; repeated: Count; demo: boolean };
+const DEMO_SIGNALS: Signals = { forgot: { thisWeek: 2, lastWeek: 0 }, missed: { thisWeek: 1 }, repeated: { thisWeek: 0 }, demo: true };
+
+// Accepts { forgot | forgotNameOrPlace, missed | missedCheckins, repeated | repeatedQuestions },
+// each a number or { thisWeek, lastWeek }.
+function readSignals(raw: unknown): Signals {
+  if (!raw || typeof raw !== "object") return DEMO_SIGNALS;
+  const r = raw as Record<string, unknown>;
+  const count = (...keys: string[]): Count | null => {
+    for (const k of keys) {
+      const v = r[k];
+      if (typeof v === "number") return { thisWeek: v };
+      if (v && typeof v === "object" && typeof (v as Count).thisWeek === "number") {
+        const c = v as Count;
+        return { thisWeek: c.thisWeek, lastWeek: typeof c.lastWeek === "number" ? c.lastWeek : undefined };
+      }
+    }
+    return null;
+  };
+  const forgot = count("forgot", "forgotNameOrPlace", "forgotName");
+  const missed = count("missed", "missedCheckins", "missedCheckIns");
+  const repeated = count("repeated", "repeatedQuestions");
+  if (!forgot && !missed && !repeated) return DEMO_SIGNALS;
+  return {
+    forgot: forgot ?? { thisWeek: 0 },
+    missed: missed ?? { thisWeek: 0 },
+    repeated: repeated ?? { thisWeek: 0 },
+    demo: r.demo === true,
+  };
+}
+
+function SignalRow({ label, c }: { label: string; c: Count }) {
+  const up = c.lastWeek !== undefined && c.thisWeek > c.lastWeek;
+  return (
+    <li className={up ? "wd-sig is-up" : "wd-sig"}>
+      <span className="wd-sig-label">{label}</span>
+      <span className="wd-sig-value">
+        {c.thisWeek}
+        {c.lastWeek !== undefined && <span className="wd-sig-last"> ({T.sigLastWeek(c.lastWeek)})</span>}
+      </span>
+    </li>
+  );
+}
+
+function SignalsCard({ raw }: { raw: unknown }) {
+  const s = readSignals(raw);
+  return (
+    <section className="wd-signals" aria-label={T.signalsTitle}>
+      <p className="wd-kpi-label">
+        {T.signalsTitle}
+        {s.demo && <span className="wd-demo">{T.demoTag}</span>}
+      </p>
+      <ul className="wd-sig-list">
+        <SignalRow label={T.sigForgot} c={s.forgot} />
+        <SignalRow label={T.sigMissed} c={s.missed} />
+        <SignalRow label={T.sigRepeated} c={s.repeated} />
+      </ul>
+      <p className="wd-note">{T.signalsNote}</p>
+    </section>
+  );
+}
 
 const POLL_MS = 15000;
 const hour = (h: number) => new Date(2000, 0, 1, h % 24).toLocaleTimeString(T.locale, { hour: "numeric" });
@@ -125,6 +191,7 @@ export default function WeekDashboard({ wide = false }: { wide?: boolean }) {
   return (
     <section className={wide ? "wd wd-wide" : "wd"} aria-label={T.weekTitle}>
       <h2 className="fa-section-title">{T.weekTitle}</h2>
+      <SignalsCard raw={data.signals} />
       <div className="wd-kpis">
         <Kpi label={T.kBp} value={bp.latest ?? "·"} sub={bp.average ? T.kBpSub(bp.average, bp.inRangeDays, bp.daysMeasured) : ""} demo={bp.demo} />
         <Kpi label={T.kMind} value={T.kMindVal(memory.recall, memory.of)} sub={T.kMindSub(memory.recall - memory.lastWeek)} demo={memory.demo} />
