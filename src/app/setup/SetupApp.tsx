@@ -75,6 +75,7 @@ export default function SetupApp() {
   const [notice, setNotice] = useState("");
   const [confirming, setConfirming] = useState(false);
   const [disconnected, setDisconnected] = useState(false);
+  const [voice, setVoice] = useState<"cedar" | "marin">("cedar");
 
   // mic test
   const [micOn, setMicOn] = useState(false);
@@ -99,6 +100,26 @@ export default function SetupApp() {
   const set = <K extends keyof Settings>(k: K, v: Settings[K]) => {
     setS((prev) => ({ ...prev, [k]: v }));
     if (save(k, v)) setNotice((SETUP_STRINGS[k === "lang" ? (v as Settings["lang"]) : s.lang] ?? SETUP_STRINGS.en).saved);
+  };
+
+  // Sonny's voice is shared (TV and phones), so it lives on the server, not in this browser.
+  useEffect(() => {
+    if (!unlocked) return;
+    fetch("/api/agent/voice", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((j: { voice?: string }) => {
+        if (j.voice === "cedar" || j.voice === "marin") setVoice(j.voice);
+      })
+      .catch(() => {});
+  }, [unlocked]);
+
+  const pickVoice = async (v: "cedar" | "marin") => {
+    setVoice(v);
+    const res = await fetch("/api/agent/voice", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ voice: v }) }).catch(() => null);
+    if (res?.ok) {
+      setNotice(S.voiceSaved);
+      void testSound();
+    }
   };
 
   const submitPin = async (value: string) => {
@@ -260,6 +281,11 @@ export default function SetupApp() {
               {notice}
             </p>
           )}
+
+          <section className="st-card">
+            <h2 className="st-label">{S.voice}</h2>
+            <Seg label={S.voice} value={voice} options={S.voiceOpts} onChange={(v) => void pickVoice(v)} />
+          </section>
 
           <section className="st-card">
             <h2 className="st-label">{S.rate}</h2>
