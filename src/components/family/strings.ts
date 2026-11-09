@@ -83,6 +83,12 @@ const ko = {
   nudgeDone: (v: string): string => (v === "approved" ? "Sonny가 할머니께 곧 전화 온다고 전할게요." : "저녁 7시에 다시 알려 드릴게요."),
   nudgeLog: (v: string): string => (v === "approved" ? "지금 할머니께 전화하기로 함" : "저녁 7시 안부 전화 알림"),
   nudgeReminder: "저녁 7시: 할머니께 안부 전화",
+  // struggle call: grandma has been stuck on a task for a while
+  struggleSub: "할머니가 도움이 필요해요",
+  struggleBook: "대신 예약해 줘",
+  struggleCallHer: "내가 전화할게",
+  struggleDone: (v: string): string => (v === "approved" ? "Sonny가 지금 예약하고 할머니께 알려 드릴게요." : v === "declined" ? "Sonny가 할머니께 곧 전화 온다고 전할게요." : "나중에 관리 화면에서 볼 수 있어요."),
+  struggleLog: (v: string): string => (v === "approved" ? "할머니 대신 예약하기로 함" : v === "declined" ? "할머니께 직접 전화하기로 함" : "도움 요청 전화를 받지 않음"),
   // what the family routes write
   mom: "엄마",
   approvedLog: (what: "taxi" | "order" | "other") =>
@@ -170,6 +176,11 @@ const en: Strings = {
   nudgeDone: (v: string): string => (v === "approved" ? "Sonny will tell grandma you're calling." : "Reminder set for 7 PM."),
   nudgeLog: (v: string): string => (v === "approved" ? "Calling grandma now" : "Reminder: call grandma at 7 PM"),
   nudgeReminder: "7 PM: call grandma",
+  struggleSub: "Grandma needs a hand",
+  struggleBook: "Book it for her",
+  struggleCallHer: "I'll call her",
+  struggleDone: (v: string): string => (v === "approved" ? "Booking it now. Sonny will tell grandma." : v === "declined" ? "Sonny will tell grandma you're calling." : "It's waiting in your admin."),
+  struggleLog: (v: string): string => (v === "approved" ? "Asked Sonny to book it for grandma" : v === "declined" ? "Calling grandma to help" : "Missed a call about grandma"),
   mom: "Mom",
   approvedLog: (what: "taxi" | "order" | "other") => `Approved the ${what === "taxi" ? "taxi" : what === "order" ? "order" : "request"}`,
   approveInbox: (from: string, text: string) => `${from} approved it. Please go ahead: ${text}`,

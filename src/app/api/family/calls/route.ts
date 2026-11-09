@@ -42,6 +42,19 @@ export async function POST(request: Request) {
   const verb = call.status === "approved" ? "approved" : call.status === "declined" ? "declined" : "missed";
   const at = new Date().toISOString();
 
+  if (call.reason === "struggle") {
+    // Grandma got stuck on a task. approve: Sonny finishes it for her; decline: mom calls her herself.
+    const text =
+      call.status === "approved"
+        ? `${who} approved call ${call.id}: book it for grandma now and tell her it's done.`
+        : call.status === "declined"
+          ? `${who} declined call ${call.id}: ${who} will call grandma to help. Tell grandma "${who}'s going to call you."`
+          : `${who} missed call ${call.id}: keep helping grandma gently.`;
+    store.tvInbox.push({ id: randomUUID(), at, from: who, text });
+    logEvent("call", `${T.struggleLog(verb)}: ${call.script}`, at, { visibility: "family", familyText: T.struggleLog(verb) });
+    return Response.json({ ok: true, call });
+  }
+
   if (call.reason === "nudge") {
     // A nudge has no money in it: "approve" means she is calling grandma now,
     // anything else means "remind me at 7 PM".
