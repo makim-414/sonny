@@ -64,6 +64,7 @@ Pickle covers your workday through Zoom. Sonny covers grandma's whole day. Scan 
 - Two safety layers: a strange order (quantity or amount) makes Sonny ask grandma again ("Two thousand? Not two?"). Over the per-purchase limit (default $30), Sonny calls mom: her phone rings "Sonny is calling", Sonny reads the request in its own voice (Kokoro), mom says yes or no.
 - "Anything big or strange, Sonny calls mom first. Grandma keeps her independence; mom keeps the veto."
 - Today the call is a full-screen ring in mom's app. Roadmap: a real phone call (telephony voice agent).
+- Sonny also calls mom the other way round: "Grandma went to the temple this morning and has been quiet since lunch. You could ask about the kimchi she just made." Mom taps "Call grandma now" (Sonny tells grandma her daughter is calling) or "Remind me at 7 PM". Stage line: "Sonny doesn't replace family; it nudges mom to call, with something to talk about."
 
 ## Family admin
 
@@ -127,4 +128,5 @@ Do not use:
 
 - **"Will she really talk to it?"** Our riskiest assumption, not tested with her yet. Our bet: she answers when it speaks first, and keeps it on because it asks to be taught.
 - **"What about the real phone call?"** Today mom's app rings full screen. Next: Sonny places a real call through a telephony voice agent (pipecat or livekit, both in `docs/OPEN_SOURCE.md` as roadmap).
+- **"Doesn't this replace family?"** No. "Sonny doesn't replace family; it nudges mom to call, with something to talk about." It even rings mom when grandma has been quiet, with a topic for the call.
 - **"What is the long-term vision?"** Multiplayer: seniors meeting each other by voice through their TVs, with Sonny as host. No betting or gambling.

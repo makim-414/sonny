@@ -65,7 +65,13 @@ function startRing(): () => void {
 
 async function speak(text: string): Promise<void> {
   try {
-    const res = await fetch("/api/tts", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text }) });
+    // Kokoro can take many seconds on a cold server; mom should not stare at a silent call.
+    const res = await fetch("/api/tts", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text }),
+      signal: AbortSignal.timeout(5000),
+    });
     if (!res.ok) throw new Error(String(res.status));
     const url = URL.createObjectURL(await res.blob());
     await new Promise<void>((resolve) => {
@@ -146,17 +152,21 @@ export default function IncomingCall() {
       if (!call || busy.current) return;
       busy.current = true;
       recog.current?.abort();
+      // A nudge has nothing to decline: "no" means "remind me at 7 PM".
+      const nudge = call.reason === "nudge";
+      const d = nudge && decision === "decline" ? "missed" : decision;
+      const done = nudge ? T.nudgeDone : T.callDone;
       try {
         const res = await fetch("/api/family/calls", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ id: call.id, decision }),
+          body: JSON.stringify({ id: call.id, decision: d }),
         });
         const json = (await res.json().catch(() => ({}))) as { call?: GuardianCall };
-        const status = json.call?.status ?? (decision === "approve" ? "approved" : decision === "decline" ? "declined" : "missed");
-        setResult(T.callDone(status));
+        const status = json.call?.status ?? (d === "approve" ? "approved" : d === "decline" ? "declined" : "missed");
+        setResult(done(status));
       } catch {
-        setResult(T.callDone("missed"));
+        setResult(done("missed"));
       }
       setPhase("done");
       setTimeout(() => {
@@ -206,15 +216,14 @@ export default function IncomingCall() {
 
   if (!call) return null;
 
+  const nudge = call.reason === "nudge";
   const dollars = new Intl.NumberFormat(T.locale, { style: "currency", currency: "USD" }).format(call.amount / 100);
   return (
     <div className="fa-call" role="dialog" aria-modal="true" aria-label={T.callTitle}>
       <div className="fa-call-top">
         <span className={phase === "ringing" ? "fa-call-orb is-ringing" : "fa-call-orb"} aria-hidden />
         <h2 className="fa-call-title">{T.callTitle}</h2>
-        <p className="fa-call-sub">
-          {T.callSub} · {dollars}
-        </p>
+        <p className="fa-call-sub">{nudge ? T.nudgeSub : `${T.callSub} · ${dollars}`}</p>
       </div>
 
       {phase !== "ringing" && <p className="fa-call-script">{call.script}</p>}
@@ -233,7 +242,18 @@ export default function IncomingCall() {
             </button>
           </>
         )}
-        {(phase === "deciding" || phase === "speaking") && (
+        {(phase === "deciding" || phase === "speaking") && nudge && (
+          <>
+            {/* In a real deployment this is a tel: link to grandma's number; the demo leaves it out. */}
+            <button className="fa-call-btn is-later" onClick={() => void finish("missed")}>
+              {T.nudgeLater}
+            </button>
+            <button className="fa-call-btn is-yes" onClick={() => void finish("approve")}>
+              {T.nudgeCall}
+            </button>
+          </>
+        )}
+        {(phase === "deciding" || phase === "speaking") && !nudge && (
           <>
             <button className="fa-call-btn is-no" onClick={() => void finish("decline")}>
               {T.callDecline}

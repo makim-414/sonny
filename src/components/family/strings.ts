@@ -76,6 +76,13 @@ const ko = {
   callLog: (v: string): string => (v === "approved" ? "전화로 승인함" : v === "declined" ? "전화로 거절함" : "전화를 받지 않음"),
   yesWords: /^(네|응|예|좋아|그래|승인|yes|yeah|yep|ok|okay|sure|approve)/i,
   noWords: /^(아니|아니요|안돼|안 돼|싫어|거절|no|nope|don't|decline|stop)/i,
+  // nudge call: Sonny suggests mom calls grandma
+  nudgeSub: "할머니 일로 전화했어요",
+  nudgeCall: "지금 할머니께 전화",
+  nudgeLater: "저녁 7시에 알려 줘",
+  nudgeDone: (v: string): string => (v === "approved" ? "Sonny가 할머니께 곧 전화 온다고 전할게요." : "저녁 7시에 다시 알려 드릴게요."),
+  nudgeLog: (v: string): string => (v === "approved" ? "지금 할머니께 전화하기로 함" : "저녁 7시 안부 전화 알림"),
+  nudgeReminder: "저녁 7시: 할머니께 안부 전화",
   // what the family routes write
   mom: "엄마",
   approvedLog: (what: "taxi" | "order" | "other") =>
@@ -157,6 +164,12 @@ const en: Strings = {
   callLog: (v: string) => (v === "approved" ? "Approved on a call" : v === "declined" ? "Declined on a call" : "Missed a call"),
   yesWords: /\b(yes|yeah|yep|ok|okay|sure|approve|go ahead)\b/i,
   noWords: /\b(no|nope|don't|do not|decline|stop|cancel)\b/i,
+  nudgeSub: "About grandma",
+  nudgeCall: "Call grandma now",
+  nudgeLater: "Remind me at 7 PM",
+  nudgeDone: (v: string): string => (v === "approved" ? "Sonny will tell grandma you're calling." : "Reminder set for 7 PM."),
+  nudgeLog: (v: string): string => (v === "approved" ? "Calling grandma now" : "Reminder: call grandma at 7 PM"),
+  nudgeReminder: "7 PM: call grandma",
   mom: "Mom",
   approvedLog: (what: "taxi" | "order" | "other") => `Approved the ${what === "taxi" ? "taxi" : what === "order" ? "order" : "request"}`,
   approveInbox: (from: string, text: string) => `${from} approved it. Please go ahead: ${text}`,

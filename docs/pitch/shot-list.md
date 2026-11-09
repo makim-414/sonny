@@ -87,6 +87,12 @@ curl -s -X POST '<SITE>/api/family/calls/demo?demo=1' -H 'content-type: applicat
 
 ### Cut 8. The rest of her day (1:07 to 1:17)
 Record each as a 3 second clip; label "demo data".
+0. Optional nudge card: ring mom with a nudge call and film the "Call grandma now" / "Remind me at 7 PM" screen:
+
+```bash
+curl -s -X POST '<SITE>/api/family/calls/demo?demo=1' -H 'content-type: application/json' -d '{"reason":"nudge"}'
+```
+
 1. Grandma: "Tomorrow is my temple day. Remind me in the morning."
 2. Mom taps "I'll be there at 7 tonight"; grandma answers "Good, drive safe"; mom's reply card fills.
 3. Grandma: "When is my favorite singer on?"
