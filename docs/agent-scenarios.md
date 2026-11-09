@@ -66,6 +66,24 @@
 
 한국어로만 돌린 이전 17턴 결과는 커밋 `d3d505a` 의 이 문서에 있다.
 
+## 잘못된 주문 안전장치 (11:12 실행)
+
+`?demo=1` 쿠키로 같은 서버에서 돌렸다. 가족 앱의 `POST /api/family/calls` 와 `/api/family/inbox` 도 실제로 거쳤다.
+
+| 말 / 이벤트 | 응답 | 결과 |
+|---|---|---|
+| "Sonny, order two thousand burgers" | 4.0s Haiku | "Did you mean 2 burgers, or 2,000?" (결제 없음) |
+| "Oh no, I meant just two" | 2.6s Haiku | 2개 주문, 용돈에서 바로 결제 |
+| "Order five chickens for the church dinner" | 2.9s Haiku | $44.95 가 한도 $30 를 넘는다. ledger 는 `pending_approval` 이고 `store.calls` 에 `ringing` 이 생긴다. 말은 "I'm calling Sarah to check." |
+| 엄마가 전화 승인 → inbox "Mom approved call <id>" | 0s (모델 없음) | "Sarah said yes, it's ordered." + 주문 카드 |
+| "Order four big pizzas" → 엄마 거절 | 0s (모델 없음) | "Sarah said not this time, so I cancelled it." + Cancelled 카드 |
+| "Sonny, call a taxi to the clinic now" → "Yes" | 1.1s, 2.1s Haiku | 8분 거리, $4.50 이라 바로 결제. 차가 6분 뒤 도착 |
+
+- 전화 script 예: "Hi, it's Sonny. Grandma June wants to order 5 chicken for $44.95. That's over her $30 limit. Should I go ahead?"
+- 가족 앱의 `decide` 는 잔액보다 큰 금액의 승인을 거부한다("not enough balance"). 그래서 데모 주문은 잔액 안에서 한도만 넘는 금액으로 한다.
+- 고친 버그: Haiku 가 한 단계에서 `errand_order` 를 두 번 병렬로 불러 전화가 두 통 걸렸다. 지금은 주문, 택시, 기억 저장이 턴당 한 번만 실행된다.
+- 이름과 장소는 공개 전에 모두 가명으로 바꿨다(Grandma June, 할머니, 수진, 햇살시).
+
 ## 안전장치
 
 - Haiku 가 도구를 부르지 않고 행동을 말하면 같은 턴을 Sonnet 으로 다시 돌린다(`meta.rerun`). 예: "ordered", "on the way", "I'll remember", "turned it on".
