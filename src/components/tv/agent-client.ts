@@ -23,6 +23,8 @@ export async function callAgent(req: AgentRequest): Promise<AgentResult> {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(req),
+        // A slow model must not freeze the TV: after 20s fall back to the local reply.
+        signal: AbortSignal.timeout(20_000),
       });
       if (res.status === 404) {
         apiMissingUntil = Date.now() + RETRY_AFTER_MS;

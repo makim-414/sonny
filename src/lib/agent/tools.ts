@@ -14,6 +14,7 @@ import { PLACES } from "./services/places";
 import { T } from "./strings";
 import { ringGuardian, spend, walletSnapshot } from "./wallet";
 import { taskDone } from "./watch";
+import { connectionFor, requestConnection } from "./connections";
 import { encodeSkill, errandParts, findSkill, messageParts, skillsOf } from "./skills";
 
 // One request's context. Tools push TV actions here; the route returns them.
@@ -159,6 +160,31 @@ export function createTools(ctx: AgentContext) {
         callGuardian(ctx, pay, T.whatOrder(list), cost);
         ctx.actions.push({ type: "notifyFamily", message: T.notifyOrder(list), level: "warn" });
         return { ok: true, status: "calling_daughter", cost, reason: pay.reason === "over_limit" ? `over the ${T.usd(store.wallet.perSpendLimit)} per-purchase limit` : `only ${T.usd(pay.balance)} left in the allowance`, say: "Tell her: I'm calling Sarah to check." };
+  };
+
+  // Shared by ride_request and skill_run: book, pay from the allowance or call Sarah.
+  const bookRide = (to: string, from?: string, when?: string) => {
+        taskDone(); // a ride is under way: grandma is no longer stuck
+        const ride = requestRide({ to, from, when, now: ctx.now });
+        const cost = T.usd(ride.fareCents);
+        const pay = spend(ride.fareCents, `Taxi to ${ride.destination.name} (${DEMO})`, ctx.now.toISOString());
+        const pickup = kstClock(new Date(ride.pickupAt));
+        shared.lastRide = { at: ctx.now.getTime(), status: pay.status === "done" ? "booked" : "waiting_ok", car: ride.carModel, plate: ride.plate, pickupISO: ride.pickupAt, destination: ride.destination.name };
+        if (pay.status === "done") {
+          ctx.actions.push({
+            type: "showCard",
+            title: T.rideCardTitle,
+            body: `${T.rideBody(ride.pickup.name, ride.destination.name, ride.carModel, ride.plate, ride.etaMin)}\n${DEMO}`,
+          });
+          ctx.actions.push({ type: "notifyFamily", message: T.notifyRide(ride.pickup.name, ride.destination.name), level: "info" });
+          // Paid rides are a plain family line (kind family), not an approval card.
+          log(ctx, "family", T.logRidePaid(cost, ride.destination.name, ride.carModel, ride.plate, pickup) + ` (${DEMO})`, { visibility: "family" });
+          return { ok: true, status: "done", paid: cost, balanceLeft: T.usd(pay.balance), car: ride.carModel, plate: ride.plate, etaMin: ride.etaMin, destination: ride.destination.name };
+        }
+        shared.requests.push({ kind: "taxi", at: ctx.now.toISOString(), ride, walletEntryId: pay.entry.id });
+        callGuardian(ctx, pay, T.whatRide(ride.destination.name), cost);
+        ctx.actions.push({ type: "notifyFamily", message: T.notifyRide(ride.pickup.name, ride.destination.name), level: "warn" });
+        return { ok: true, status: "calling_daughter", cost, reason: pay.reason === "over_limit" ? `over the ${T.usd(store.wallet.perSpendLimit)} per-purchase limit` : `only ${T.usd(pay.balance)} left in the allowance`, destination: ride.destination.name, say: "Tell her: I'm calling Sarah to check." };
   };
 
   const skillMemory = async () => skillsOf(await ctx.memory.all());
@@ -308,27 +334,7 @@ export function createTools(ctx: AgentContext) {
         if (!destinationNamed(ctx.heard, ctx.lastSaid)) {
           return { ok: false, status: "need_destination", say: T.askWhere };
         }
-        taskDone(); // a ride is under way: grandma is no longer stuck
-        const ride = requestRide({ to, from, when, now: ctx.now });
-        const cost = T.usd(ride.fareCents);
-        const pay = spend(ride.fareCents, `Taxi to ${ride.destination.name} (${DEMO})`, ctx.now.toISOString());
-        const pickup = kstClock(new Date(ride.pickupAt));
-        shared.lastRide = { at: ctx.now.getTime(), status: pay.status === "done" ? "booked" : "waiting_ok", car: ride.carModel, plate: ride.plate, pickupISO: ride.pickupAt, destination: ride.destination.name };
-        if (pay.status === "done") {
-          ctx.actions.push({
-            type: "showCard",
-            title: T.rideCardTitle,
-            body: `${T.rideBody(ride.pickup.name, ride.destination.name, ride.carModel, ride.plate, ride.etaMin)}\n${DEMO}`,
-          });
-          ctx.actions.push({ type: "notifyFamily", message: T.notifyRide(ride.pickup.name, ride.destination.name), level: "info" });
-          // Paid rides are a plain family line (kind family), not an approval card.
-          log(ctx, "family", T.logRidePaid(cost, ride.destination.name, ride.carModel, ride.plate, pickup) + ` (${DEMO})`, { visibility: "family" });
-          return { ok: true, status: "done", paid: cost, balanceLeft: T.usd(pay.balance), car: ride.carModel, plate: ride.plate, etaMin: ride.etaMin, destination: ride.destination.name };
-        }
-        shared.requests.push({ kind: "taxi", at: ctx.now.toISOString(), ride, walletEntryId: pay.entry.id });
-        callGuardian(ctx, pay, T.whatRide(ride.destination.name), cost);
-        ctx.actions.push({ type: "notifyFamily", message: T.notifyRide(ride.pickup.name, ride.destination.name), level: "warn" });
-        return { ok: true, status: "calling_daughter", cost, reason: pay.reason === "over_limit" ? `over the ${T.usd(store.wallet.perSpendLimit)} per-purchase limit` : `only ${T.usd(pay.balance)} left in the allowance`, destination: ride.destination.name, say: "Tell her: I'm calling Sarah to check." };
+        return bookRide(to, from, when);
       },
     }),
 
@@ -356,7 +362,7 @@ export function createTools(ctx: AgentContext) {
         "Grandma teaches you HOW to do something for her, step by step (\"Let me teach you how I do my Sunday groceries: ...\", \"When I say 'call Martha', send her ...\"). Save it as a skill you can repeat later.",
       inputSchema: z.object({
         name: z.string().describe("short name she would say to start it, e.g. 'Sunday groceries', 'call Martha'"),
-        action: z.enum(["errand", "message", "other"]).describe("errand = a grocery order, message = a note to a friend or family member"),
+        action: z.enum(["errand", "message", "ride", "other"]).describe("errand = a grocery order, message = a note to a friend or family member, ride = a taxi to a place (steps: 'to: <place>')"),
         steps: z
           .array(z.string())
           .min(1)
@@ -365,9 +371,18 @@ export function createTools(ctx: AgentContext) {
       execute: async ({ name, action, steps }) => {
         if (!first(ctx, "skill_learn")) return AGAIN;
         const text = encodeSkill(name, action, steps);
+        // A skill that needs an outside account is connected once by the guardian.
+        // Grandma is never asked for an id, a password or a card.
+        // Groceries already run on the allowance wallet, so only rides and the pharmacy ask.
+        const service = action === "ride" ? "ride" : /pharmac|prescription|refill|약국/i.test(`${name} ${steps.join(" ")}`) ? "pharmacy" : null;
         const saved = await ctx.memory.remember({ text, category: "skill", source: "grandma", provenance: `${TAUGHT_BY}, ${ctx.now.toISOString()}`, at: ctx.now.toISOString() });
         ctx.actions.push({ type: "showCard", title: T.skillLearnedTitle(name), body: steps.join("\n") });
         log(ctx, "memory", T.logSkill(name, steps.join(", ")), { visibility: "family", familyText: T.famSkill(name) });
+        if (service && connectionFor(service)?.status !== "connected") {
+          requestConnection(service, name, ctx.now.toISOString());
+          ctx.actions.push({ type: "notifyFamily", message: `Connect Grandma's ${service} account for "${name}"`, level: "info" });
+          return { saved: !saved.duplicate, id: saved.id, name, needsAccount: service, say: `Say exactly: "I learned it, June. Sarah will connect your ${service} account once, I'll ask her." Never ask her for an id, password or card.` };
+        }
         return { saved: !saved.duplicate, id: saved.id, name, say: "Thank her in one short line and say you will do it her way next time." };
       },
     }),
@@ -385,6 +400,17 @@ export function createTools(ctx: AgentContext) {
           const res = await placeOrder(items, true, shop);
           const list = items.map((i) => i.name).join(", ");
           return { ...res, skill: sk.name, steps: sk.steps, say: `Say: "Done, just the way you like it: ${list}${shop ? ` from ${shop}` : ""}." (if it is calling Sarah instead, say that)` };
+        }
+        if (sk.action === "ride") {
+          const c = connectionFor("ride");
+          if (c?.status !== "connected") {
+            requestConnection("ride", sk.name, ctx.now.toISOString());
+            return { ok: false, status: "account_not_connected", say: `Say: "Sarah hasn't connected your ride account yet, June. I've asked her again." Never ask for a password or card.` };
+          }
+          const to = sk.steps.find((x) => /^to\s*:/i.test(x))?.replace(/^to\s*:\s*/i, "") ?? sk.steps[0];
+          ctx.once?.add("ride_request");
+          const res = bookRide(to);
+          return { ...res, skill: sk.name, account: c.account, say: "Say in one short line that her usual ride is booked, with the car and time." };
         }
         if (sk.action === "message") {
           const { to, text } = messageParts(sk);

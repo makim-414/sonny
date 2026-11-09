@@ -12,6 +12,7 @@ import { getSession, pushTurn } from "./session";
 import { T } from "./strings";
 import { createTools, DEMO, lessonsThisMonth, shared, type AgentContext } from "./tools";
 import { settle, spend } from "./wallet";
+import { connect, connections } from "./connections";
 import { findSkill, skillsOf } from "./skills";
 import { onIdle, onNudge, onVoice, struggleCheck, taskDone, type Quick } from "./watch";
 import { requestRide } from "./services/ride";
@@ -30,7 +31,7 @@ const SMART = process.env.HYODO_SMART_MODEL ?? "claude-sonnet-5-5";
 const TEACH_WORDS =
   /기억해|이름은|이름이|비법|가르쳐|알려 줄게|해야 (해|돼|한다)|하면 (돼|좋아)|절여|넣어야|remember (this|that)|\bname is\b|\bnamed\b|recipe|the trick is|the secret is|\b(here'?s|a little|my) (trick|tip|secret)\b|\btrick:|you (have|need) to|always (put|use|add)|never (put|use)/i;
 const ORDER_NOW = /\b(order|buy|get me|pick up)\b.{2,}|시켜|주문해|사다 줘|사 줘/i;
-const SKILL_TEACH = /\bteach you how\b|\bhow I (do|make|like|want)\b|\bwhen I say\b|\bthis is how\b|하는 법|이렇게 해/i;
+const SKILL_TEACH = /\blearn to\b|\blearn how to\b|\bteach you how\b|\bhow I (do|make|like|want)\b|\bwhen I say\b|\bthis is how\b|하는 법|이렇게 해/i;
 const PLAY_EN = /\b(turn on|put on|play|watch|switch to)\b/i;
 const MED_WORDS = /약.{0,6}(먹었|먹음|먹을게|드셨|챙겨 먹|안 먹)|\b(took|taken|had|take)\b.{0,12}\b(pills?|medicine|meds)\b|\bI (took|have taken|had) (it|them|that)\b/i;
 const LESSON_COUNT_WORDS = /배운 (거|게|것).{0,8}(몇|얼마)|how many .*(learn|taught)/i;
@@ -368,6 +369,18 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   };
 
   if (req.source === "family") {
+    // Mom connected an account (Connect in the family app, or approving the request card).
+    const conn = req.text.match(/connect(?:ed|ion) ([0-9a-f-]{8,})/i) ?? req.text.match(/\(connection ([0-9a-f-]{8,})\)/i);
+    if (conn) {
+      const c = connections.find((x) => x.id === conn[1]);
+      if (c && c.status !== "connected") connect(c.id, "Sarah");
+      if (c) {
+        const say = EN ? `Sarah connected your ${c.service} account, June. Just ask for "${c.skillName}" any time.` : `수진이가 계정을 연결했어요. 이제 "${c.skillName}" 말씀만 하세요.`;
+        logEvent("said", say, nowIso, { visibility: "family" });
+        pushTurn(L.approvalTurn(req.text), say);
+        return { say, sayEn: EN ? say : undefined, actions: [{ type: "showCard", title: `${c.service[0].toUpperCase()}${c.service.slice(1)} account connected`, body: `${c.account ?? ""}  ${c.card ?? ""}\nConnected by Sarah · demo` }], meta: { ms: Date.now() - started, model: "none (connected)", tools: [] } };
+      }
+    }
     const approved = handleCallAnswer(req.text, now) ?? handleApproval(req.text, now);
     if (approved) return { ...approved, meta: { ...approved.meta, ms: Date.now() - started, memory: memory.backend } };
   }
@@ -609,6 +622,11 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
       spoken = safeLine(ran);
     }
     if (spoken.length >= 4) say = EN ? fixGreeting(twoSentences(spoken), now) : spoken;
+    // Never ask grandma for credentials, whatever the model wrote.
+    if (/\b(password|passcode|pin|card number|credit card|debit card|username|user name|log ?in|sign ?in)\b|비밀번호|카드 번호|아이디/i.test(say) && /\?/.test(say)) {
+      console.warn("[agent] replaced a credential question:", JSON.stringify(say));
+      say = EN ? "Sarah will connect that for you once, June. I'll ask her." : "그건 따님이 한 번만 연결해 드릴 거예요. 제가 여쭤볼게요.";
+    }
     // Never contradict the taxi's real state ("I have not booked it yet" after booking).
     const ride = recentRide(now);
     if (ride?.status === "booked" && !ran.includes("ride_request") && /\b(not|haven'?t|have not|didn'?t|did not)\b.{0,25}\b(book|booked|call|called|order)|mix-?up|아직 안 불|안 불렀/i.test(say)) {

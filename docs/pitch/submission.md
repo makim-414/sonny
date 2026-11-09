@@ -4,19 +4,19 @@ The form asks for three things: the 90 second demo video, the GitHub repo (https
 
 ## Short description (paste into the form)
 
-Final (12:20). Confirmed messages: the killer line "Grandma isn't the patient. She's the boss.", "Families don't want to be caretakers. They want to be family.", the four selling points (say it and the allowance pays; Sonny calls first; teach it once; mom only when it matters) and the three-step roadmap (phone today, a Sonny TV app next, then our own device). Words of authority and money (errand runner, orders, allowance, veto), not the usual elder-care words.
+Final (12:55). Messages: the killer line "Grandma isn't the patient. She's the boss.", the video card "Grandma says it. Sonny does it.", new skills by talking with accounts and cards connected once by mom, Sonny calls mom only when it matters, and the three-step roadmap. The caretaker/family line is out of the video, so it is out of the form text too. Words of authority and money (errand runner, orders, allowance, veto), not the usual elder-care words.
 
 **Tagline:** Grandma isn't the patient. She's the boss.
 
-Backup taglines: "Sonny handles the errands, so family can just be family." / "Sonny: the grandkid who's always home."
+Backup taglines: "Grandma says it. Sonny does it." / "Sonny: the grandkid who's always home."
 
-**About 50 words (52):**
+**About 50 words (51):**
 
-Grandma isn't the patient. She's the boss. Sonny is an AI errand runner for parents who live alone: she gives orders out loud, Sonny pays from the allowance mom sets, does things the way she taught it once, and calls mom only when it matters. Families want to be family, not caretakers.
+Grandma isn't the patient. She's the boss. Sonny is an AI errand runner for parents who live alone: she says it, Sonny does it, paid from the allowance mom sets. She builds new skills just by talking, mom connects accounts and cards once, and Sonny calls mom only when it matters.
 
-**About 150 words (146):**
+**About 150 words (149):**
 
-Grandma isn't the patient. She's the boss. Sonny is an AI errand runner for parents who live alone. Families don't want to be caretakers. They want to be family; yet this morning my mom booked my grandmother's taxi from her own phone, then called to check. Sonny takes that job. Grandma taps one icon and Sonny calls first. She says it, and Sonny books the ride or orders groceries with the allowance mom funds. She teaches Sonny how she likes things done, once, and it does them her way from then on. Sonny calls mom only when it matters: something big, something strange, or grandma stuck. Mom sees what got done, never what was said. Built on a Claude agent with GBrain memory and the Kokoro voice, all open source except the model. Today a phone app, next a Sonny TV app, then our own device.
+Grandma isn't the patient. She's the boss. Sonny is an AI errand runner for parents who live alone: grandma says it, Sonny does it. This morning my mom booked my grandmother's taxi from her own phone, then called to check. Sonny takes that job. Grandma taps one icon and Sonny calls first. She asks for a ride or groceries, and Sonny pays from the allowance mom funds. Grandma builds new skills just by talking ("learn to get me my usual ride"). Anything that needs an account or a card, mom connects once from her phone, so grandma never types a password. Sonny calls mom only when it matters: something big, something strange, or grandma stuck. Mom sees what got done, never what was said. Built on a Claude agent with GBrain memory and the Kokoro voice. Today a phone app, next a Sonny TV app, then our own device.
 
 ## Checklist
 

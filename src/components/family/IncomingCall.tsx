@@ -191,8 +191,9 @@ export default function IncomingCall() {
         .join(" ")
         .trim();
       setHeard(said);
-      if (T.yesWords.test(said)) void finish("approve");
-      else if (T.noWords.test(said)) void finish("decline");
+      // "No, don't approve" must decline, so check no first.
+      if (T.noWords.test(said)) void finish("decline");
+      else if (T.yesWords.test(said)) void finish("approve");
     };
     r.onerror = () => undefined;
     r.onend = () => {

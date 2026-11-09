@@ -14,6 +14,9 @@ import { isTurnComplete, transcribe } from "@/lib/voice/stt";
 import { callAgent } from "@/components/tv/agent-client";
 import { formatTime, useDemoClock } from "@/components/tv/use-demo-clock";
 import { Orb } from "./Orb";
+import { AltLook } from "./AltLook";
+import { FaceLook } from "./FaceLook";
+import { BuddyLook } from "./BuddyLook";
 import type { OrbMode, OrbSignal } from "./ParticleOrb";
 
 type Line = { text: string; en?: string; who: "assistant" | "user" };
@@ -816,10 +819,23 @@ export function OrbApp() {
 
   if (!mounted) return <main className="orb-root" />;
 
-  // Design options for the owner: ?eyes=1 adds two blinking dots, ?look=character shows a
-  // plain warm round character instead of particles. Default is the particle orb only.
+  // Default look is the 3D buddy. Design options stay for comparison: ?look=orb (particles),
+  // ?eyes=1, ?look=character, wave, bars, glow, smiley, classic.
   const params = new URLSearchParams(window.location.search);
-  const look = params.get("look") === "character" ? "character" : params.get("eyes") === "1" ? "eyes" : "orb";
+  const lookParam = params.get("look");
+  const look =
+    lookParam === "character" ||
+    lookParam === "wave" ||
+    lookParam === "bars" ||
+    lookParam === "glow" ||
+    lookParam === "smiley" ||
+    lookParam === "classic" ||
+    lookParam === "buddy" ||
+    lookParam === "orb"
+      ? lookParam
+      : params.get("eyes") === "1"
+        ? "eyes"
+        : "buddy"; // default look (owner, 11/9); the particle orb stays behind ?look=orb
 
   return (
     <main
@@ -836,7 +852,10 @@ export function OrbApp() {
         onPointerCancel={cornerUp}
         onContextMenu={(e) => e.preventDefault()}
       />
-      {look !== "character" && <Orb signal={signal} />}
+      {(look === "orb" || look === "eyes") && <Orb signal={signal} />}
+      {(look === "wave" || look === "bars" || look === "glow") && <AltLook look={look} signal={signal} />}
+      {(look === "smiley" || look === "classic") && <FaceLook look={look} signal={signal} />}
+      {look === "buddy" && <BuddyLook signal={signal} />}
       {look === "character" && <span className={`orb-character is-${mode}`} aria-hidden />}
       {(look === "eyes" || look === "character") && (
         <span className={`orb-eyes is-${mode} ${look === "character" ? "on-character" : ""}`} aria-hidden>

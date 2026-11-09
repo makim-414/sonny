@@ -36,7 +36,9 @@ export async function POST(request: Request) {
   if (body?.approve) {
     const target = store.events.find((e) => e.id === body.approve);
     if (!target) return Response.json({ error: "unknown event id" }, { status: 404 });
-    if (!familyState.approvedIds.includes(target.id)) familyState.approvedIds.push(target.id);
+    // A second tap on Approve must not send the TV the same go-ahead twice.
+    if (familyState.approvedIds.includes(target.id)) return Response.json({ ok: true, duplicate: true });
+    familyState.approvedIds.push(target.id);
     const text = body.text?.trim() || T.approveInbox(from, target.text);
     const item = { id: crypto.randomUUID(), at: new Date().toISOString(), from, text };
     store.tvInbox.push(item);
