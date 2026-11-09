@@ -42,7 +42,10 @@ export type ListenHandlers = {
 export type Listener = { stop(): void; abort(): void };
 
 // Starts one listening turn. Ends by itself after the speaker pauses.
-export function listenOnce(handlers: ListenHandlers, lang = "ko-KR"): Listener | null {
+// continuous: keep listening through pauses and hand over the words only when stop() is called
+// (the VAD decides when the turn ends). Otherwise the recognizer ends the turn on its own.
+export function listenOnce(handlers: ListenHandlers, lang = "ko-KR", opts: { continuous?: boolean } = {}): Listener | null {
+  const continuous = opts.continuous === true;
   const Ctor = getCtor();
   if (!Ctor) {
     handlers.onError?.("unsupported");
@@ -50,7 +53,7 @@ export function listenOnce(handlers: ListenHandlers, lang = "ko-KR"): Listener |
   }
   const rec = new Ctor();
   rec.lang = lang;
-  rec.continuous = false;
+  rec.continuous = continuous;
   rec.interimResults = true;
   rec.maxAlternatives = 1;
 
@@ -74,7 +77,7 @@ export function listenOnce(handlers: ListenHandlers, lang = "ko-KR"): Listener |
     }
     interimText = interim;
     handlers.onInterim?.((finalText + interim).trim());
-    if (finalText && !interim) deliver(finalText);
+    if (!continuous && finalText && !interim) deliver(finalText);
   };
   rec.onerror = (e) => handlers.onError?.(e.error);
   rec.onend = () => {

@@ -9,6 +9,10 @@
   --card-bg: rgba(22, 24, 30, 0.92);
   --card-border: rgba(255, 231, 176, 0.35);
   --highlight: #ffd84a;
+  --start-bg: rgba(255, 231, 176, 0.14);
+  --start-glow: rgba(255, 205, 130, 0.35);
+  --start-size: clamp(96px, 26vw, 128px);
+  --t-start: clamp(24px, 6vw, 30px);
   --orb-core: #ffe7b0;
   --orb-edge: #8cbcff;
   --orb-glow: rgba(255, 205, 130, 0.16);
@@ -42,19 +46,37 @@
 
 .orb-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
-.orb-start,
 .orb-notice {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 18vh);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 22vh);
   margin: 0;
   text-align: center;
   font-size: var(--t-hint);
   color: var(--text-faint);
-  animation: orb-breathe 2.4s ease-in-out infinite;
 }
-.orb-notice { bottom: calc(env(safe-area-inset-bottom, 0px) + 22vh); animation: none; }
+
+/* One big round Start button under the orb; gone once the talk starts. */
+.orb-start {
+  position: absolute;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 10vh);
+  transform: translateX(-50%);
+  width: var(--start-size);
+  height: var(--start-size);
+  border-radius: 50%;
+  border: 2px solid var(--card-border);
+  background: var(--start-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--t-start);
+  font-weight: 700;
+  cursor: pointer;
+  animation: orb-glow 2.4s ease-in-out infinite;
+}
+.orb-start:active { transform: translateX(-50%) scale(0.96); }
+.orb-start:focus-visible { outline: 3px solid var(--highlight); outline-offset: 4px; }
 
 .orb-line {
   position: absolute;
@@ -147,6 +169,7 @@
 }
 
 @keyframes orb-breathe { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+@keyframes orb-glow { 0%, 100% { box-shadow: 0 0 0 0 var(--start-glow); } 50% { box-shadow: 0 0 32px 6px var(--start-glow); } }
 @keyframes orb-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes orb-card-in { from { opacity: 0; transform: translate(-50%, -46%) scale(0.96); } to { opacity: 1; transform: translate(-50%, -50%); } }
 

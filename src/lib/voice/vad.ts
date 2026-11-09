@@ -7,6 +7,8 @@ const ASSETS = "/api/tts/vad/";
 
 export type Vad = { start(): void; pause(): void; destroy(): void };
 
+export type VadOptions = { redemptionMs: number };
+
 export type VadHandlers = {
   onSpeechStart: () => void;
   // 16 kHz mono samples of the whole utterance.
@@ -16,7 +18,7 @@ export type VadHandlers = {
   onLevel?: (level: number) => void;
 };
 
-export async function createVad(h: VadHandlers): Promise<Vad | null> {
+export async function createVad(h: VadHandlers, o: VadOptions): Promise<Vad | null> {
   try {
     const { MicVAD } = await import("@ricky0123/vad-web");
     const vad = await MicVAD.new({
@@ -26,7 +28,7 @@ export async function createVad(h: VadHandlers): Promise<Vad | null> {
       startOnLoad: false,
       positiveSpeechThreshold: 0.6,
       negativeSpeechThreshold: 0.45,
-      redemptionMs: 700, // end of turn after ~0.7 s of silence
+      redemptionMs: o.redemptionMs, // silence that ends a turn
       preSpeechPadMs: 200,
       minSpeechMs: 250,
       onSpeechStart: h.onSpeechStart,
