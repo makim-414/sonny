@@ -9,7 +9,8 @@ export type Vad = { start(): void; pause(): void; destroy(): void };
 
 export type VadHandlers = {
   onSpeechStart: () => void;
-  onSpeechEnd: () => void;
+  // 16 kHz mono samples of the whole utterance.
+  onSpeechEnd: (audio: Float32Array) => void;
   onMisfire?: () => void;
   // Mic loudness of each ~30 ms frame, 0..1, for the orb's tremble.
   onLevel?: (level: number) => void;
@@ -29,7 +30,7 @@ export async function createVad(h: VadHandlers): Promise<Vad | null> {
       preSpeechPadMs: 200,
       minSpeechMs: 250,
       onSpeechStart: h.onSpeechStart,
-      onSpeechEnd: () => h.onSpeechEnd(),
+      onSpeechEnd: (audio) => h.onSpeechEnd(audio),
       onVADMisfire: () => h.onMisfire?.(),
       onFrameProcessed: (_probs, frame) => {
         if (!h.onLevel) return;
