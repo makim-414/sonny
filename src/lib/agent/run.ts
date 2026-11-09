@@ -20,12 +20,15 @@ const SMART = process.env.HYODO_SMART_MODEL ?? "claude-sonnet-5-5";
 // Clear teaching ("내 손주 이름은 민수야", "김장할 때는 ... 해야 해"): Haiku is made to
 // call memory_remember on its first step, since it sometimes only says it will.
 const TEACH_WORDS = /기억해|이름은|이름이|비법|가르쳐|알려 줄게|해야 (해|돼|한다)|하면 (돼|좋아)|절여|넣어야|remember this|my .* name is|recipe/i;
+const PLAY_EN = /\b(turn on|put on|play|watch|switch to)\b/i;
+const MED_WORDS = /약.{0,6}(먹었|먹음|먹을게|드셨|챙겨 먹|안 먹)|took my (medicine|pills)/i;
+const LESSON_COUNT_WORDS = /배운 (거|게|것).{0,8}(몇|얼마)|how many .*(learn|taught)/i;
 // Haiku sometimes claims an action without calling the tool. Rerun those on Sonnet.
 const CLAIMS = [
   { words: /주문했|시켰|주문 넣/, tools: ["errand_order"] },
   { words: /택시.*(불렀|요청했)/, tools: ["ride_request"] },
   { words: /기억할게|기억해 둘게|기억해 두었|기억했/, tools: ["memory_remember", "memory_correct"] },
-  { words: /틀어 드렸|틀었어/, tools: ["tv_play", "tv_tune"] },
+  { words: /틀어 드렸|틀었어|찾아볼게|찾아 드릴게/, tools: ["tv_play", "tv_tune", "epg_search"] },
   { words: /틀어 드릴게|알려 드릴게|예약했|예약해 둘게/, tools: ["schedule_at", "tv_play"] },
   { words: /알렸어|전해 드렸|전했어|전해 드릴게|전할게/, tools: ["family_notify", "health_checkin"] },
 ];
@@ -176,6 +179,9 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
     `할머니에 대해 기억하는 것 (GBrain id, 내용):\n${facts.map((f) => `- (${f.id}) ${f.text}`).join("\n")}`,
     recentTaught.length ? `최근 새로 배운 것:\n${recentTaught.map((f) => `- (${f.id}) ${f.text}`).join("\n")}` : "",
     `이번 달 할머니께 배운 lesson: ${lessons.length}개`,
+    shared.lastLater?.length
+      ? `방금 알려 드린 나중 프로그램 (예약할 때 이 채널과 시각을 그대로 쓴다):\n${shared.lastLater.map((l) => `- ${l.channel}번 ${l.channelName} "${l.title}" ${l.startsAt} (${l.startISO})`).join("\n")}`
+      : "",
     task ? `이번 차례 할 일: ${task.trim()}` : "",
     "마지막 답은 반드시 <ko>…</ko><en>…</en><heard>…</heard><family>…</family> 형식으로 쓴다.",
   ]
@@ -185,14 +191,20 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   const model = opts.model ?? pickModel(req);
   // Force the one tool this turn clearly needs (Haiku only: Sonnet always thinks,
   // and Anthropic rejects a forced tool choice with thinking on).
-  const force: "family_notify" | "memory_remember" | null =
+  const force: "family_notify" | "memory_remember" | "health_checkin" | "lessons_show" | "tv_play" | null =
     req.source !== "voice"
       ? null
       : replyingToFamily && !/말하지 마|비밀|don't tell/i.test(req.text)
         ? "family_notify"
-        : TEACH_WORDS.test(req.text)
-          ? "memory_remember"
-          : null;
+        : PLAY_EN.test(req.text)
+          ? "tv_play"
+          : MED_WORDS.test(req.text)
+          ? "health_checkin"
+          : LESSON_COUNT_WORDS.test(req.text)
+            ? "lessons_show"
+            : TEACH_WORDS.test(req.text)
+              ? "memory_remember"
+              : null;
   let say = defaultSay;
   let sayEn: string | undefined;
   let familyText: string | undefined;

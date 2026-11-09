@@ -10,6 +10,7 @@ export async function POST() {
   await resetMemory();
   shared.health.length = 0;
   shared.requests.length = 0;
+  shared.lastLater = undefined;
   store.pending.length = 0;
   store.currentChannel = null;
   const memory = await getMemory();
