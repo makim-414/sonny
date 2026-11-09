@@ -30,9 +30,12 @@ export async function POST(request: Request) {
   if (decision === "missed") {
     call.status = "missed";
   } else {
-    const r = decide(call.walletEntryId, decision === "approve");
-    // The spend may already have been settled in the admin; the call still records mom's answer.
-    if (!r.ok && r.message !== "not pending") return Response.json({ error: r.message }, { status: 409 });
+    // Nudge calls carry no spend; only spend calls settle a wallet entry.
+    if (call.walletEntryId) {
+      const r = decide(call.walletEntryId, decision === "approve");
+      // The spend may already have been settled in the admin; the call still records mom's answer.
+      if (!r.ok && r.message !== "not pending") return Response.json({ error: r.message }, { status: 409 });
+    }
     call.status = decision === "approve" ? "approved" : "declined";
   }
 

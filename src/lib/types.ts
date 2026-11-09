@@ -62,11 +62,12 @@ export type Wallet = {
 export type GuardianCall = {
   id: string;
   at: string; // ISO time
-  walletEntryId: string; // the pending_approval entry this call is about
+  walletEntryId?: string; // the pending_approval entry this call is about (spend calls only)
   script: string; // what Sonny says to the guardian, plain English
   amount: number; // cents
-  reason: "over_limit" | "unusual_quantity" | "low_balance";
-  status: "ringing" | "approved" | "declined" | "missed";
+  // "nudge": Sonny calls mom to suggest she checks in on grandma (no money involved).
+  reason: "over_limit" | "unusual_quantity" | "low_balance" | "nudge";
+  status: "ringing" | "approved" | "declined" | "missed" | "done";
 };
 
 // One line in the shared activity log the family app reads.
