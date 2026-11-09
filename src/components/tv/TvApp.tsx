@@ -7,7 +7,7 @@ import { speak, splitSentences, stopSpeaking, unlockSpeech } from "@/lib/voice/s
 import { callAgent } from "./agent-client";
 import { Avatar, type AvatarMood } from "./Avatar";
 import { BroadcastScreen } from "./BroadcastScreen";
-import { ASSISTANT_NAME, USER_TITLE } from "./brand";
+import { ASSISTANT_NAME, PRODUCT_NAME, PRODUCT_NAME_EN, USER_TITLE } from "./brand";
 import { CHANNELS, channelForNumber, programTitle } from "./channels";
 import { fetchGuide, programAt, sceneFor, surfChannels, type Guide } from "./epg-client";
 import { QrCode } from "./QrCode";
@@ -15,6 +15,34 @@ import { formatDate, formatTime, useDemoClock } from "./use-demo-clock";
 
 type Caption = { who: "assistant" | "user"; text: string; en?: string };
 type Card = { title: string; body?: string; imageUrl?: string };
+
+const BOOT_MS = 3000;
+const BOOT_SEEN_KEY = "tv-boot-seen";
+
+// First visit (or ?boot) shows the "plugged in" screen for the demo video.
+function shouldBoot(): boolean {
+  if (typeof window === "undefined") return false;
+  if (readFlag("boot")) return true;
+  try {
+    return window.localStorage.getItem(BOOT_SEEN_KEY) === null;
+  } catch {
+    return false;
+  }
+}
+
+// Korean subject particle: 이 after a final consonant, 가 after a vowel.
+function subjectParticle(word: string): string {
+  const code = word.charCodeAt(word.length - 1) - 0xac00;
+  if (code < 0 || code > 11171) return "가";
+  return code % 28 === 0 ? "가" : "이";
+}
+
+// "이번 달 배운 것 12개" style cards get the big counter layout.
+function learnedCount(card: Card): string | null {
+  if (!/배운|가르쳐/.test(card.title)) return null;
+  const m = `${card.title} ${card.body ?? ""}`.match(/(\d+)\s*(개|가지)?/);
+  return m ? m[1] : null;
+}
 type Toast = { id: number; text: string; tone: "info" | "urgent" | "private" };
 type Timer = { id: number; at: number; label: string; action: TvAction };
 
@@ -110,6 +138,7 @@ export function TvApp() {
   const [showQr, setShowQr] = useState(() => !readFlag("noqr"));
   const [guide, setGuide] = useState<Guide | null>(null);
   const [nextDay, setNextDay] = useState<string | null>(null);
+  const [booting, setBooting] = useState(shouldBoot);
 
   const queueRef = useRef<Promise<void>>(Promise.resolve());
   const sayGenRef = useRef(0);
@@ -128,6 +157,19 @@ export function TvApp() {
   useEffect(() => {
     englishRef.current = english;
   }, [english]);
+
+  useEffect(() => {
+    if (!booting) return;
+    const id = setTimeout(() => {
+      setBooting(false);
+      try {
+        window.localStorage.setItem(BOOT_SEEN_KEY, "1");
+      } catch {
+        // private mode: the boot screen just shows again next time
+      }
+    }, BOOT_MS);
+    return () => clearTimeout(id);
+  }, [booting]);
 
   // ---------- small UI helpers ----------
 
@@ -524,6 +566,7 @@ export function TvApp() {
   const userTurn = caption?.who === "user";
   const ducked = mood !== "idle";
   const origin = window.location.origin;
+  const learned = card ? learnedCount(card) : null;
 
   return (
     <main className={`tv-root ${ducked ? "is-ducked" : ""}`}>
@@ -567,7 +610,18 @@ export function TvApp() {
         </span>
       </div>
 
-      {card && (
+      {card && learned !== null && (
+        <section className="tv-card is-learned" role="dialog" aria-label={card.title}>
+          <span className="tv-learned-num">{learned}</span>
+          <span className="tv-learned-text">
+            <h2 className="tv-card-title">{card.title}</h2>
+            {card.body && <p className="tv-card-body">{card.body}</p>}
+          </span>
+          <span className="tv-demo-tag tv-card-tag">demo data</span>
+        </section>
+      )}
+
+      {card && learned === null && (
         <section className="tv-card" role="dialog" aria-label={card.title}>
           {card.imageUrl && (
             // eslint-disable-next-line @next/next/no-img-element
@@ -580,7 +634,7 @@ export function TvApp() {
         </section>
       )}
 
-      {showQr && (
+      {showQr && !captionVisible && (
         <aside className="tv-qr">
           <figure className="tv-qr-item">
             <QrCode text={`${origin}/remote`} className="tv-qr-code" />
@@ -641,6 +695,22 @@ export function TvApp() {
             aria-label="말 대신 글로 입력"
           />
         </form>
+      )}
+
+      {booting && (
+        <div className="tv-boot" aria-live="polite">
+          <Avatar mood="speaking" />
+          <span className="tv-boot-title">
+            TV에 {ASSISTANT_NAME}
+            {subjectParticle(ASSISTANT_NAME)} 연결됐어요
+          </span>
+          <span className="tv-boot-sub">
+            {english ? `${PRODUCT_NAME_EN} is now on this TV` : PRODUCT_NAME}
+          </span>
+          <span className="tv-boot-bar">
+            <i />
+          </span>
+        </div>
       )}
 
       {nextDay && (

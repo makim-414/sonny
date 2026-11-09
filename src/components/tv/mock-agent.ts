@@ -123,6 +123,14 @@ export function mockAgent(req: AgentRequest): AgentReply {
     return { say: "마음 채널 틀어 드릴게요.", actions: [{ type: "tune", channel: 17 }] };
   }
 
+  if (has(text, ["배운 거", "배운 것", "몇 개 배웠"])) {
+    return {
+      say: "이번 달에 할머니한테 열두 가지를 배웠어요. 김치 담그는 법도 배웠고요, 우리 동네 옛날 이름도 배웠어요.",
+      sayEn: "This month you taught me twelve things, like how to make kimchi and the old name of our town.",
+      actions: [{ type: "showCard", title: "이번 달 배운 것 12개", body: "김치 담그는 법 · 동네 옛 이름 · 손주 이름은 민수" }],
+    };
+  }
+
   if (has(text, ["마다", "기억", "알아 둬", "알아둬"])) {
     return {
       say: "아, 그렇구나! 할머니가 알려 주셔서 하나 배웠어요. 잘 기억해 둘게요.",

@@ -9,7 +9,9 @@
 - F: demo clock +30 min. `schedule` timers run on this clock.
 - N: next morning. Clock jumps to 08:00 next day, shows a 'next morning' screen, then calls morning-checkin. Old timers before that time are dropped.
 - E: English line under captions (`sayEn`, `heardEn`). Start with it on: `/tv?en`.
-- Q: hide or show the two QR codes (phone remote `/remote`, family app `/family`, both from window.location.origin). Start hidden: `/tv?noqr`.
+- Boot screen: the first visit on a browser shows 'TV에 손주가 연결됐어요' for 3 s, then the broadcast. Force it again with `/tv?boot`.
+- Learned counter: a `showCard` whose title has 배운 or 가르쳐 and a number (for example '이번 달 배운 것 12개') gets the big-number style.
+- Q: hide or show the two QR codes (phone remote `/remote`, family app `/family`, both from window.location.origin). Start hidden: `/tv?noqr`. They also hide while a caption is up.
 - While listening, thinking or speaking the broadcast dims and shrinks and 'TV 소리 줄였어요' shows (no real broadcast audio exists).
 
 ## Phone remote `/remote`
