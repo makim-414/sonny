@@ -9,6 +9,10 @@
 - If the mic is blocked or speech recognition is missing (possible in an iOS home-screen app), a small '말 대신 글로 적기' line appears.
 - Desktop demo keys: Enter or Space (tap), E, T (text line), P (greet again), N (next morning 08:00 + greeting), F (+30 min).
 - It also polls `/api/family/inbox`. Only one screen should consume the inbox: open the other with `?noinbox` (orb) when `/tv` is the one showing family messages.
+- Voice (APP_LANG en): Kokoro 82M via `POST /api/tts {text}` -> 16-bit WAV, voice af_heart, about 1.3 to 1.6 s per sentence on the M-series laptop; the next sentence is fetched while one plays. Model cache `~/.cache/hyodo-tts` (96 MB, `TTS_CACHE_DIR` to move it); the page calls `GET /api/tts` on open to preload. `next.config.ts` must keep `serverExternalPackages: ["kokoro-js"]`. Hangul lines and failed clips use the browser voice.
+- The orb's speaking ripple follows the real voice level from a WebAudio analyser (0 to about 0.7 measured). Browser-voice fallback uses a fake rhythm.
+- Turn taking: Silero VAD (`@ricky0123/vad-web`) runs with Web Speech `en-US`; 0.7 s of silence ends the turn. VAD and recognition pause while the assistant thinks or speaks. Model, worklet and onnxruntime wasm come from `/api/tts/vad/<file>` (served from node_modules, no CDN). `?novad` turns VAD off.
+- Particles stay canvas 2D (smooth at 1000 to 1400 particles); three.js was not needed.
 - PWA: `src/app/manifest.ts` serves `/manifest.webmanifest` (name from `src/lib/brand.ts`, standalone, dark colors). Icons in `public/icons/` (192, 512, maskable 512, apple-touch 180), generated from `public/icons/orb-icon.svg` with ImageMagick. `public/sw.js` only exists so the app can be installed. The Claude browser pane blocks service workers; real Chrome registers it.
 
 
