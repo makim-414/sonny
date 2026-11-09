@@ -29,6 +29,7 @@ function need(path: string): Need {
   if (path === "/family" || path.startsWith("/family/")) return "guardian";
   if (path.startsWith("/api/family") || path.startsWith("/api/events")) return "guardian";
   if (path === "/" || path === "/tv" || path.startsWith("/tv/") || path.startsWith("/remote")) return "device";
+  if (path === "/setup" || path.startsWith("/setup/")) return "device"; // hidden family setup, PIN inside
   if (path.startsWith("/api/")) return "device";
   return "public";
 }

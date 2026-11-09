@@ -51,3 +51,19 @@ The agent's echo of inbox items ("엄마 → TV: ...") is dropped because `POST 
 ## Summary line (top of the phone)
 
 From the raw log: last time grandma spoke (`heard`, ignoring proactive triggers), medicine status, TV channel, and one reassurance line: green "오늘은 전화 안 하셔도 괜찮아요." when she talked today and took her medicine with no urgent alert.
+
+## Hidden setup on grandma's phone (`/setup`)
+
+- Opened by a 2 second long-press on the top-left corner of `/` (wired by the TV session), or directly at `/setup`. Needs a paired device or a guardian session (proxy), then the family PIN (`FAMILY_PIN`, demo `0000`, checked on the server).
+- Saved on the phone in localStorage (every read and write in try/catch). Grandma's screen reads the same keys:
+
+| Key | Values | Default |
+|---|---|---|
+| `sonny.rate` | `"0.7"`, `"0.85"`, `"1"` (voice speed) | `"0.85"` |
+| `sonny.waitMs` | `"1500"`, `"2000"`, `"3000"` (silence before Sonny answers) | `"2000"` |
+| `sonny.textScale` | `"normal"`, `"large"`, `"xlarge"` | `"normal"` |
+| `sonny.captions` | `"on"`, `"off"` | `"on"` |
+| `sonny.volume` | `"0"` to `"1"` in steps of 0.1 | `"1"` |
+| `sonny.lang` | `"en"`, `"ko"` | `APP_LANG` |
+
+- Also on the page: a test sound (Kokoro through `/api/tts`, at the chosen volume and speed), a mic test (level bar plus live transcript), and "Disconnect this phone" (asks twice; drops the device cookie and its row in the admin's device list).

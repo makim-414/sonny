@@ -279,6 +279,7 @@ function Device({ data }: { data: AdminData }) {
         <p className="ad-caption">{d.lastTalk ? A.lastTalk(d.lastTalk) : A.noTalk}</p>
       </div>
       <p className="ad-caption">{A.deviceHint}</p>
+      <p className="ad-caption">{A.setupHint}</p>
       <button
         className="fa-btn fa-btn-primary ad-wide"
         disabled={busy}
