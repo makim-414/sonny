@@ -90,6 +90,9 @@ export function ParticleOrb({ signal }: { signal: React.RefObject<OrbSignal> }) 
     const cur: Target = { ...TARGETS.idle };
     let angle = 0;
     let voice = 0; // smoothed voice loudness
+    // Turn cue (?turns=1): her turn moves and lights the rim, Sonny's turn moves the body.
+    const turns = new URLSearchParams(window.location.search).get("turns") === "1" ? 1 : 0;
+    let listen = 0;
     let last = performance.now();
     let raf = 0;
 
@@ -124,6 +127,7 @@ export function ParticleOrb({ signal }: { signal: React.RefObject<OrbSignal> }) 
         voice *= 0.9;
       }
       const tremble = s.mode === "listening" ? s.pulse * 0.12 : 0;
+      listen += ((s.mode === "listening" ? 1 : 0) - listen) * ease;
 
       const base = Math.min(w, h) * 0.3 * (cur.radius + breath + talk * 0.12 * motion);
       const cx = w / 2;
@@ -158,8 +162,11 @@ export function ParticleOrb({ signal }: { signal: React.RefObject<OrbSignal> }) 
 
         const ph = phase[i];
         const wob = cur.wobble * Math.sin(t * 1.3 + ph) * motion;
-        const wave = cur.spread * talk * 0.28 * Math.sin(ph * 3 + t * 6 + y * 4) * motion;
-        const jit = tremble * Math.sin(t * 40 + ph * 7) * motion;
+        const rim = 1 - Math.abs(z);
+        const waveW = turns ? (1 - rim) * 1.7 : 1;
+        const trembleW = turns ? rim * rim * 2.5 : 1;
+        const wave = cur.spread * talk * 0.28 * waveW * Math.sin(ph * 3 + t * 6 + y * 4) * motion;
+        const jit = (tremble + turns * listen * 0.03) * trembleW * Math.sin(t * (tremble > 0 ? 40 : 3) + ph * 7) * motion;
         const r = 1 + wob + wave + jit;
         x *= r;
         y *= r;
@@ -169,7 +176,8 @@ export function ParticleOrb({ signal }: { signal: React.RefObject<OrbSignal> }) 
         const sx = cx + x * base * persp * 1.6;
         const sy = cy + y * base * persp * 1.6;
         const depth = (z + 1) / 2; // 0 back .. 1 front
-        ctx.globalAlpha = Math.min(1, (0.18 + depth * 0.8) * (1 + joy * 0.6));
+        const turnLight = 1 + turns * listen * (rim * rim * 1.6 - 0.45); // listening: bright rim, quiet core
+        ctx.globalAlpha = Math.min(1, (0.18 + depth * 0.8) * (1 + joy * 0.6) * turnLight);
         ctx.fillStyle = depth > 0.45 ? core : edge;
         const size = dot * (0.6 + depth * 0.9);
         ctx.fillRect(sx - size / 2, sy - size / 2, size, size);
