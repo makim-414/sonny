@@ -14,7 +14,7 @@ export function TvBuddy({ mood, className }: { mood: AvatarMood; className?: str
   }, [mood]);
   return (
     <div className={`tv-buddy ${className ?? ""}`} aria-hidden>
-      <BuddyLook signal={signal} />
+      <BuddyLook signal={signal} parrot />
     </div>
   );
 }

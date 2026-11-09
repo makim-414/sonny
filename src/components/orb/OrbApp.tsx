@@ -833,11 +833,12 @@ export function OrbApp() {
     lookParam === "smiley" ||
     lookParam === "classic" ||
     lookParam === "buddy" ||
+    lookParam === "parrot" ||
     lookParam === "orb"
       ? lookParam
       : params.get("eyes") === "1"
         ? "eyes"
-        : "buddy"; // default look (owner, 11/9); the particle orb stays behind ?look=orb
+        : "parrot"; // default look (owner, 11/9 13:15: the cockatiel); ?look=buddy for the glasses buddy, ?look=orb for the particle orb
 
   return (
     <main
@@ -858,6 +859,7 @@ export function OrbApp() {
       {(look === "wave" || look === "bars" || look === "glow") && <AltLook look={look} signal={signal} />}
       {(look === "smiley" || look === "classic") && <FaceLook look={look} signal={signal} />}
       {look === "buddy" && <BuddyLook signal={signal} />}
+      {look === "parrot" && <BuddyLook signal={signal} parrot />}
       {look === "character" && <span className={`orb-character is-${mode}`} aria-hidden />}
       {(look === "eyes" || look === "character") && (
         <span className={`orb-eyes is-${mode} ${look === "character" ? "on-character" : ""}`} aria-hidden>
@@ -877,7 +879,7 @@ export function OrbApp() {
               <i />
               <i />
               <span className="orb-call-buddy">
-                <BuddyLook signal={callSignal} ringing />
+                <BuddyLook signal={callSignal} ringing parrot={look === "parrot"} />
               </span>
             </span>
             <h2 className="orb-call-title">{copy().calling}</h2>
@@ -922,7 +924,7 @@ export function OrbApp() {
               <i />
               <i />
               <span className="orb-call-buddy">
-                <BuddyLook signal={callSignal} ringing />
+                <BuddyLook signal={callSignal} ringing parrot={look === "parrot"} />
               </span>
             </span>
             <h2 className="orb-call-title">{copy().calling}</h2>
