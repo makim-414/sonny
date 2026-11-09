@@ -13,6 +13,8 @@
 - Sonny calls instead of speaking up: routine and idle check-ins show a full-screen "Sonny is calling" (same layout as the family call screen, larger) with a 440/480 Hz ringtone (2 s on, 4 s off), vibration, and one flat green Answer button (`--success`, dark text). Remote OK answers. Answered: the agent's line plays and the talk continues. 30 s without an answer (`?ring=` seconds): "Missed call from Sonny" and `idle-checkin:2` goes to the agent, which decides on the family alert. C key calls now (I does the same).
 - An empty `say` from the agent is not spoken and does not switch the orb to speaking.
 - Web Push is dropped (owner, 11/9); a real phone-network call is roadmap only.
+- Alive signals: idle breathes, listening gathers and leans in (extra tilt), thinking spins slowly, speaking follows the real voice level, joy (a reply with thanks or something learned) hops once and brightens. Same in WebGL and 2D.
+- Design options for the owner only: `?eyes=1` (two blinking dots), `?look=character` (plain warm round character instead of particles). Captures: `/Users/makim/_sessions/c0mpiled-17/visual-options/01-orb.png`, `02-orb-eyes.png`, `03-character.png` (390x844).
 - Hidden setup: hold the invisible 64x64 top-left corner, or the remote's Menu or S key, for 2 s to open `/setup`. Short taps do nothing there.
 - Family settings (localStorage, written by `/setup`): `sonny.rate`, `sonny.waitMs`, `sonny.textScale` (normal/large/xlarge or 1/1.25/1.5), `sonny.captions` (on/off), `sonny.volume` (0..1), `sonny.lang` (en/ko). URL `?rate=` and `?wait=` win. Read in `src/components/orb/settings.ts`.
 - Desktop demo keys: Enter or Space (tap), E, T (text line), P (greet again), N (next morning 08:00 + greeting), F (+30 min).
