@@ -39,6 +39,35 @@ const REST_DEFAULT_MS = 45_000;
 // Sonny's call rings this long; unanswered it counts as a missed second check-in.
 const CALL_RING_MS = 30_000;
 
+function dayPart(d: Date): "morning" | "afternoon" | "evening" {
+  const h = d.getHours();
+  return h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
+}
+
+// "Grandma's name is June" (or "이름은 순자") in the agent's memory.
+async function loadName(): Promise<string | null> {
+  try {
+    const res = await fetch("/api/agent/memory", { cache: "no-store" });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { facts?: { text?: string }[] };
+    for (const f of json.facts ?? []) {
+      const m = f.text?.match(/name is (\p{Lu}[\p{L}'-]+)/u) ?? f.text?.match(/이름은\s*([가-힣]{1,4})/);
+      if (m) return m[1];
+    }
+  } catch {
+    // offline: plain hello
+  }
+  return null;
+}
+
+function PhoneIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="orb-call-icon" aria-hidden>
+      <path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z" />
+    </svg>
+  );
+}
+
 function secondsParam(name: string, fallbackMs: number): number {
   if (typeof window === "undefined") return fallbackMs;
   const v = Number(new URLSearchParams(window.location.search).get(name));
@@ -98,6 +127,8 @@ const COPY_BY = {
     channelBody: (n: number) => `Channel ${n}`,
     taught: "What grandma taught me",
     calling: "Sonny is calling",
+    greet: (part: "morning" | "afternoon" | "evening", name: string | null) =>
+      name ? `Good ${part}, ${name}` : "Hello",
     callSub: "Answer to talk with Sonny",
     answer: "Answer",
     missed: "Missed call from Sonny",
@@ -114,6 +145,8 @@ const COPY_BY = {
     channelBody: (n: number) => `${n}번`,
     taught: "할머니가 가르쳐 주신 것",
     calling: "Sonny 에게서 전화가 왔어요",
+    greet: (part: "morning" | "afternoon" | "evening", name: string | null) =>
+      `${{ morning: "좋은 아침이에요", afternoon: "좋은 오후예요", evening: "좋은 저녁이에요" }[part]}${name ? `, ${name}님` : ""}`,
     callSub: "받으면 Sonny 와 이야기해요",
     answer: "받기",
     missed: "Sonny 부재중 전화",
@@ -176,6 +209,7 @@ export function OrbApp() {
   const lastActivityRef = useRef(0); // real ms, for dimming the resting orb
   const [resting, setResting] = useState(false);
   const [calling, setCalling] = useState(false);
+  const [name, setName] = useState<string | null>(null);
   const answerRef = useRef<((answered: boolean) => void) | null>(null);
   const cardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -486,6 +520,7 @@ export function OrbApp() {
       Object.assign(window, { __orbVoiceLevel: voiceLevel, __orbTranscribe: transcribe });
     }
     warmTts();
+    void loadName().then(setName);
     setVoiceVolume(getSettings().volume);
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
   }, []);
@@ -782,7 +817,27 @@ export function OrbApp() {
         </span>
       )}
 
-      {!started && (
+      {!started && !hasFlag("start") && (
+        // Opening the app is Sonny calling: she already knows how to answer a phone.
+        // No ringtone before the first touch (browsers block sound); the waves ring instead.
+        <section className="orb-call is-opening" role="dialog" aria-label={copy().calling} onPointerDown={(e) => e.stopPropagation()}>
+          <div className="orb-call-top">
+            <h1 className="orb-call-greeting">{copy().greet(dayPart(now ?? new Date()), name)}</h1>
+            <span className="orb-call-waves" aria-hidden>
+              <i />
+              <i />
+              <i />
+              <span className="orb-call-orb" />
+            </span>
+            <h2 className="orb-call-title">{copy().calling}</h2>
+          </div>
+          <button type="button" className="orb-call-answer" onClick={start}>
+            <PhoneIcon />
+            <span>{copy().answer}</span>
+          </button>
+        </section>
+      )}
+      {!started && hasFlag("start") && (
         <button
           type="button"
           className="orb-start"
@@ -811,14 +866,17 @@ export function OrbApp() {
       {calling && (
         <section className="orb-call" role="dialog" aria-modal="true" aria-label={copy().calling} onPointerDown={(e) => e.stopPropagation()}>
           <div className="orb-call-top">
-            <span className="orb-call-orb" aria-hidden />
+            <span className="orb-call-waves" aria-hidden>
+              <i />
+              <i />
+              <i />
+              <span className="orb-call-orb" />
+            </span>
             <h2 className="orb-call-title">{copy().calling}</h2>
             <p className="orb-call-sub">{copy().callSub}</p>
           </div>
           <button type="button" className="orb-call-answer" onClick={() => answerRef.current?.(true)}>
-            <svg viewBox="0 0 24 24" className="orb-call-icon" aria-hidden>
-              <path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z" />
-            </svg>
+            <PhoneIcon />
             <span>{copy().answer}</span>
           </button>
         </section>

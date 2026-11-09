@@ -247,11 +247,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: calc(env(safe-area-inset-top, 0px) + 12vh) var(--sp-6) calc(env(safe-area-inset-bottom, 0px) + 10vh);
+  padding: calc(env(safe-area-inset-top, 0px) + 8vh) var(--sp-6) calc(env(safe-area-inset-bottom, 0px) + 8vh);
   background: var(--bg);
   animation: orb-in var(--dur) var(--ease-out);
 }
-.orb-call-top { display: grid; justify-items: center; gap: var(--sp-4); text-align: center; }
+.orb-call-top { display: grid; justify-items: center; gap: var(--sp-3); text-align: center; }
+.orb-call.is-opening { animation: none; }
 .orb-call-orb {
   width: var(--call-orb-size);
   height: var(--call-orb-size);
@@ -259,6 +260,26 @@
   background: radial-gradient(circle, var(--brand), transparent 70%);
   animation: orb-ring 1.6s var(--ease-out) infinite;
 }
+.orb-call-greeting { margin: 0 0 var(--sp-6); font-size: var(--t-call-title); font-weight: 700; line-height: 1.15; }
+/* Ripples around the orb: the ring you can see before sound is allowed. */
+.orb-call-waves {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: calc(var(--call-orb-size) * 1.5);
+  height: calc(var(--call-orb-size) * 1.5);
+}
+.orb-call-waves > i {
+  position: absolute;
+  width: var(--call-orb-size);
+  height: var(--call-orb-size);
+  border-radius: 50%;
+  border: 2px solid color-mix(in oklab, var(--brand) 60%, transparent);
+  animation: orb-wave 2.4s var(--ease-out) infinite;
+}
+.orb-call-waves > i:nth-child(2) { animation-delay: 0.8s; }
+.orb-call-waves > i:nth-child(3) { animation-delay: 1.6s; }
+@keyframes orb-wave { from { transform: scale(0.7); opacity: 0.9; } to { transform: scale(1.5); opacity: 0; } }
 .orb-call-title { margin: 0; font-size: var(--t-call-title); font-weight: 700; line-height: 1.15; }
 .orb-call-sub { margin: 0; font-size: var(--t-call-sub); color: var(--text-faint); }
 /* One big flat green Answer button: semantic --success, dark text for contrast, no glow. */
