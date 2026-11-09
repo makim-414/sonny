@@ -67,7 +67,8 @@ export type GuardianCall = {
   amount: number; // cents
   // "nudge": Sonny calls mom to suggest she checks in on grandma (no money involved).
   // "struggle": grandma has been stuck on a task (for example booking a ride) for a while.
-  reason: "over_limit" | "unusual_quantity" | "low_balance" | "nudge" | "struggle";
+  // "health": a wellness check reading was out of range (for example blood pressure).
+  reason: "over_limit" | "unusual_quantity" | "low_balance" | "nudge" | "struggle" | "health";
   status: "ringing" | "approved" | "declined" | "missed" | "done";
 };
 
@@ -98,3 +99,13 @@ export type ServiceConnection = {
   card?: string; // masked, e.g. "•••• 4242"; payments still come from the allowance wallet
   demo: true;
 };
+
+// Wellness checks Sonny runs by phone, switched on per family by the guardian.
+// A wellness check, not a diagnosis: reports always say so.
+export type HealthPlan = {
+  bp: { on: boolean; time: string }; // "09:00"
+  mind: { on: boolean; day: string; time: string }; // "Mon", "10:00"
+};
+
+export type BpReading = { at: string; systolic: number; diastolic: number; pulse?: number; inRange: boolean; demo?: boolean };
+export type MindCheck = { at: string; recall: number; orientation: number; demo?: boolean }; // recall 0-3, orientation 0-2
