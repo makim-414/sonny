@@ -1,125 +1,151 @@
 # Demo video script (90 seconds)
 
 One day in grandma's life, told through her TV and mom's phone.
-Goal for the judges: in 90 seconds they see that the agent covers her whole day (health, getting out, memory, groceries, family, fun), and that it actually acts, not just chats.
+
+Two rules shape this cut:
+- **Narrow beats wide** (gstack office hours): one loop is shown for real and in depth. Grandma speaks, the TV acts, she teaches it, mom's phone gets the result.
+- **Her whole day** (owner): everything else she gets help with is shown as a fast, clearly labelled card montage that follows the clock.
+
+Two pillars to land:
+1. Grandma hands things off to the agent: pills, taxi, groceries, her show.
+2. Mom sees what got done, not what was said. She stops calling to check.
 
 ## Recording setup
 
-- Left two thirds of the frame: the TV screen (`/tv`, laptop on HDMI or full-screen browser). Right third: mom's phone (`/family` at 390 px, or a real phone screen-mirrored).
-- English subtitles burned in at the bottom. Korean audio stays (grandma's voice and the TV voice). Press `E` on the TV for the built-in English captions where they exist.
-- A small clock in the top corner of the TV frame shows the demo time so the day is easy to follow (07:50, 09:40, ...). The TV's demo clock fast-forwards between scenes.
-- Grandma's lines: recorded by a family member or read by the presenter. Do not show a real face, name or address on screen.
-- Honest labels on screen where something is mocked: "Ride service mocked for the demo", "TV guide: seed data from a real Korean listing".
-- Narration (presenter voice, English) only in scenes 1 and 8. Scenes 2 to 7 run on their own sound plus subtitles.
+- Left two thirds of the frame: the TV (`/tv` full screen on a real TV or monitor over HDMI). Right third: mom's phone (`/family`, a real phone if possible).
+- English subtitles burned in. Korean audio stays. `E` on the TV turns on its own English captions.
+- A clock in the top corner of the TV frame shows the demo time (the TV's demo clock fast-forwards between scenes).
+- Grandma's lines: recorded by a family member or read by the presenter. No real face, name or address on screen.
+- Anything not live gets a small corner label: "demo data", "ride service mocked", "TV guide: seed data from a real Korean listing".
+- English narration only in scenes 1, 2 and 9.
 
 ## Timeline
 
-| # | Time | Clock on screen | What the viewer sees |
-|---|---|---|---|
-| 1 | 0:00 to 0:12 | none | Problem: grandma alone with the TV |
-| 2 | 0:12 to 0:22 | 07:50 | The TV speaks first: medicine and weather |
-| 3 | 0:22 to 0:36 | 09:40 | Hospital taxi, mom gets the heads-up |
-| 4 | 0:36 to 0:47 | 13:10 | Grandma teaches, the agent remembers |
-| 5 | 0:47 to 0:59 | 15:20 | Grocery request, mom approves on her phone |
-| 6 | 0:59 to 1:12 | 17:30 | Mom's message reaches the TV, grandma's answer comes back as a summary |
-| 7 | 1:12 to 1:20 | 19:55 | Her favorite show, found and turned on |
-| 8 | 1:20 to 1:30 | none | Close: today an app on the TV, next the TV itself |
+| # | Time | Clock | What | Live loop or card |
+|---|---|---|---|---|
+| 1 | 0:00 to 0:09 | none | Problem: grandma alone with the TV | Title cards |
+| 2 | 0:09 to 0:15 | none | Plug it in: her TV becomes the agent | Real shot |
+| 3 | 0:15 to 0:27 | 07:50 | The TV speaks first: pills and weather. Mom's phone: "no need to call today" | Live loop |
+| 4 | 0:27 to 0:39 | 09:40 | Hospital taxi, plate number in huge letters, card on mom's phone | Live loop |
+| 5 | 0:39 to 0:50 | 13:10 | Grandma teaches, the agent remembers, lesson counter | Live loop |
+| 6 | 0:50 to 0:56 | 13:12 | "Don't tell my daughter": nothing shows on mom's phone | Live loop |
+| 7 | 0:56 to 1:08 | 17:30 | Mom's message on the TV, grandma's answer back as a summary | Live loop |
+| 8 | 1:08 to 1:18 | 15:20 to 21:00 | The rest of her day in 10 seconds | Card montage |
+| 9 | 1:18 to 1:30 | none | Roadmap, Pickle line, scan the QR | Close |
 
 ## Scenes
 
-### 1. Problem (0:00 to 0:12)
+### 1. Problem (0:00 to 0:09)
 
-- Screen: a dim living room, the TV glowing, an empty chair next to it. Text cards one after another:
+- Screen: dim living room, the TV glowing, an empty chair. Title cards in quick succession:
   "My grandmother lives alone." / "My mom stays over every third night." / "Her only outing: the temple, once or twice a week." / "The rest of the day, the TV is on."
-- Narration (English, presenter): "This is my grandmother's day. She will never install an app. But her TV is on from morning to night. So we put an AI assistant inside it."
+- Narration: "This is my grandmother's day. She will never install an app. But her TV is on from morning to night."
 
-### 2. Morning, the TV speaks first (0:12 to 0:22)
+### 2. Plug it in (0:09 to 0:15)
 
-- Screen: TV at 07:50. The agent overlay slides up over the morning news, big captions.
-- TV (Korean): "할머니, 좋은 아침이에요. 아침 약 드셨어요? 오늘 낮에 비가 와요. 절에 가실 때 우산 챙기세요."
+- Screen: close-up of a hand plugging a small HDMI stick into the back of an ordinary TV. The TV wakes; the agent overlay slides up over the broadcast. (In the demo the laptop plays the stick.)
+- Narration: "We don't sell her a new device. Plug in a stick, and the TV she already has becomes her assistant."
+
+### 3. Morning: the TV speaks first (0:15 to 0:27)
+
+- TV at 07:50, agent overlay over the morning news.
+- TV: "할머니, 좋은 아침이에요. 아침 약 드셨어요? 오늘 오후에 비가 와요. 절에 가실 때 우산 챙기세요."
   - Subtitle: "Good morning, Grandma. Did you take your morning pills? Rain this afternoon, take an umbrella to the temple."
-- Grandma (Korean): "응, 방금 먹었어."
+- Grandma: "응, 방금 먹었어."
   - Subtitle: "Yes, I just took them."
-- Phone (right third): the summary line flips to "약은 드셨어요". Feed shows the TV line and her answer.
-- Point made: proactive, not a chatbot waiting for a question.
+- Phone: the top of `/family` changes to green "오늘은 전화 안 하셔도 괜찮아요" and "약: 드셨어요".
+  - Subtitle on the phone side: "Mom: no need to call today."
 
-### 3. Hospital taxi (0:22 to 0:36)
+### 4. Hospital taxi (0:27 to 0:39)
 
-- Screen: TV at 09:40.
-- Grandma (Korean): "오늘 병원 가는 날인데, 택시 좀 불러 줘."
+- TV at 09:40.
+- Grandma: "오늘 병원 가는 날인데, 택시 좀 불러 줘."
   - Subtitle: "I have a hospital visit today. Call me a taxi."
-- TV (Korean): "네, 집 앞에서 서울내과까지 택시 불렀어요. 10분 뒤에 도착해요. 따님께도 알려 드렸어요."
-  - Subtitle: "Done. A taxi from your door to the clinic, arriving in 10 minutes. I told your daughter too."
-- TV shows a big card: car model, plate number, arrival time in very large text.
-- Phone: a taxi card appears in the feed ("택시 요청", pickup, destination, time).
-- Lower-third text: "This morning my mom booked this exact ride for her on Kakao T, from her own phone. Now the TV does it." Then small label: "Ride service mocked for the demo".
-- Point made: the agent acts in the real world, with the family in the loop.
+- TV: "네, 집 앞에서 병원까지 택시 불렀어요. 10분 뒤에 와요. 따님께도 알려 드렸어요."
+  - Subtitle: "Done. A taxi from your door to the clinic, here in 10 minutes. I let your daughter know."
+- TV: a big card with car, plate number and arrival time in very large text.
+- Phone: a "택시 요청" card in the feed.
+- Lower third: "This morning my mom booked this exact ride for her on Kakao T, from her own phone. Now the TV does it." Corner label: "ride service mocked".
 
-### 4. Grandma teaches, the agent remembers (0:36 to 0:47)
+### 5. Grandma teaches (0:39 to 0:50)
 
-- Screen: TV at 13:10, quiet afternoon.
-- Grandma (Korean): "내가 하나 가르쳐 줄게. 우리 딸은 사흘에 한 번 와서 자고 가. 그날은 저녁을 두 사람 몫 해야 돼."
+- TV at 13:10.
+- Grandma: "내가 하나 가르쳐 줄게. 우리 딸은 사흘에 한 번 와서 자고 가. 그날은 저녁을 두 사람 몫 해야 돼."
   - Subtitle: "Let me teach you something. My daughter comes every third day and stays the night. On those days, dinner is for two."
-- TV (Korean): "가르쳐 주셔서 고마워요, 할머니. 꼭 기억할게요."
-  - Subtitle: "Thank you for teaching me, Grandma. I will remember."
-- Screen: a small "배운 것" (learned) card fades in on the TV and lands in the phone feed as "배운 것".
-- Point made: the character is a student. Seniors do not want to be cared for, they want to be useful. What she teaches becomes the agent's long-term memory.
+- TV: "가르쳐 주셔서 고마워요, 할머니. 이번 달에 저한테 37가지를 가르쳐 주셨어요."
+  - Subtitle: "Thank you for teaching me, Grandma. You've taught me 37 things this month."
+- TV: a small counter "이번 달 배운 것 37" ticks up from 36. Corner label: "demo count".
+- Point made: she is the teacher, not the patient. What she teaches becomes the agent's long-term memory (GBrain, with source and corrections).
 
-### 5. Groceries, mom approves (0:47 to 0:59)
+### 6. "Don't tell my daughter" (0:50 to 0:56)
 
-- Screen: TV at 15:20.
-- TV (Korean): "할머니, 오늘 따님 오시는 날이죠. 저녁 두 사람 몫 장 봐 둘까요? 두부, 애호박, 계란이요."
-  - Subtitle: "Your daughter is coming today, right? Shall I order groceries for two? Tofu, zucchini, eggs."
-  - (This line uses what she taught in scene 4. That is the payoff of memory.)
-- Grandma (Korean): "그래, 그렇게 해."
-  - Subtitle: "Yes, go ahead."
-- Phone: an approval card "주문 요청" with "승인" (Approve). Mom taps Approve. The card turns into "승인함".
-- TV (Korean): "따님이 승인하셨어요. 저녁 6시 전에 도착해요."
-  - Subtitle: "Your daughter approved it. It arrives before 6 pm."
-- Point made: anything that spends money waits for the family. Safe by design.
+- TV at 13:12.
+- Grandma: "이건 딸한테 말하지 마. 딸 생일 선물로 목도리 뜨고 있어."
+  - Subtitle: "Don't tell my daughter. I'm knitting her a scarf for her birthday."
+- TV: "네, 우리 둘만 아는 비밀이에요."
+  - Subtitle: "Okay. Just between us."
+- Phone: nothing new in the feed. At the bottom only: "할머니의 사적인 대화 1건은 표시하지 않았어요."
+  - Subtitle on the phone side: "Mom sees what got done, not what was said."
 
-### 6. Mom's message, grandma's answer (0:59 to 1:12)
+### 7. Mom's message, grandma's answer (0:56 to 1:08)
 
-- Screen: split. Mom taps the quick button "오늘 저녁 7시에 갈게요" (I'll be there at 7 tonight).
-- TV: the message appears in big text with mom's name, and the TV reads it out loud.
-  - TV (Korean): "따님이 보낸 메시지예요. 오늘 저녁 7시에 갈게요."
+- Phone at 17:30: mom taps the big button "오늘 저녁 7시에 갈게요" (I'll be there at 7 tonight).
+- TV: the message appears in big text and is read out loud.
+  - TV: "따님이 보낸 메시지예요. 오늘 저녁 7시에 갈게요."
   - Subtitle: "A message from your daughter: I'll be there at 7 tonight."
-- Grandma (Korean): "그래, 조심해서 와. 김치 다 익었으니까 가져가라고 해."
+- Grandma: "그래, 조심해서 와. 김치 다 익었으니까 가져가라고 해."
   - Subtitle: "Okay, drive safe. Tell her the kimchi is ready, she should take some home."
-- Phone: a "할머니 소식" (news from grandma) line arrives: "할머니 답 요약: 7시 좋다고 하셨어요. 익은 김치 가져가래요."
+- Phone: the reply card fills in under her message: "할머니 답: 7시 좋다고 하셨어요. 익은 김치 가져가래요."
   - Subtitle: "Grandma's reply, summarized: 7 is fine. Take the kimchi home."
-- Point made: the loop closes both ways without a phone call.
 
-### 7. Evening show (1:12 to 1:20)
+### 8. The rest of her day, in 10 seconds (1:08 to 1:18)
 
-- Screen: TV at 19:55.
-- TV (Korean): "할머니, 5분 뒤에 임영웅 나오는 프로그램 해요. 틀어 드릴게요."
-  - Subtitle: "Grandma, your favorite singer is on in 5 minutes. I'll put it on."
-- The channel switches by itself. Phone feed: "채널: 89번으로 바꿨어요".
-- Point made, kept short: changing the channel is just one tool among many.
+Fast cards, each about 2 seconds, the clock jumping forward. Corner label on all: "demo data".
 
-### 8. Close (1:20 to 1:30)
+1. 15:20, groceries: "따님 오시는 날이라 두 사람 몫 장보기: 두부, 애호박, 계란" with an approval card on mom's phone; mom taps 승인. (It used what she taught in scene 5.)
+2. 18:00, temple: "내일은 절 가시는 날이에요. 버스는 9시 40분."
+3. 19:55, her show: "5분 뒤 임영웅 나오는 프로그램, 89번으로 틀어 드릴게요." The channel switches.
+4. 21:00, evening pills: "저녁 약 드실 시간이에요."
+5. Next morning, safety: "평소보다 TV가 늦게 켜졌어요" lands on mom's phone as an alert.
 
-- Screen: the full day's feed on mom's phone scrolls fast (pills, taxi, lesson, groceries, message, show). Then the product name.
-- Narration (English, presenter): "Pickle covers your whole workday through Zoom. We cover grandma's whole day through her TV. Today it's an app on her TV. Next, it's the TV itself."
-- End card: product name, GitHub repo URL, "Built in 5 hours at c0mpiled-17 Seoul".
+- Music only, no narration. Subtitles name each card in English: "Groceries, approved by mom", "Temple day", "Her favorite show", "Evening pills", "Safety check".
+
+### 9. Close (1:18 to 1:30)
+
+- Screen: a four-step strip: "1. HDMI stick" / "2. Android and Google TV app" / "3. Pass-through box over the set-top box" / "4. The TV itself". Then the TV shows a big QR code.
+- Narration: "Pickle covers your whole workday through Zoom. We cover grandma's whole day through her TV. Today a stick, next the TV itself. Scan this, and be grandma's daughter for 30 seconds."
+- End card: product name, GitHub URL, "Built in 5 hours at c0mpiled-17 Seoul with Claude, GBrain and gstack".
+
+## Live demo at the judging table (not the video)
+
+Office hours rule: watch, don't demo. Put the phone in the judge's hand.
+
+1. TV (monitor over HDMI, full screen) shows a QR code in the corner: "Be grandma's daughter. Scan me."
+2. The judge scans it; `/family` opens on their phone. The three big buttons are the first thing they see.
+3. They tap "오늘 저녁 7시에 갈게요" (or type in English). The message appears on the TV and the TV reads it out.
+4. The presenter answers as grandma, in Korean. Within seconds the judge's phone shows "할머니 답" with the summary.
+5. Optional second beat: the presenter says "택시 불러 줘" to the TV; a taxi card appears on the judge's phone with an approve button.
+
+Fallbacks: if the mic fails, type grandma's line into the TV's text box. If Wi-Fi fails, phone hotspot. If both fail, play the 90 second video.
 
 ## Shot list for the recording session
 
-1. Reset the store (restart the dev server) so the feed starts empty.
-2. Run scenes in order on the TV with the demo clock fast-forwarding. Keep `/family` open on the phone side the whole time so the feed fills live.
-3. Seed fallback if a live step fails during recording (local only):
+1. Restart the dev server so the feed starts empty.
+2. Run scenes 3 to 7 live on the TV with the demo clock fast-forwarding; keep `/family` open on the phone side so the feed fills live.
+3. Record scene 8 as cards. Seed the phone side if needed (local only):
 
 ```bash
-curl -s -X POST http://localhost:3000/api/events -H 'content-type: application/json' -d '{"kind":"alert","text":"택시 요청: 집 앞에서 서울내과, 10분 뒤 도착"}'
+curl -s -X POST http://localhost:3000/api/events -H 'content-type: application/json' -d '{"kind":"task","text":"주문 요청: 두부, 애호박, 계란. 승인해 주세요","visibility":"family"}'
 ```
 
 ```bash
-curl -s -X POST http://localhost:3000/api/events -H 'content-type: application/json' -d '{"kind":"alert","text":"주문 요청: 두부, 애호박, 계란. 승인해 주세요"}'
+curl -s -X POST http://localhost:3000/api/events -H 'content-type: application/json' -d '{"kind":"alert","text":"[warn] 평소보다 TV가 늦게 켜졌어요","visibility":"family"}'
 ```
+
+4. If grandma's reply does not come back in time, seed it:
 
 ```bash
-curl -s -X POST http://localhost:3000/api/events -H 'content-type: application/json' -d '{"kind":"family","text":"할머니 답 요약: 7시 좋다고 하셨어요. 익은 김치 가져가래요"}'
+curl -s -X POST http://localhost:3000/api/events -H 'content-type: application/json' -d '{"kind":"family","text":"할머니 답 요약: 7시 좋다고 하셨어요. 익은 김치 가져가래요","visibility":"family"}'
 ```
 
-4. Record twice. Keep the cleaner take. Trim to 90 seconds or less before upload (hard limit).
+5. Record twice, keep the cleaner take, export at 1:30 or less (hard limit).
