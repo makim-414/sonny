@@ -20,6 +20,7 @@ type FamilyData = {
 
 // A skill grandma taught that needs an account mom connects once (see lib/agent/connections.ts).
 const CONNECTION_TAG = /\s*\(connection [\w-]+\)/;
+const isConnect = (text: string) => CONNECTION_TAG.test(text) || /Connect her \w+ account\?/i.test(text);
 
 const EMPTY: FamilyData = { events: [], hiddenCount: 0, summary: null, approvedIds: [] };
 
@@ -103,7 +104,7 @@ export default function FamilyApp({ embedded = false }: { embedded?: boolean }) 
     setBusyId(item.event.id);
     try {
       await post({ approve: item.event.id });
-      setNotice(CONNECTION_TAG.test(item.event.text) ? T.connected : item.request === "taxi" ? T.approvedTaxi : T.approvedOrder);
+      setNotice(isConnect(item.event.text) ? T.connected : item.request === "taxi" ? T.approvedTaxi : T.approvedOrder);
       refresh();
     } catch {
       setNotice(T.approveFail);
@@ -152,13 +153,13 @@ export default function FamilyApp({ embedded = false }: { embedded?: boolean }) 
           {pending.map((p) => (
             <article key={p.event.id} className="fa-approval">
               <div className="fa-approval-head">
-                <h3>{p.label}</h3>
+                <h3>{isConnect(p.event.text) ? T.lSkill : p.label}</h3>
                 <time>{clock(p.event.at)}</time>
               </div>
               <p>{p.text.replace(CONNECTION_TAG, "")}</p>
               <div className="fa-approval-actions">
                 <button className="fa-btn fa-btn-primary" disabled={busyId === p.event.id} onClick={() => approve(p)}>
-                  {busyId === p.event.id ? T.approving : CONNECTION_TAG.test(p.event.text) ? T.connect : T.approve}
+                  {busyId === p.event.id ? T.approving : isConnect(p.event.text) ? T.connect : T.approve}
                 </button>
                 <button className="fa-btn" onClick={() => setDismissed((d) => [...d, p.event.id])}>
                   {T.later}
