@@ -10,6 +10,7 @@ import { CORRECTED_BY, TAUGHT_BY } from "@/lib/memory/seed";
 import { orderErrand, type ErrandOrder } from "./services/errand";
 import { newsToday, weatherToday } from "./services/info";
 import { requestRide, type RideBooking } from "./services/ride";
+import { PLACES } from "./services/places";
 import { T } from "./strings";
 import { ringGuardian, spend, walletSnapshot } from "./wallet";
 import { taskDone } from "./watch";
@@ -21,6 +22,8 @@ export type AgentContext = {
   memory: MemoryStore;
   actions: TvAction[];
   private: boolean; // this turn was kept from the family
+  heard?: string; // what grandma said this turn
+  lastSaid?: string; // what Sonny said on the previous turn
   once?: Set<string>; // tools that may act only once per turn (Haiku sometimes calls twice in parallel)
 };
 
@@ -51,7 +54,19 @@ type Shared = {
   confirmOrder?: { items: { name: string; qty?: number }[]; question: string };
   // An offer Sonny made while speaking first ("want me to get groceries for two?").
   offer?: { kind: "errand" | "skill"; said: string; basis: string };
+  // The taxi as it really stands, so a later "what?" gets the same facts back.
+  lastRide?: { at: number; status: "booked" | "waiting_ok"; car: string; plate: string; pickupISO: string; destination: string };
 };
+
+/** Did this turn name a place, or say yes to Sonny's question that named one? */
+function destinationNamed(heard = "", lastSaid = "") {
+  const named = (t: string) =>
+    Object.values(PLACES).some((p) => p.aliases.some((a) => new RegExp(`\\b${a}\\b`, "i").test(t)) || t.toLowerCase().includes(p.name.toLowerCase())) ||
+    /\bto (the )?[A-Z][a-z]+/.test(t) ||
+    /(으로|에|까지) 가/.test(t);
+  if (named(heard)) return true;
+  return /\b(yes|yeah|yep|sure|ok|okay|please|that'?s right|right)\b|응|네|그래|맞아/i.test(heard) && named(lastSaid);
+}
 const g = globalThis as unknown as { __hyodoAgent?: Shared };
 export const shared: Shared = g.__hyodoAgent ?? (g.__hyodoAgent = { health: [], requests: [] });
 
@@ -289,11 +304,16 @@ export function createTools(ctx: AgentContext) {
       }),
       execute: async ({ to, from, when }) => {
         if (!first(ctx, "ride_request")) return AGAIN;
+        // Demo rule: never book from the memory default alone. Ask once, then book.
+        if (!destinationNamed(ctx.heard, ctx.lastSaid)) {
+          return { ok: false, status: "need_destination", say: T.askWhere };
+        }
         taskDone(); // a ride is under way: grandma is no longer stuck
         const ride = requestRide({ to, from, when, now: ctx.now });
         const cost = T.usd(ride.fareCents);
         const pay = spend(ride.fareCents, `Taxi to ${ride.destination.name} (${DEMO})`, ctx.now.toISOString());
         const pickup = kstClock(new Date(ride.pickupAt));
+        shared.lastRide = { at: ctx.now.getTime(), status: pay.status === "done" ? "booked" : "waiting_ok", car: ride.carModel, plate: ride.plate, pickupISO: ride.pickupAt, destination: ride.destination.name };
         if (pay.status === "done") {
           ctx.actions.push({
             type: "showCard",

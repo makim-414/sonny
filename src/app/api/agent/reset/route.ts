@@ -14,6 +14,8 @@ export async function POST() {
   shared.lastLater = undefined;
   shared.confirmOrder = undefined;
   shared.offer = undefined;
+  shared.lastRide = undefined;
+  store.tvInbox.length = 0; // approvals or messages left from an earlier run
   resetWatch();
   store.calls.length = 0;
   store.pending.length = 0;
