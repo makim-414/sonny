@@ -1,10 +1,32 @@
 # Sonny
 
-**Grandma says it. Sonny does it.**
+**The AI that knows when to call mom.**
 
-Adult children spend 27 hours a week running errands for aging parents. With Sonny, grandma just asks out loud whenever she needs something, Sonny gets it done from an allowance the family loads, and mom only gets a call when grandma is stuck.
+Sonny is a voice agent for parents who live alone. Grandma just talks to it on her phone or her TV, every call doubles as a quiet health and memory check-up, and mom gets a call only when Sonny is stuck, grandma does not answer, or something looks strange.
 
-## Live demo
+[Live demo](https://sonny-nine.vercel.app/?demo=1) · [Demo video](https://youtu.be/WY7xkU4z6yI) · Built at c0mpiled-17 Seoul (YC RFS: AI for the Aging Population)
+
+<p align="center">
+  <img src="docs/screens/00-sonny.png" alt="Sonny, a little yellow cockatiel, on grandma's phone" width="260">
+  &nbsp;&nbsp;
+  <img src="docs/screens/02-family.png" alt="Mom's phone: what got done today, and when Sonny is calling" width="260">
+</p>
+
+## The problem
+
+- 63 million Americans are family caregivers, 1 in 4 adults, giving about 27 hours a week (National Alliance for Caregiving and AARP, Caregiving in the U.S. 2025).
+- About half of dementia in the U.S. goes undiagnosed (45%, 2026 cohort study).
+- Mom is already grandma's remote assistant: she books the ride from her own phone, then calls to check. The call home turns into a chore list.
+
+## What Sonny does
+
+1. **Grandma just talks.** She taps one icon and says what she needs: a ride, a show on TV, a note to a friend. No app to learn, no password to type.
+2. **Every call is a quiet check-up.** Sonny weaves sleep, recall and daily blood-pressure questions into normal conversation, tracks weekly signals, and sends mom a simple report. A wellness check, not a diagnosis.
+3. **Sonny knows when to call mom.** When grandma is stuck, does not answer, or a payment looks strange, mom's phone rings. Otherwise she sees what got done, never what was said.
+
+## Try it in 60 seconds
+
+Open grandma and mom on two devices, tap **Answer** on grandma's phone, and ask for a taxi. When grandma gets stuck, mom's phone rings.
 
 | Who | Open this |
 |---|---|
@@ -12,47 +34,56 @@ Adult children spend 27 hours a week running errands for aging parents. With Son
 | Mom's phone | https://sonny-nine.vercel.app/family?demo=1 |
 | Grandma's TV | https://sonny-nine.vercel.app/tv?demo=1 |
 
-Open grandma and mom on two devices, tap **Answer** on grandma's phone, and ask for a taxi. When grandma gets stuck, mom's phone rings. Demo video: see the submission form.
+| Grandma's phone (`/`) | Mom's phone (`/family`) | TV mode (`/tv`) |
+|---|---|---|
+| ![Sonny calling grandma](docs/screens/01-grandma-call.png) | ![Mom's feed](docs/screens/02-family.png) | ![TV mode](docs/screens/13-tv.png) |
+
+## How it works
+
+```mermaid
+flowchart LR
+  G["Grandma<br/>phone or TV, voice only"] --> A["Sonny agent<br/>Claude + tool calling"]
+  A --> M["GBrain memory<br/>lessons with provenance"]
+  A --> V["Voice<br/>OpenAI TTS, Kokoro fallback<br/>Silero VAD, smart-turn"]
+  A --> C["Family calls<br/>stuck, no answer, strange spend"]
+  C --> F["Mom's app<br/>feed, approvals, weekly signals"]
+  A --> F
+```
+
+- **Agent:** Claude through the Vercel AI SDK, calling real tools (memory, schedule, ride, TV guide, spend limits, call the guardian, family message).
+- **Memory:** [GBrain](https://github.com/garrytan/gbrain), keyless local PGLite. Every lesson is stored with its source and can be corrected or withdrawn.
+- **Voice:** OpenAI `gpt-4o-mini-tts` speaks (voices cedar and marin, chosen by the family), with [Kokoro](https://github.com/hexgrad/kokoro) as the self-hosted fallback. [Silero VAD](https://github.com/snakers4/silero-vad) listens hands-free, [smart-turn](https://github.com/pipecat-ai/smart-turn) decides whether an older speaker has finished or is only pausing, and [faster-whisper](https://github.com/SYSTRAN/faster-whisper) transcribes when the browser cannot.
+- **Privacy:** redaction happens on the server ([`src/app/api/family/view.ts`](src/app/api/family/view.ts)); private lines never reach mom's phone, not even in the network panel. There is no camera.
+- **Sign-in:** signed httpOnly cookies, one-QR device pairing, [`src/proxy.ts`](src/proxy.ts) as the first gate.
+
+More: [architecture](docs/ARCHITECTURE.md), [open source credits and licenses](docs/OPEN_SOURCE.md), [family app contract](docs/family-app-contract.md).
 
 ## Built with GBrain and gstack
 
-- **GBrain is Sonny's long-term memory.** Every skill grandma teaches ("my Sunday groceries", "my usual ride to Dr. Lee") is stored in GBrain with its source, and can be corrected or withdrawn. Code: [`src/lib/memory/gbrain-store.ts`](src/lib/memory/gbrain-store.ts). Usage log: [`docs/gstack/gbrain-usage.md`](docs/gstack/gbrain-usage.md).
+- **GBrain is Sonny's long-term memory.** Every skill grandma teaches ("my usual ride to Dr. Lee", "a note to Martha") is stored in GBrain with its source, and can be corrected or withdrawn. Code: [`src/lib/memory/gbrain-store.ts`](src/lib/memory/gbrain-store.ts). Usage log: [`docs/gstack/gbrain-usage.md`](docs/gstack/gbrain-usage.md).
 - **gstack shaped the build.** We ran gstack `/office-hours` to pressure-test the idea ([`docs/gstack/office-hours.md`](docs/gstack/office-hours.md), [run log](docs/gstack/office-hours-run.md)) and gstack `/review` at the feature freeze, which found nine serious issues; we fixed the ones that could break the demo, including "No, don't approve" being heard as a yes ([`docs/gstack/review.md`](docs/gstack/review.md)).
 
-Sonny is an AI errand runner for parents who live alone: grandma says it, Sonny does it. She taps one icon and gives the orders out loud.
-Grandma builds new skills just by talking ("learn to get me my usual ride"). Anything that needs an account or a card, mom connects once from her phone, so grandma never types a password.
+## What's real, what's mocked
 
-Built at c0mpiled-17 Seoul, 2026-11-09 (YC Request for Startups, Fall 2026: AI for the Aging Population).
+**Real:** the Claude agent and its tool calls, GBrain memory, the voice stack, mom's spend limits and approvals, Sonny's calls to mom (struggle, nudge and over-limit), the health check-ins, and the skills grandma teaches by talking.
 
-## What Sonny does
+**Mocked:**
+- Ride and shopping services: there is no real taxi or store API behind them.
+- Account connection: no real credentials are stored.
+- Payments: top-ups are demo credits, or Stripe Checkout in test mode when `STRIPE_SECRET_KEY` is set.
+- TV integration: the TV app runs in the browser today (`/tv`); Android TV and Samsung TV apps are next.
 
-1. **Say it, the allowance pays.** Grandma asks out loud for a taxi or her groceries; Sonny books and pays from an allowance her daughter tops up. Anything over the per-purchase limit waits for mom.
-2. **Sonny calls first.** One icon on her phone, no app to learn. Sonny opens every moment as a phone call she only has to answer: pills, weather, the day ahead.
-3. **Teach it once.** Grandma teaches Sonny how she likes things done ("my Sunday groceries", "a note to Martha", "learn to get me my usual ride"), once, and Sonny does it her way from then on. Her lessons become its long-term memory. Anything that needs an account or a card, mom connects once from her phone, so grandma never types a password.
-4. **Mom only when it matters.** When grandma gets stuck, Sonny doesn't make her feel slow; it quietly calls mom ("Book it for her" or "I'll call her"). A strange order gets a double-check, then a call. And when grandma has been quiet, Sonny nudges mom to call, with something to talk about.
-5. **Health check-ins.** Sonny calls for a daily blood-pressure reading and a weekly two-minute memory check, then sends mom a simple report. A wellness check, not a diagnosis.
+**Demo video:** the live-action B-roll is AI-generated footage. Every app screen in it is the real product.
 
-Mom sees what got done, never what was said: grandma's private conversations are redacted on the server, and "don't tell my daughter" stays between them. There is no camera.
+## Go-to-market
 
-## Screens
+1. **Today, families:** mom sends one link, grandma taps once, and the icon sits on her home screen. No sign-up, no password, no app store for grandma. The family pays monthly.
+2. **Next, built into her TV:** the same Sonny as an Android TV and Samsung TV app the family installs remotely. Americans 75+ watch 4.4 hours of TV a day (BLS ATUS 2025), and 61% of U.S. internet homes stream mainly on the smart TV (Parks Associates 2026).
+3. **Then, home-care agencies and senior health plans:** the channels that already sit in her home, and want the daily blood-pressure and memory check-ins.
 
-<img src="docs/screens/00-sonny.png" alt="Sonny, a little yellow cockatiel, on grandma's phone" width="240">
+## Run locally
 
-Sonny is a little yellow cockatiel. Parrots learn by repeating what you teach them, and so does Sonny.
-
-| Grandma's phone (`/`) | Mom's phone (`/family`) | Allowance (`/admin/allowance`) |
-|---|---|---|
-| ![Sonny calling grandma](docs/screens/01-grandma-call.png) | ![Mom's feed](docs/screens/02-family.png) | ![Allowance](docs/screens/07-admin-allowance.png) |
-
-| Hidden setup (`/setup`) | TV mode (`/tv`) |
-|---|---|
-| ![Setup](docs/screens/10-setup.png) | ![TV mode](docs/screens/13-tv.png) |
-
-Screenshots live in `docs/screens/`.
-
-## Run it
-
-Requirements: Node.js 22+, pnpm, an Anthropic API key. Optional: Python with faster-whisper for the speech-to-text fallback (see `docs/stt.md`).
+Requirements: Node.js 22+, pnpm, an Anthropic API key. Optional: an OpenAI key for the warmer voice, and Python with faster-whisper for the speech-to-text fallback (see [`docs/stt.md`](docs/stt.md)).
 
 ```bash
 pnpm install
@@ -66,19 +97,20 @@ pnpm build
 pnpm start
 ```
 
-- `pnpm dev` and `pnpm start` read `ANTHROPIC_API_KEY` from the macOS keychain item `anthropic-hackathon-key`, so no key lives in any file. On another machine, set `ANTHROPIC_API_KEY` in your shell and run `pnpm exec next start`.
+- `pnpm dev` and `pnpm start` read `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` from the macOS keychain, so no key lives in any file. On another machine, set both in your shell and run `pnpm exec next start`. Without an OpenAI key, Sonny speaks with Kokoro.
 - Open http://localhost:3000.
 
 | Screen | Address | Who |
 |---|---|---|
 | Grandma's phone | `/` | A paired phone. Add it to the home screen. |
-| TV mode | `/tv` | The next step: the same Sonny on a TV |
+| TV mode | `/tv` | The same Sonny on a TV |
+| Family app | `/family` | Mom, signed in |
 | Family admin | `/admin` (overview, today, taught, routines, allowance, privacy, device) | Mom, signed in |
 | Hidden setup on grandma's phone | `/setup` (hold the top-left corner of `/` for 2 seconds) | Family, with the PIN |
 
 ### Demo accounts (test values only)
 
-- Family sign-in at `/login`: `mom@sonny.demo` (Sarah, daughter, admin) or `mike@sonny.demo` (Mike, son), password `grandma-demo` for both. Each family member sees grandma's feed and approvals; every action and top-up is logged with their name. On `/family` the demo can switch between them.
+- Family sign-in at `/login`: `mom@sonny.demo` (Sarah, daughter, admin) or `mike@sonny.demo` (Mike, son), password `grandma-demo` for both. Every action is logged with the family member's name.
 - Skip sign-in anywhere with `?demo=1`: `/?demo=1` (be grandma), `/admin?demo=1` (be her daughter).
 - Family PIN for `/setup`: `0000`.
 - Pair a real phone: `/admin/device`, "Connect grandma's phone", scan the QR with her phone.
@@ -88,70 +120,32 @@ pnpm start
 | Variable | What it does |
 |---|---|
 | `ANTHROPIC_API_KEY` | The agent (read from the keychain by the scripts above) |
+| `OPENAI_API_KEY` | Sonny's voice (`gpt-4o-mini-tts`). Optional: Kokoro is the fallback. |
 | `AUTH_SECRET` | Signs session cookies. Set it in any real deployment; there is a development fallback. |
 | `FAMILY_PIN` | PIN for the hidden setup screen (demo `0000`) |
-| `STRIPE_SECRET_KEY` | Turns allowance top-ups into Stripe Checkout (test mode). Without it, top-ups are demo credits. |
+| `STRIPE_SECRET_KEY` | Turns top-ups into Stripe Checkout (test mode). Without it, top-ups are demo credits. |
 | `AUTH_MODE=off` | Turns sign-in off (emergency switch for a live demo) |
 | `STT_URL` | Local speech-to-text and turn-detection server (default `http://127.0.0.1:3201`) |
 
 Rehearsal helpers: `POST /api/family/calls/demo?demo=1` rings mom's phone with a test call (`{"reason":"struggle"}`, `{"reason":"nudge"}`, or a spend over the limit).
 
-## How it is built
+## Repo map
 
-```
-Grandma's phone (/)                         Mom's phone (/admin)
-  one icon, a particle, voice in/out          today, approvals, allowance, "Sonny is calling"
-        |                                                ^
-        v                                                |
-  Claude agent (Vercel AI SDK, tool calling) ---- family inbox and activity log
-     tools: memory, schedule, ride, order, allowance, call the guardian, TV guide, family message
-        |
-  GBrain memory   Kokoro voice   Silero VAD   smart-turn   faster-whisper
-  (lessons with   (speech out,   (hands-free  (has she     (speech to text
-   provenance)     on our server) listening)   finished?)   fallback)
-```
-
-- **Agent:** Claude through the Vercel AI SDK, calling real tools. The ride service is mocked; Stripe runs in test mode.
-- **Memory:** [GBrain](https://github.com/garrytan/gbrain), keyless local PGLite. Every lesson is stored with its source and can be corrected or withdrawn. Usage log: [docs/gstack/gbrain-usage.md](docs/gstack/gbrain-usage.md).
-- **Voice:** [Kokoro](https://github.com/hexgrad/kokoro) speaks; [Silero VAD](https://github.com/snakers4/silero-vad) (via [ricky0123/vad](https://github.com/ricky0123/vad)) listens hands-free; [smart-turn](https://github.com/pipecat-ai/smart-turn) decides whether an older speaker has finished or is only pausing; [faster-whisper](https://github.com/SYSTRAN/faster-whisper) transcribes when the browser cannot.
-- **Privacy:** redaction happens on the server (`src/app/api/family/view.ts`); private lines never reach mom's phone, not even in the network panel.
-- **Sign-in:** signed httpOnly cookies, one-QR device pairing, `src/proxy.ts` as the first gate.
-
-Everything except the Claude agent is open source you can self-host. Full list with licenses and how we use each: [docs/OPEN_SOURCE.md](docs/OPEN_SOURCE.md).
-
-Built with [gstack](https://github.com/garrytan/gstack): office hours and review during the build. Records: [docs/gstack/](docs/gstack/).
-
-More: architecture [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), family app contract [docs/family-app-contract.md](docs/family-app-contract.md), pitch and demo script [docs/pitch/](docs/pitch/).
-
-## What's real, what's mocked
-
-**Real:** the Claude agent and its tool calls, GBrain memory, the Kokoro voice, the allowance wallet and mom's approvals, Sonny's calls to mom (struggle, nudge and over-limit), and the skills grandma teaches by talking.
-
-**Mocked:**
-- Ride and grocery services: there is no real taxi or store API behind them.
-- Account connection: no real credentials are stored.
-- Payments: allowance top-ups are demo credits, or Stripe Checkout in test mode when `STRIPE_SECRET_KEY` is set.
-- TV integration: the TV app runs in the browser today (`/tv`); Android TV and Samsung TV apps are next.
-
-**Demo video:** the live-action B-roll is AI-generated footage. Every app screen in it is the real product.
-
-## How Sonny gets into her home
-
-1. **Today, the family installs it:** mom sends one link, grandma taps once, and the icon sits on her home screen. No sign-up, no password, no app store for grandma. Sonny calls her first.
-2. **The TV she already watches:** the same Sonny as an Android TV and Samsung TV app the family installs remotely. Americans 75+ watch 4.4 hours of TV a day (BLS ATUS 2025), and 61% of U.S. internet homes stream mainly on the smart TV (Parks Associates 2026).
-3. **Who pays:** the family pays monthly. Next come the channels that already sit in her home: home-care agencies, senior living communities, and senior health plans that want the daily blood-pressure check-ins.
-4. **Then our own device:** a small box or speaker that ships pre-paired to the family.
-
-## Roadmap
-
-1. **Today:** a one-icon web app on grandma's phone, set up by mom with one QR.
-2. **Next:** a Sonny app on the TV she already watches all day (Android TV / Google TV, Samsung Tizen).
-3. **Then:** our own Sonny device, plugged in by the family, nothing to install.
-
-The phone ships today and proves the agent; the TV apps reuse the same web app; the device comes when we know exactly what grandma uses.
+| Path | What lives there |
+|---|---|
+| [`src/app`](src/app) | Next.js App Router: grandma's phone (`/`), TV (`/tv`), family app (`/family`), admin, sign-in, and the `api/` routes (agent, turn, tts, stt, family, events) |
+| [`src/components/orb`](src/components/orb) | Grandma's one-icon screen: the Sonny orb and parrot looks, the call UI |
+| [`src/components/family`](src/components/family) | Mom's phone: feed, incoming Sonny call, weekly signals, health card, allowance |
+| [`src/components/tv`](src/components/tv) | TV mode: broadcast screen, channel lineup, pairing QR, Sonny on the TV |
+| [`src/lib/agent`](src/lib/agent) | The Sonny agent: persona, tool definitions, wellness plan, watch and escalation rules, wallet |
+| [`src/lib/memory`](src/lib/memory) | Long-term memory on GBrain (with a JSON store fallback), search and seed facts |
+| [`src/lib/tts`](src/lib/tts) | Speech out: OpenAI TTS, Kokoro fallback, player and ringer |
+| [`src/lib/voice`](src/lib/voice) | Speech in: voice activity detection, listening, speech-to-text client |
+| [`docs/gstack`](docs/gstack) | Records of how we used gstack and GBrain during the build |
+| [`docs/pitch`](docs/pitch) | Pitch, 90 second demo script, shot list, Q&A and the submission text |
+| [`docs`](docs) | Architecture, open source credits, agent scenarios, STT and TV notes. Start at [`docs/README.md`](docs/README.md) |
+| [`scripts`](scripts) | Local speech-to-text server, TV guide check, VAD asset copy used by `pnpm dev` and `pnpm build` |
 
 ## Why we built it
 
-The founder's grandmother lives alone. The morning of this hackathon, the founder's mom booked her taxi to the doctor from her own phone, then called to check. Mom is already grandma's assistant. Sonny takes the job.
-
-Built at c0mpiled-17 Seoul, 2026-11-09.
+The founder's grandmother lives alone. The morning of this hackathon, the founder's mom booked her taxi to the doctor from her own phone, then called to check. Mom is already grandma's assistant. Sonny takes the job, and calls mom only when it matters.
