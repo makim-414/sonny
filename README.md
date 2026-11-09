@@ -62,7 +62,7 @@ pnpm start
 
 ### Demo accounts (test values only)
 
-- Family sign-in at `/login`: `mom@sonny.demo` / `grandma-demo`.
+- Family sign-in at `/login`: `mom@sonny.demo` (Sarah, daughter, admin) or `mike@sonny.demo` (Mike, son), password `grandma-demo` for both. Each family member sees grandma's feed and approvals; every action and top-up is logged with their name. On `/family` the demo can switch between them.
 - Skip sign-in anywhere with `?demo=1`: `/?demo=1` (be grandma), `/admin?demo=1` (be her daughter).
 - Family PIN for `/setup`: `0000`.
 - Pair a real phone: `/admin/device`, "Connect grandma's phone", scan the QR with her phone.

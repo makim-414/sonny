@@ -1,4 +1,5 @@
 import type { ActivityEvent } from "@/lib/types";
+import { FAMILY_MEMBERS } from "@/lib/auth/members";
 import { T } from "./strings";
 
 export type Tone = "grandma" | "tv" | "family" | "memory" | "info" | "warn" | "urgent" | "task";
@@ -13,7 +14,10 @@ export type FeedItem = {
   request: RequestKind | null;
 };
 
-const FAMILY_NAMES = /^(엄마|아빠|딸|아들|손녀|손자|가족|이모|삼촌|mom|dad|daughter|son|family)$/i;
+const FAMILY_NAMES = new RegExp(
+  `^(엄마|아빠|딸|아들|손녀|손자|가족|이모|삼촌|mom|dad|daughter|son|family|${FAMILY_MEMBERS.map((m) => m.name).join("|")})$`,
+  "i",
+);
 // "[urgent] ...", "(warn) ...", or the agent's own "가족 알림(urgent): ..."
 const LEVEL_PREFIX = /^(?:가족\s?알림\s*)?[[(](info|warn|urgent)[\])]\s*:?\s*/i;
 const URGENT_WORDS = /긴급|응급|119|쓰러|아프|아파|숨이|가슴|emergenc|911|chest|fell|fall(en)?\b|pain|hurt|can't breathe/i;

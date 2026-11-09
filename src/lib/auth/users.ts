@@ -2,10 +2,15 @@ import { timingSafeEqual } from "node:crypto";
 
 // Demo guardian accounts. Test values only, listed in the README under "Demo accounts".
 // A real deployment would store hashed passwords; this demo has no database.
+import { FAMILY_MEMBERS } from "./members";
+
+// Family members share grandma's feed and approvals; every action is logged with their name.
+// Test passwords only (listed in the README); the public member data is in members.ts.
 type Guardian = { email: string; password: string; name: string };
 
-const GUARDIANS: Guardian[] = [{ email: "mom@sonny.demo", password: "grandma-demo", name: "Mom" }];
+const GUARDIANS: Guardian[] = FAMILY_MEMBERS.map((m) => ({ email: m.email, name: m.name, password: "grandma-demo" }));
 
+export { FAMILY_MEMBERS, memberByEmail } from "./members";
 export const DEMO_GUARDIAN = GUARDIANS[0];
 export const DEMO_DEVICE_ID = "demo-device";
 
