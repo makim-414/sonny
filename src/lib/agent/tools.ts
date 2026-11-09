@@ -12,6 +12,7 @@ import { newsToday, weatherToday } from "./services/info";
 import { requestRide, type RideBooking } from "./services/ride";
 import { T } from "./strings";
 import { ringGuardian, spend, walletSnapshot } from "./wallet";
+import { taskDone } from "./watch";
 
 // One request's context. Tools push TV actions here; the route returns them.
 export type AgentContext = {
@@ -252,6 +253,7 @@ export function createTools(ctx: AgentContext) {
       }),
       execute: async ({ to, from, when }) => {
         if (!first(ctx, "ride_request")) return AGAIN;
+        taskDone(); // a ride is under way: grandma is no longer stuck
         const ride = requestRide({ to, from, when, now: ctx.now });
         const cost = T.usd(ride.fareCents);
         const pay = spend(ride.fareCents, `Taxi to ${ride.destination.name} (${DEMO})`, ctx.now.toISOString());

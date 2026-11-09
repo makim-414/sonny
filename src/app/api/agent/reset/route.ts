@@ -1,5 +1,6 @@
 import { resetSession } from "@/lib/agent/session";
 import { shared } from "@/lib/agent/tools";
+import { resetWatch } from "@/lib/agent/watch";
 import { getMemory, resetMemory } from "@/lib/memory";
 import { store } from "@/lib/store";
 
@@ -13,6 +14,7 @@ export async function POST() {
   shared.lastLater = undefined;
   shared.confirmOrder = undefined;
   shared.offer = undefined;
+  resetWatch();
   store.calls.length = 0;
   store.pending.length = 0;
   store.currentChannel = null;

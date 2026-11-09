@@ -11,7 +11,9 @@ import { AGENT_NAME, PERSONA, PROACTIVE_TASKS } from "./persona";
 import { getSession, pushTurn } from "./session";
 import { T } from "./strings";
 import { createTools, DEMO, lessonsThisMonth, shared, type AgentContext } from "./tools";
-import { settle } from "./wallet";
+import { settle, spend } from "./wallet";
+import { onIdle, onNudge, onVoice, struggleCheck, taskDone, type Quick } from "./watch";
+import { requestRide } from "./services/ride";
 
 // On the venue network IPv6 to api.anthropic.com hangs and Node's default 250 ms
 // happy-eyeballs window fails the whole connect (ETIMEDOUT). Give IPv4 time.
@@ -25,7 +27,7 @@ const SMART = process.env.HYODO_SMART_MODEL ?? "claude-sonnet-5-5";
 // Clear teaching ("내 손주 이름은 민수야", "my grandson's name is Max"): Haiku is made to
 // call memory_remember on its first step, since it sometimes only says it will.
 const TEACH_WORDS =
-  /기억해|이름은|이름이|비법|가르쳐|알려 줄게|해야 (해|돼|한다)|하면 (돼|좋아)|절여|넣어야|remember (this|that)|\bname is\b|\bnamed\b|recipe|the trick is|the secret is|you (have|need) to|always (put|use|add)|never (put|use)/i;
+  /기억해|이름은|이름이|비법|가르쳐|알려 줄게|해야 (해|돼|한다)|하면 (돼|좋아)|절여|넣어야|remember (this|that)|\bname is\b|\bnamed\b|recipe|the trick is|the secret is|\b(here'?s|a little|my) (trick|tip|secret)\b|\btrick:|you (have|need) to|always (put|use|add)|never (put|use)/i;
 const ORDER_NOW = /\b(order|buy|get me|pick up)\b.{2,}|시켜|주문해|사다 줘|사 줘/i;
 const PLAY_EN = /\b(turn on|put on|play|watch|switch to)\b/i;
 const MED_WORDS = /약.{0,6}(먹었|먹음|먹을게|드셨|챙겨 먹|안 먹)|\b(took|taken|had|take)\b.{0,12}\b(pills?|medicine|meds)\b|\bI (took|have taken|had) (it|them|that)\b/i;
@@ -34,7 +36,7 @@ const LESSON_COUNT_WORDS = /배운 (거|게|것).{0,8}(몇|얼마)|how many .*(l
 const CLAIMS = [
   { words: /주문했|시켰|주문 넣|도착해요|\bI('ve| have)? ordered\b|\bon (the|its|their) way\b|\bwill arrive\b|\barrives?\b|\bbooked\b/i, tools: ["errand_order", "ride_request"] },
   { words: /택시.*(불렀|요청했)|\bI('ve| have)? (called|booked|requested) (a|the|your) (taxi|cab|ride)/i, tools: ["ride_request"] },
-  { words: /기억할게|기억해 둘게|기억해 두었|기억했|\bI('ll| will) remember\b|\bI('ve| have) (saved|noted) that\b/i, tools: ["memory_remember", "memory_correct"] },
+  { words: /기억할게|기억해 둘게|기억해 두었|기억했|\bI('ll| will) remember\b|\bI('ve| have) (saved|noted) that\b|\b(I'm|I am) (saving|keeping|writing down) (that|it|this)\b/i, tools: ["memory_remember", "memory_correct"] },
   { words: /틀어 드렸|틀었어|찾아볼게|찾아 드릴게|\bI('ve| have)? (turned|put) (it |that )?on\b|\blet me find\b/i, tools: ["tv_play", "tv_tune", "epg_search"] },
   { words: /틀어 드릴게|알려 드릴게|예약했|예약해 둘게|\bI('ll| will) remind\b|\bI('ve| have)? set (a|the) reminder\b/i, tools: ["schedule_at", "tv_play"] },
   { words: /\b(I'll|I will|I've|I have) (record|recorded|written|write|noted|note)\b.{0,30}\b(pill|medicine)/i, tools: ["health_checkin"] },
@@ -166,12 +168,57 @@ function twoSentences(s: string): string {
 
 type Reply = AgentReply & { meta: Record<string, unknown> };
 
+/** "routine:<name>" from the always-on screen: a short nudge for that routine. */
+function routineTask(key: string): string | null {
+  const m = key.match(/^routine:(.+)$/);
+  if (!m) return null;
+  const name = m[1].trim().toLowerCase();
+  const base = PROACTIVE_TASKS[name === "pills" || name === "medicine" ? "medicine-reminder" : name === "bingo" || name === "temple" ? "temple-day" : name === "evening" ? "evening-checkin" : ""];
+  return `${base ?? (EN ? `It's time for her routine "${m[1]}".` : `"${m[1]}" 할 시간이다.`)} ${EN ? "Speak first in one or two short sentences, using what you remember about this routine." : "기억을 살려 한두 문장으로 먼저 말을 건다."}`;
+}
+
+/** Mom answered a struggle or nudge call. */
+function answerHelpCall(reason: "struggle" | "nudge", verdict: string, text: string, now: Date): Reply {
+  const at = now.toISOString();
+  const actions: TvAction[] = [];
+  let say: string;
+  if (reason === "nudge") {
+    say = verdict === "approved" ? (EN ? "Sarah's going to call you tonight." : "수진이가 오늘 밤에 전화한대요.") : "";
+  } else if (verdict === "approved") {
+    // Mom said "book it for her": use the clinic from memory and pay from the allowance.
+    const ride = requestRide({ to: "clinic", now });
+    const pay = spend(ride.fareCents, `Taxi to ${ride.destination.name} (${DEMO})`, at);
+    taskDone();
+    actions.push({ type: "showCard", title: T.rideCardTitle, body: `${T.rideBody(ride.pickup.name, ride.destination.name, ride.carModel, ride.plate, ride.etaMin)}\n${T.approvedTag}\n${DEMO}` });
+    logEvent("family", `${T.logRidePaid(T.usd(ride.fareCents), ride.destination.name, ride.carModel, ride.plate, kstClock(new Date(ride.pickupAt)))} (${DEMO})${pay.status === "done" ? "" : " [pending]"}`, at, { visibility: "family" });
+    say = EN ? `Sarah asked me to book it. A ${ride.carModel} comes in ${ride.etaMin} minutes.` : `따님이 대신 불러 달래요. ${ride.carModel} 택시가 ${ride.etaMin}분 뒤에 와요.`;
+  } else if (verdict === "declined") {
+    taskDone();
+    say = EN ? "Sarah is calling you now." : "따님이 지금 전화하신대요.";
+  } else {
+    say = T.missedSay;
+  }
+  if (say) logEvent("said", say, at, { visibility: "family" });
+  pushTurn(L.approvalTurn(text), say ? `${say} ${L.doneNote(`${reason} call ${verdict}`)}` : L.doneNote(`${reason} call ${verdict}`));
+  return { say, sayEn: EN ? say : undefined, actions, meta: { ms: 0, model: `none (${reason} call)`, tools: [] } };
+}
+
+const SECRET_TEXT = /말하지 마|비밀|don't tell|secret|between us/i;
+
+/** A rule-based reply (struggle call, idle alert, nudge): log it like a turn and return it. */
+function quickReply(q: Quick, userTurn: string, at: string): Reply {
+  if (q.say) logEvent("said", q.say, at, { visibility: "family" });
+  pushTurn(userTurn, q.say ? `${q.say} ${L.doneNote(q.note)}` : L.doneNote(q.note));
+  return { say: q.say, sayEn: EN ? q.say : undefined, actions: q.actions, meta: { ms: 0, model: `none (${q.note})`, tools: [] } };
+}
+
 /** Mom answered Sonny's call ("Mom approved call <id>"). The family app already settled the wallet. */
 function handleCallAnswer(text: string, now: Date): Reply | null {
   const m = text.match(/\b(approved|declined|missed) call ([0-9a-f-]{8,})/i);
   if (!m) return null;
   const verdict = m[1].toLowerCase();
   const call = store.calls.find((c) => c.id === m[2]);
+  if (call?.reason === "struggle" || call?.reason === "nudge") return answerHelpCall(call.reason, verdict, text, now);
   const idx = call ? shared.requests.findIndex((r) => r.walletEntryId === call.walletEntryId) : -1;
   const req = idx >= 0 ? shared.requests[idx] : undefined;
   const at = now.toISOString();
@@ -272,6 +319,23 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
     if (approved) return { ...approved, meta: { ...approved.meta, ms: Date.now() - started, memory: memory.backend } };
   }
 
+  // Sonny's own watch: a stuck task, long silences, nudges for mom. Rules, no model.
+  if (req.source === "voice") {
+    logEvent("heard", req.text, nowIso, { visibility: "private" });
+    const q = onVoice(req.text, now);
+    if (q) return { ...quickReply(q, req.text, nowIso), heardEn: EN ? req.text : undefined };
+  } else {
+    const q = struggleCheck(now);
+    if (q) return quickReply(q, `[${req.source}] ${req.text}`, nowIso);
+  }
+  if (req.source === "proactive" && req.text.trim() === "family-nudge") {
+    return quickReply(onNudge(now, (t) => SECRET_TEXT.test(t)), "[family-nudge]", nowIso);
+  }
+  if (req.source === "proactive" && req.text.trim() === "idle-checkin") {
+    const r = onIdle(now);
+    if (r !== "ask-model") return quickReply(r, "[idle-checkin]", nowIso);
+  }
+
   // Build the user turn for this request.
   let userTurn: string;
   let task = "";
@@ -281,7 +345,7 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   const englishInKo = !EN && req.source !== "proactive" && isEnglish(req.text);
   if (req.source === "proactive") {
     const key = req.text.trim();
-    task = PROACTIVE_TASKS[key] ?? L.proactiveTask(key);
+    task = PROACTIVE_TASKS[key] ?? routineTask(key) ?? L.proactiveTask(key);
     userTurn = L.proactiveTurn(key);
     // "먼저 말 걸기:" is the prefix the family app skips when it looks for grandma's last words.
     logEvent("heard", `먼저 말 걸기: ${key}`, nowIso, { visibility: "private" });
@@ -296,7 +360,6 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   } else {
     replyingToFamily = !!session.awaitingFamilyReply;
     userTurn = req.text;
-    logEvent("heard", req.text, nowIso, { visibility: "private" });
     if (EN) heardEn = req.text;
     if (englishInKo) {
       heardEn = req.text;
@@ -321,7 +384,7 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   // personal), so yesterday's teaching shows up this morning.
   const taughtNewest = all.filter((f) => f.source !== "seed").slice(-1)[0];
   let focusLine = "";
-  if (req.source === "proactive" && /morning|checkin|idle|evening/.test(req.text) && taughtNewest) {
+  if (req.source === "proactive" && /^(morning-checkin|evening-checkin)$/.test(req.text.trim()) && taughtNewest) {
     focusLine = EN
       ? ` Open with what she taught you most recently: "${taughtNewest.text}". Turn it into one warm, useful offer for today (for example, if family is coming for dinner: "Sarah's staying tonight, want me to get groceries for two?"). That offer is your one question. Do not just repeat the fact: make the offer. Mention the 8 AM pill only as a short reminder, not a question.`
       : ` 할머니가 최근에 가르쳐 주신 것으로 시작한다: "${taughtNewest.text}". 그걸로 오늘 쓸모 있는 제안 하나를 한다(예: 가족이 저녁에 오면 "오늘 수진이 오니까 장 좀 봐 드릴까요?"). 질문은 그 제안 하나. 약은 짧게 알려 드리기만 한다.`;
