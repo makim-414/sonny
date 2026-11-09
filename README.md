@@ -1,8 +1,8 @@
 # Sonny
 
-**Grandma isn't the patient. She's the boss.**
+**Grandma says it. Sonny does it.**
 
-Sonny is an AI errand runner for parents who live alone: grandma taps one icon and gives the orders out loud, and Sonny gets them done. Grandma says it. Sonny does it.
+Sonny is an AI errand runner for parents who live alone: grandma says it, Sonny does it. She taps one icon and gives the orders out loud.
 Mom funds an allowance and holds the veto; Sonny calls her only when something is big, strange, or grandma is stuck.
 Grandma builds new skills just by talking ("learn to get me my usual ride"). Anything that needs an account or a card, mom connects once from her phone, so grandma never types a password.
 
