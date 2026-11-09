@@ -1,5 +1,7 @@
 # Sonny: submission (c0mpiled-17 Seoul, 2026-11-09)
 
+**Live demo:** https://sonny-nine.vercel.app/?demo=1 (grandma), https://sonny-nine.vercel.app/family?demo=1 (mom), https://sonny-nine.vercel.app/tv?demo=1 (TV). Open grandma and mom on two devices to see a call go through.
+
 The form asks for three things: the 90 second demo video, the GitHub repo (https://github.com/makim-414/sonny) and a short description. The description is right below; the checklist follows.
 
 ## Short description (paste into the form)

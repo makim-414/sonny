@@ -2,8 +2,12 @@
 
 **Grandma says it. Sonny does it.**
 
+Adult children spend 27 hours a week running errands for aging parents. With Sonny, grandma just asks out loud whenever she needs something, Sonny gets it done from an allowance the family loads, and mom only gets a call when grandma is stuck.
+
+- **Try it live:** https://sonny-nine.vercel.app/?demo=1 (grandma), https://sonny-nine.vercel.app/family?demo=1 (mom), https://sonny-nine.vercel.app/tv?demo=1 (TV)
+- Open grandma and mom on two devices to see a call go through.
+
 Sonny is an AI errand runner for parents who live alone: grandma says it, Sonny does it. She taps one icon and gives the orders out loud.
-Mom funds an allowance and holds the veto; Sonny calls her only when something is big, strange, or grandma is stuck.
 Grandma builds new skills just by talking ("learn to get me my usual ride"). Anything that needs an account or a card, mom connects once from her phone, so grandma never types a password.
 
 Built at c0mpiled-17 Seoul, 2026-11-09 (YC Request for Startups, Fall 2026: AI for the Aging Population).
