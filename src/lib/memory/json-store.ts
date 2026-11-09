@@ -1,24 +1,38 @@
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { SEED_FACTS } from "./seed";
+import { SEED_FACTS, SEED_LESSONS } from "./seed";
 import { rankFacts } from "./search";
 import type { MemoryFact, MemoryStore } from "./types";
 
-// File-backed memory. Lives outside the repo so nothing personal gets committed.
+// File-backed memory, the safety net under GBrain. Lives outside the repo.
 const DATA_DIR = process.env.HYODO_DATA_DIR ?? path.join(os.homedir(), ".hyodo-tv");
 const FILE = path.join(DATA_DIR, "memory.json");
 
 let cache: MemoryFact[] | null = null;
 let writing: Promise<void> = Promise.resolve();
 
+export function seedFacts(): MemoryFact[] {
+  const at = new Date().toISOString();
+  return [
+    ...SEED_FACTS.map((f) => ({ ...f, id: crypto.randomUUID(), at, provenance: "seed (demo data)" })),
+    ...SEED_LESSONS.map((l) => ({
+      id: crypto.randomUUID(),
+      text: l.text,
+      category: "lesson" as const,
+      source: "seed" as const,
+      at: new Date(l.at).toISOString(),
+      provenance: `seed: 김순자 할머니가 TV 대화에서 가르침 (demo data)`,
+    })),
+  ];
+}
+
 async function load(): Promise<MemoryFact[]> {
   if (cache) return cache;
   try {
     cache = JSON.parse(await fs.readFile(FILE, "utf8")) as MemoryFact[];
   } catch {
-    const at = new Date().toISOString();
-    cache = SEED_FACTS.map((f) => ({ ...f, id: crypto.randomUUID(), at }));
+    cache = seedFacts();
     await save();
   }
   return cache;
@@ -35,12 +49,29 @@ function save(): Promise<void> {
 
 export const jsonMemory: MemoryStore = {
   backend: "json",
-  async remember({ text, category = "taught", source = "grandma" }) {
+  async remember({ text, category = "taught", source = "grandma", provenance, at }) {
     const facts = await load();
-    const fact: MemoryFact = { id: crypto.randomUUID(), text, category, source, at: new Date().toISOString() };
+    const fact: MemoryFact = { id: crypto.randomUUID(), text, category, source, at: at ?? new Date().toISOString(), provenance };
     facts.push(fact);
     await save();
     return fact;
+  },
+  async correct(id, text, provenance) {
+    const facts = await load();
+    const i = facts.findIndex((f) => f.id === id);
+    if (i < 0) return null;
+    const next: MemoryFact = { ...facts[i], id: crypto.randomUUID(), text, at: new Date().toISOString(), provenance, source: "grandma" };
+    facts.splice(i, 1, next);
+    await save();
+    return next;
+  },
+  async forget(id) {
+    const facts = await load();
+    const i = facts.findIndex((f) => f.id === id);
+    if (i < 0) return false;
+    facts.splice(i, 1);
+    await save();
+    return true;
   },
   async recall(query, limit = 6) {
     return rankFacts(await load(), query, limit);
