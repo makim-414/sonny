@@ -14,15 +14,16 @@ export async function GET() {
   }
 }
 
-// POST /api/tts { text, voice? } -> audio/wav (16-bit mono, 24 kHz). The phone falls back
+// POST /api/tts { text, voice?, speed? (0.5..1.5, default 0.85) } -> audio/wav (16-bit mono, 24 kHz). The phone falls back
 // to the browser voice when this fails.
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => null)) as { text?: unknown; voice?: unknown } | null;
+  const body = (await request.json().catch(() => null)) as { text?: unknown; voice?: unknown; speed?: unknown } | null;
   const text = typeof body?.text === "string" ? body.text.trim() : "";
   if (!text) return Response.json({ error: "need { text }" }, { status: 400 });
   if (text.length > MAX_CHARS) return Response.json({ error: "text is too long" }, { status: 400 });
   try {
-    const wav = await synthesize(text, typeof body?.voice === "string" ? body.voice : undefined);
+    const speed = typeof body?.speed === "number" && body.speed >= 0.5 && body.speed <= 1.5 ? body.speed : undefined;
+    const wav = await synthesize(text, typeof body?.voice === "string" ? body.voice : undefined, speed);
     return new Response(new Uint8Array(wav), {
       headers: { "content-type": "audio/wav", "cache-control": "no-store" },
     });

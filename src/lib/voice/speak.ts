@@ -6,7 +6,7 @@ const PREFERRED_VOICES: Record<string, string[]> = {
 };
 
 // Slightly slow for older ears, a little bright for a grandchild voice.
-const RATE = 0.92;
+const DEFAULT_RATE = 0.85;
 const PITCH = 1.1;
 
 const cachedVoice = new Map<string, SpeechSynthesisVoice>();
@@ -69,7 +69,7 @@ export function stopSpeaking() {
 }
 
 // Speaks one chunk of text. Resolves when done, cancelled, or after a safety timeout.
-export async function speak(text: string, lang = "ko-KR"): Promise<void> {
+export async function speak(text: string, lang = "ko-KR", rate = DEFAULT_RATE): Promise<void> {
   const clean = text.trim();
   if (!clean) return;
   const s = synth();
@@ -90,7 +90,7 @@ export async function speak(text: string, lang = "ko-KR"): Promise<void> {
     };
     const u = new SpeechSynthesisUtterance(clean);
     u.lang = lang;
-    u.rate = RATE;
+    u.rate = rate;
     u.pitch = PITCH;
     const voice = pickVoice(s, lang);
     if (voice) u.voice = voice;

@@ -9,6 +9,8 @@ import { KokoroTTS } from "kokoro-js";
 const MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
 export const DEFAULT_VOICE = "af_heart"; // warm US English female voice
 const SAMPLE_RATE = 24_000;
+// A little slower than normal so older ears catch every word (owner, 11/9). Clients may pass speed.
+export const DEFAULT_SPEED = 0.85;
 
 env.cacheDir = process.env.TTS_CACHE_DIR || path.join(os.homedir(), ".cache", "hyodo-tts");
 
@@ -47,8 +49,8 @@ function toWav16(samples: Float32Array, sampleRate: number): Buffer {
   return buf;
 }
 
-export async function synthesize(text: string, voice = DEFAULT_VOICE): Promise<Buffer> {
+export async function synthesize(text: string, voice = DEFAULT_VOICE, speed = DEFAULT_SPEED): Promise<Buffer> {
   const tts = await loadKokoro();
-  const audio = await tts.generate(text, { voice: voice as "af_heart" });
+  const audio = await tts.generate(text, { voice: voice as "af_heart", speed });
   return toWav16(audio.audio as Float32Array, audio.sampling_rate || SAMPLE_RATE);
 }
