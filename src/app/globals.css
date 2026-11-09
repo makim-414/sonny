@@ -1,6 +1,8 @@
 @import "tailwindcss";
 /* Design tokens (neutral achromatic core, from Taster). Every screen reads these. */
 @import "../styles/tokens.css";
+/* Light surface for the family app. Activate with class "theme-light" on a page wrapper. */
+@import "../styles/theme-light.css";
 
 @theme inline {
   --color-background: var(--bg);
