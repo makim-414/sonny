@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LoginForm } from "./LoginForm";
+import LightPage from "@/components/family/LightPage";
 import { L } from "./strings";
 import { DEMO_GUARDIAN } from "@/lib/auth/users";
 import "@/components/family/family.css";
@@ -32,7 +33,8 @@ async function Form({ searchParams }: { searchParams: PageProps<"/login">["searc
 
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
-    <div className="fa lg">
+    <div className="fa lg theme-light">
+      <LightPage />
       <main className="lg-card">
         <h1 className="lg-title">{L.title}</h1>
         <p className="lg-sub">{L.sub}</p>
