@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ActivityEvent } from "@/lib/types";
 import { clock, toFeedItem, type FeedItem, type Summary } from "./derive";
+import { T } from "./strings";
 import "./family.css";
 
 const POLL_MS = 2000;
 
-const QUICK = ["병원 택시 불러 드려", "오늘 저녁 7시에 갈게요", "약 드셨는지 여쭤봐"];
 
 type FamilyData = {
   events: ActivityEvent[];
@@ -88,7 +88,7 @@ export default function FamilyApp() {
       setSent({ text: t, afterId });
       refresh();
     } catch {
-      setNotice("보내지 못했어요. 다시 눌러 주세요");
+      setNotice(T.sendFail);
     } finally {
       setSending(false);
     }
@@ -98,50 +98,50 @@ export default function FamilyApp() {
     setBusyId(item.event.id);
     try {
       await post({ approve: item.event.id });
-      setNotice(item.request === "taxi" ? "택시를 승인했어요" : "주문을 승인했어요");
+      setNotice(item.request === "taxi" ? T.approvedTaxi : T.approvedOrder);
       refresh();
     } catch {
-      setNotice("승인하지 못했어요. 다시 눌러 주세요");
+      setNotice(T.approveFail);
     } finally {
       setBusyId(null);
     }
   }
 
   const s = data.summary;
-  const medLabel = !s ? "·" : s.medicine === "taken" ? "드셨어요" : s.medicine === "asked" ? "여쭤봤어요" : "기록 없음";
+  const medLabel = !s ? "·" : s.medicine === "taken" ? T.medsTaken : s.medicine === "asked" ? T.medsAsked : T.medsUnknown;
 
   return (
     <div className="fa">
       <header className="fa-header">
         <div>
-          <h1 className="fa-title">할머니 집</h1>
-          <p className="fa-sub">{online ? "할머니 TV와 연결돼 있어요" : "연결이 끊겼어요. 다시 잇는 중"}</p>
+          <h1 className="fa-title">{T.title}</h1>
+          <p className="fa-sub">{online ? T.online : T.offline}</p>
         </div>
         <span className={online ? "fa-live" : "fa-live fa-live-off"} aria-hidden />
       </header>
 
-      <section className="fa-summary" aria-label="할머니 오늘">
-        <h2 className="fa-summary-title">할머니 오늘</h2>
+      <section className="fa-summary" aria-label={T.todayTitle}>
+        <h2 className="fa-summary-title">{T.todayTitle}</h2>
         {s?.reassure && <p className={`fa-reassure fa-reassure-${s.reassure.tone}`}>{s.reassure.text}</p>}
-        <p className="fa-summary-line">{s ? s.sentence : "불러오는 중"}</p>
+        <p className="fa-summary-line">{s ? s.sentence : T.loading}</p>
         <dl className="fa-stats">
           <div>
-            <dt>마지막 대화</dt>
+            <dt>{T.statLastTalk}</dt>
             <dd>{s?.lastTalk || "·"}</dd>
           </div>
           <div>
-            <dt>약</dt>
+            <dt>{T.statMeds}</dt>
             <dd className={s?.medicine === "taken" ? "fa-ok" : undefined}>{medLabel}</dd>
           </div>
           <div>
-            <dt>지금 TV</dt>
+            <dt>{T.statNow}</dt>
             <dd>{s?.tv ?? "·"}</dd>
           </div>
         </dl>
       </section>
 
       {pending.length > 0 && (
-        <section className="fa-approvals" aria-label="승인 기다리는 요청">
+        <section className="fa-approvals" aria-label={T.approvalsLabel}>
           {pending.map((p) => (
             <article key={p.event.id} className="fa-approval">
               <div className="fa-approval-head">
@@ -151,10 +151,10 @@ export default function FamilyApp() {
               <p>{p.text}</p>
               <div className="fa-approval-actions">
                 <button className="fa-btn fa-btn-primary" disabled={busyId === p.event.id} onClick={() => approve(p)}>
-                  {busyId === p.event.id ? "보내는 중" : "승인"}
+                  {busyId === p.event.id ? T.approving : T.approve}
                 </button>
                 <button className="fa-btn" onClick={() => setDismissed((d) => [...d, p.event.id])}>
-                  나중에
+                  {T.later}
                 </button>
               </div>
             </article>
@@ -162,16 +162,16 @@ export default function FamilyApp() {
         </section>
       )}
 
-      <section className="fa-composer" aria-label="할머니께 보내기">
+      <section className="fa-composer" aria-label={T.sendTitle}>
         {notice && (
           <p className="fa-notice" role="status">
             {notice}
           </p>
         )}
-        <h2 className="fa-section-title">할머니께 보내기</h2>
-        <p className="fa-hint">누르면 할머니 TV에 바로 떠요</p>
+        <h2 className="fa-section-title">{T.sendTitle}</h2>
+        <p className="fa-hint">{T.sendHint}</p>
         <div className="fa-quick">
-          {QUICK.map((q) => (
+          {T.quick.map((q) => (
             <button key={q} className="fa-quick-btn" disabled={sending} onClick={() => send(q)}>
               {q}
             </button>
@@ -188,34 +188,34 @@ export default function FamilyApp() {
             className="fa-input"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="직접 써서 보내기"
-            aria-label="할머니께 전할 말"
+            placeholder={T.inputPlaceholder}
+            aria-label={T.inputLabel}
             maxLength={500}
           />
           <button className="fa-btn fa-btn-primary" type="submit" disabled={sending || !draft.trim()}>
-            보내기
+            {T.send}
           </button>
         </form>
       </section>
       {sent && (
-        <section className="fa-reply" aria-live="polite" aria-label="보낸 메시지">
+        <section className="fa-reply" aria-live="polite" aria-label={T.sentLabel}>
           <p className="fa-reply-sent">
-            <span>TV로 보냈어요</span> {sent.text}
+            <span>{T.sentLabel}</span> {sent.text}
           </p>
           {reply ? (
             <p className="fa-reply-answer">
-              <span>할머니 답</span> {reply.text}
+              <span>{T.replyLabel}</span> {reply.text}
             </p>
           ) : (
-            <p className="fa-reply-wait">할머니 답을 기다리는 중</p>
+            <p className="fa-reply-wait">{T.replyWait}</p>
           )}
         </section>
       )}
 
-      <section className="fa-feed" aria-label="오늘 있었던 일">
-        <h2 className="fa-section-title">오늘 있었던 일</h2>
+      <section className="fa-feed" aria-label={T.feedTitle}>
+        <h2 className="fa-section-title">{T.feedTitle}</h2>
         {feed.length === 0 ? (
-          <p className="fa-empty">아직 기록이 없어요. TV가 무언가 하면 여기에 바로 보여요.</p>
+          <p className="fa-empty">{T.empty}</p>
         ) : (
           <ol className="fa-list">
             {feed.map((f) => {
@@ -227,14 +227,14 @@ export default function FamilyApp() {
                     <time>{clock(f.event.at)}</time>
                   </div>
                   <p className="fa-item-text">{f.text}</p>
-                  {approved && <p className="fa-item-note">승인함</p>}
+                  {approved && <p className="fa-item-note">{T.approved}</p>}
                 </li>
               );
             })}
           </ol>
         )}
         {data.hiddenCount > 0 && (
-          <p className="fa-private">할머니의 사적인 대화 {data.hiddenCount}건은 표시하지 않았어요.</p>
+          <p className="fa-private">{T.hidden(data.hiddenCount)}</p>
         )}
       </section>
 

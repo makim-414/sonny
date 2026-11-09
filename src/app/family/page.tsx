@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import FamilyApp from "@/components/family/FamilyApp";
-import { PRODUCT_NAME } from "@/lib/brand";
+import { PRODUCT_NAME, PRODUCT_NAME_EN, APP_LANG } from "@/lib/brand";
+import { T } from "@/components/family/strings";
 
 export const metadata: Metadata = {
-  title: `할머니 집 · ${PRODUCT_NAME}`,
-  description: "할머니 TV에서 오늘 있었던 일을 보고, TV로 말을 전해요.",
+  title: `${T.htmlTitle} · ${APP_LANG === "en" ? PRODUCT_NAME_EN : PRODUCT_NAME}`,
+  description: T.description,
 };
 
 export const viewport: Viewport = {

@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { logEvent, store } from "@/lib/store";
-import { summarize } from "@/components/family/derive";
+import { requestKind, summarize } from "@/components/family/derive";
+import { T } from "@/components/family/strings";
 import { FAMILY_SENDER, familyState } from "./state";
 import { familyView } from "./view";
 
@@ -36,11 +37,10 @@ export async function POST(request: Request) {
     const target = store.events.find((e) => e.id === body.approve);
     if (!target) return Response.json({ error: "unknown event id" }, { status: 404 });
     if (!familyState.approvedIds.includes(target.id)) familyState.approvedIds.push(target.id);
-    const text = body.text?.trim() || `${from}가 승인했어요. 진행해 주세요: ${target.text}`;
+    const text = body.text?.trim() || T.approveInbox(from, target.text);
     const item = { id: crypto.randomUUID(), at: new Date().toISOString(), from, text };
     store.tvInbox.push(item);
-    const what = /택시|카카오|차량|배차/.test(target.text) ? "택시 요청을" : /주문|장보기|배달|구매|마트/.test(target.text) ? "주문을" : "요청을";
-    const event = logEvent("family", `${from}: ${what} 승인했어요`);
+    const event = logEvent("family", `${from}: ${T.approvedLog(requestKind(target) ?? "other")}`);
     return Response.json({ ok: true, item, event }, { status: 201 });
   }
 

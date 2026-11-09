@@ -8,4 +8,6 @@ const g = globalThis as unknown as { __hyodoFamily?: FamilyState };
 
 export const familyState: FamilyState = g.__hyodoFamily ?? (g.__hyodoFamily = { approvedIds: [] });
 
-export const FAMILY_SENDER = "엄마";
+import { T } from "@/components/family/strings";
+
+export const FAMILY_SENDER = T.mom;
