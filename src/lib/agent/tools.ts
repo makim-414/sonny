@@ -13,6 +13,7 @@ import { requestRide, type RideBooking } from "./services/ride";
 import { T } from "./strings";
 import { ringGuardian, spend, walletSnapshot } from "./wallet";
 import { taskDone } from "./watch";
+import { encodeSkill, errandParts, findSkill, messageParts, skillsOf } from "./skills";
 
 // One request's context. Tools push TV actions here; the route returns them.
 export type AgentContext = {
@@ -49,7 +50,7 @@ type Shared = {
   // An order Sonny asked grandma to double-check ("2 or 2,000?").
   confirmOrder?: { items: { name: string; qty?: number }[]; question: string };
   // An offer Sonny made while speaking first ("want me to get groceries for two?").
-  offer?: { kind: "errand"; said: string; basis: string };
+  offer?: { kind: "errand" | "skill"; said: string; basis: string };
 };
 const g = globalThis as unknown as { __hyodoAgent?: Shared };
 export const shared: Shared = g.__hyodoAgent ?? (g.__hyodoAgent = { health: [], requests: [] });
@@ -112,6 +113,39 @@ function liveAnswer(ctx: AgentContext, hits: LiveHit[]) {
 
 export function createTools(ctx: AgentContext) {
   const clock = () => kstClock(ctx.now);
+
+  // Shared by errand_order and skill_run: price, sanity check, allowance, guardian call.
+  const placeOrder = async (items: { name: string; qty?: number }[], confirmed?: boolean) => {
+        const order = orderErrand({ items, now: ctx.now });
+        const list = order.items.map((i) => T.qty(i.name, i.qty)).join(", ");
+        const cost = T.usd(order.totalCents);
+        // Step 1 of the safety net: an unusual amount is checked with grandma first.
+        const odd = order.items.find((i) => i.qty > 10);
+        if (!confirmed && (odd || order.totalCents > 3 * store.wallet.perSpendLimit)) {
+          const item = odd ?? order.items.reduce((a, b) => (b.priceCents > a.priceCents ? b : a));
+          const small = String(item.qty).replace(/0+$/, "") || "1";
+          const question = T.confirmAsk(small === String(item.qty) ? "1" : small, item.qty.toLocaleString("en-US"), item.name);
+          shared.confirmOrder = { items, question };
+          log(ctx, "task", `Checking an unusual order with Grandma: ${list}, ${cost}`, { visibility: "family" });
+          return { ok: false, status: "needs_confirmation", total: cost, ask: question, say: `Ask her exactly: "${question}" Do not order yet.` };
+        }
+        shared.confirmOrder = undefined;
+        const pay = spend(order.totalCents, `Groceries: ${list} (${DEMO})`, ctx.now.toISOString());
+        if (pay.status === "done") {
+          order.status = "paid";
+          ctx.actions.push({ type: "showCard", title: T.orderCardTitle, body: `${T.orderBody(list, cost, order.arrives)}\n${DEMO}` });
+          ctx.actions.push({ type: "notifyFamily", message: T.notifyOrder(list), level: "info" });
+          log(ctx, "family", T.logOrderPaid(cost, list, order.arrives) + ` (${DEMO})`, { visibility: "family" });
+          return { ok: true, status: "done", paid: cost, balanceLeft: T.usd(pay.balance), arrives: order.arrives };
+        }
+        shared.requests.push({ kind: "order", at: ctx.now.toISOString(), order, walletEntryId: pay.entry.id });
+        callGuardian(ctx, pay, T.whatOrder(list), cost);
+        ctx.actions.push({ type: "notifyFamily", message: T.notifyOrder(list), level: "warn" });
+        return { ok: true, status: "calling_daughter", cost, reason: pay.reason === "over_limit" ? `over the ${T.usd(store.wallet.perSpendLimit)} per-purchase limit` : `only ${T.usd(pay.balance)} left in the allowance`, say: "Tell her: I'm calling Sarah to check." };
+  };
+
+  const skillMemory = async () => skillsOf(await ctx.memory.all());
+
   return {
     memory_remember: tool({
       description:
@@ -291,32 +325,67 @@ export function createTools(ctx: AgentContext) {
       }),
       execute: async ({ items, confirmed }) => {
         if (!first(ctx, "errand_order")) return AGAIN;
-        const order = orderErrand({ items, now: ctx.now });
-        const list = order.items.map((i) => T.qty(i.name, i.qty)).join(", ");
-        const cost = T.usd(order.totalCents);
-        // Step 1 of the safety net: an unusual amount is checked with grandma first.
-        const odd = order.items.find((i) => i.qty > 10);
-        if (!confirmed && (odd || order.totalCents > 3 * store.wallet.perSpendLimit)) {
-          const item = odd ?? order.items.reduce((a, b) => (b.priceCents > a.priceCents ? b : a));
-          const small = String(item.qty).replace(/0+$/, "") || "1";
-          const question = T.confirmAsk(small === String(item.qty) ? "1" : small, item.qty.toLocaleString("en-US"), item.name);
-          shared.confirmOrder = { items, question };
-          log(ctx, "task", `Checking an unusual order with Grandma: ${list}, ${cost}`, { visibility: "family" });
-          return { ok: false, status: "needs_confirmation", total: cost, ask: question, say: `Ask her exactly: "${question}" Do not order yet.` };
+        return placeOrder(items, confirmed);
+      },
+    }),
+
+    skill_learn: tool({
+      description:
+        "Grandma teaches you HOW to do something for her, step by step (\"Let me teach you how I do my Sunday groceries: ...\", \"When I say 'call Martha', send her ...\"). Save it as a skill you can repeat later.",
+      inputSchema: z.object({
+        name: z.string().describe("short name she would say to start it, e.g. 'Sunday groceries', 'call Martha'"),
+        action: z.enum(["errand", "message", "other"]).describe("errand = a grocery order, message = a note to a friend or family member"),
+        steps: z
+          .array(z.string())
+          .min(1)
+          .describe("errand: one item per step exactly as she said ('milk', 'a dozen eggs', 'the small rye bread') plus 'store: <name>' if she named a store. message: 'to: <name>', 'say: <what to say>', 'ask: <question>'"),
+      }),
+      execute: async ({ name, action, steps }) => {
+        if (!first(ctx, "skill_learn")) return AGAIN;
+        const text = encodeSkill(name, action, steps);
+        const saved = await ctx.memory.remember({ text, category: "skill", source: "grandma", provenance: `${TAUGHT_BY}, ${ctx.now.toISOString()}`, at: ctx.now.toISOString() });
+        ctx.actions.push({ type: "showCard", title: T.skillLearnedTitle(name), body: steps.join("\n") });
+        log(ctx, "memory", T.logSkill(name, steps.join(", ")), { visibility: "family", familyText: T.famSkill(name) });
+        return { saved: !saved.duplicate, id: saved.id, name, say: "Thank her in one short line and say you will do it her way next time." };
+      },
+    }),
+
+    skill_run: tool({
+      description: "Do something the way she taught you (a skill), e.g. 'Do my Sunday groceries', 'call Martha'. Uses the saved steps exactly.",
+      inputSchema: z.object({ name: z.string().describe("the skill name or what she said") }),
+      execute: async ({ name }) => {
+        if (!first(ctx, "skill_run")) return AGAIN;
+        const sk = findSkill(await skillMemory(), name);
+        if (!sk) return { ok: false, error: "No skill like that yet. Ask her to teach you how." };
+        if (sk.action === "errand") {
+          const { items, store: shop } = errandParts(sk);
+          ctx.once?.add("errand_order");
+          const res = await placeOrder(items, true);
+          const list = items.map((i) => i.name).join(", ");
+          return { ...res, skill: sk.name, steps: sk.steps, say: `Say: "Done, just the way you like it: ${list}${shop ? ` from ${shop}` : ""}." (if it is calling Sarah instead, say that)` };
         }
-        shared.confirmOrder = undefined;
-        const pay = spend(order.totalCents, `Groceries: ${list} (${DEMO})`, ctx.now.toISOString());
-        if (pay.status === "done") {
-          order.status = "paid";
-          ctx.actions.push({ type: "showCard", title: T.orderCardTitle, body: `${T.orderBody(list, cost, order.arrives)}\n${DEMO}` });
-          ctx.actions.push({ type: "notifyFamily", message: T.notifyOrder(list), level: "info" });
-          log(ctx, "family", T.logOrderPaid(cost, list, order.arrives) + ` (${DEMO})`, { visibility: "family" });
-          return { ok: true, status: "done", paid: cost, balanceLeft: T.usd(pay.balance), arrives: order.arrives };
+        if (sk.action === "message") {
+          const { to, text } = messageParts(sk);
+          ctx.actions.push({ type: "showCard", title: T.messageSentTitle(to), body: `${text}\n${DEMO}` });
+          log(ctx, "family", T.logMessageSent(to, text) + ` (${DEMO})`, { visibility: "family" });
+          return { ok: true, sentTo: to, text, say: `Say in one line that you sent ${to} her message.` };
         }
-        shared.requests.push({ kind: "order", at: ctx.now.toISOString(), order, walletEntryId: pay.entry.id });
-        callGuardian(ctx, pay, T.whatOrder(list), cost);
-        ctx.actions.push({ type: "notifyFamily", message: T.notifyOrder(list), level: "warn" });
-        return { ok: true, status: "calling_daughter", cost, reason: pay.reason === "over_limit" ? `over the ${T.usd(store.wallet.perSpendLimit)} per-purchase limit` : `only ${T.usd(pay.balance)} left in the allowance`, say: "Tell her: I'm calling Sarah to check." };
+        ctx.actions.push({ type: "showCard", title: T.skillLearnedTitle(sk.name), body: sk.steps.join("\n") });
+        return { ok: true, steps: sk.steps, say: "Walk her through the steps briefly." };
+      },
+    }),
+
+    skill_correct: tool({
+      description: "She changes a step of a skill she taught (\"No, the big rye now\"). Give the full new step list. GBrain records it as a correction of the old skill.",
+      inputSchema: z.object({ name: z.string(), steps: z.array(z.string()).min(1).describe("the complete new steps, same format as skill_learn") }),
+      execute: async ({ name, steps }) => {
+        const sk = findSkill(await skillMemory(), name);
+        if (!sk) return { ok: false, error: "No skill like that. Use skill_learn." };
+        const saved = await ctx.memory.correct(sk.id, encodeSkill(sk.name, sk.action, steps), `${CORRECTED_BY}, ${ctx.now.toISOString()}`);
+        if (!saved) return { ok: false, error: "Could not update it." };
+        ctx.actions.push({ type: "showCard", title: T.skillUpdatedTitle(sk.name), body: steps.join("\n") });
+        log(ctx, "memory", T.logSkillFix(sk.name, sk.steps.join(", "), steps.join(", ")), { visibility: "family", familyText: T.famSkillFix(sk.name) });
+        return { ok: true, name: sk.name, steps };
       },
     }),
 

@@ -36,6 +36,8 @@ The brain is keyless: `gbrain init --pglite --no-embedding`. Search is keyword-o
 | 11:04 | Scenario run in English, see [agent-scenarios.md](../agent-scenarios.md) | In `grandma-en-run-9`: fact #898 "Grandson's name is Max" (personal, private) and #899 "bingo every Wednesday and Friday", which supersedes the seed fact "Tuesday and Friday" through `--replaces`. Both carry provenance ("June taught this in a talk with Sonny, <ISO>" / "June corrected this, <ISO>"). |
 | 11:07 | Finding: GBrain answers an exact repeat with `status: "duplicate"` ("already knew this, kept fact #868") and the old id | The adapter now reports it as already known, the lesson counter does not move, and Sonny says she taught it before. |
 
+| 11:53 | "Teach him how to do it": procedures as GBrain facts | A taught procedure is a fact of category `skill`, kept readable in the brain, for example "Sunday groceries (errand): milk; a dozen eggs; the small rye bread; store: Green Market", with provenance and `valid_from`. Sonny later repeats it step by step. "No, the big rye now" is stored as a `--replaces` correction ("June corrected this, <ISO>"), so the brain keeps both what she taught and how she changed it. |
+
 ## Limits we know about
 
 - Keyword-only recall: no embeddings, so near-duplicate phrasings are not merged (GBrain reports `degraded_dedup`). We rank the entity's facts locally with a small Korean-aware scorer.

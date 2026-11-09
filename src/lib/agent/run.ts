@@ -12,6 +12,7 @@ import { getSession, pushTurn } from "./session";
 import { T } from "./strings";
 import { createTools, DEMO, lessonsThisMonth, shared, type AgentContext } from "./tools";
 import { settle, spend } from "./wallet";
+import { findSkill, skillsOf } from "./skills";
 import { onIdle, onNudge, onVoice, struggleCheck, taskDone, type Quick } from "./watch";
 import { requestRide } from "./services/ride";
 
@@ -29,14 +30,15 @@ const SMART = process.env.HYODO_SMART_MODEL ?? "claude-sonnet-5-5";
 const TEACH_WORDS =
   /기억해|이름은|이름이|비법|가르쳐|알려 줄게|해야 (해|돼|한다)|하면 (돼|좋아)|절여|넣어야|remember (this|that)|\bname is\b|\bnamed\b|recipe|the trick is|the secret is|\b(here'?s|a little|my) (trick|tip|secret)\b|\btrick:|you (have|need) to|always (put|use|add)|never (put|use)/i;
 const ORDER_NOW = /\b(order|buy|get me|pick up)\b.{2,}|시켜|주문해|사다 줘|사 줘/i;
+const SKILL_TEACH = /\bteach you how\b|\bhow I (do|make|like|want)\b|\bwhen I say\b|\bthis is how\b|하는 법|이렇게 해/i;
 const PLAY_EN = /\b(turn on|put on|play|watch|switch to)\b/i;
 const MED_WORDS = /약.{0,6}(먹었|먹음|먹을게|드셨|챙겨 먹|안 먹)|\b(took|taken|had|take)\b.{0,12}\b(pills?|medicine|meds)\b|\bI (took|have taken|had) (it|them|that)\b/i;
 const LESSON_COUNT_WORDS = /배운 (거|게|것).{0,8}(몇|얼마)|how many .*(learn|taught)/i;
 // Haiku sometimes claims an action without calling the tool. Rerun those on Sonnet.
 const CLAIMS = [
-  { words: /주문했|시켰|주문 넣|도착해요|\bI('ve| have)? ordered\b|\bon (the|its|their) way\b|\bwill arrive\b|\barrives?\b|\bbooked\b/i, tools: ["errand_order", "ride_request"] },
+  { words: /주문했|시켰|주문 넣|도착해요|\bI('ve| have)? ordered\b|\bon (the|its|their) way\b|\bwill arrive\b|\barrives?\b|\bbooked\b/i, tools: ["errand_order", "ride_request", "skill_run"] },
   { words: /택시.*(불렀|요청했)|\bI('ve| have)? (called|booked|requested) (a|the|your) (taxi|cab|ride)/i, tools: ["ride_request"] },
-  { words: /기억할게|기억해 둘게|기억해 두었|기억했|\bI('ll| will) remember\b|\bI('ve| have) (saved|noted) that\b|\b(I'm|I am) (saving|keeping|writing down) (that|it|this)\b/i, tools: ["memory_remember", "memory_correct"] },
+  { words: /기억할게|기억해 둘게|기억해 두었|기억했|\bI('ll| will) remember\b|\bI('ve| have) (saved|noted) that\b|\b(I'm|I am) (saving|keeping|writing down) (that|it|this)\b/i, tools: ["memory_remember", "memory_correct", "skill_learn", "skill_correct"] },
   { words: /틀어 드렸|틀었어|찾아볼게|찾아 드릴게|\bI('ve| have)? (turned|put) (it |that )?on\b|\blet me find\b/i, tools: ["tv_play", "tv_tune", "epg_search"] },
   { words: /틀어 드릴게|알려 드릴게|예약했|예약해 둘게|\bI('ll| will) remind\b|\bI('ve| have)? set (a|the) reminder\b/i, tools: ["schedule_at", "tv_play"] },
   { words: /\b(I'll|I will|I've|I have) (record|recorded|written|write|noted|note)\b.{0,30}\b(pill|medicine)/i, tools: ["health_checkin"] },
@@ -48,7 +50,7 @@ const CLAIMS = [
 // Turns that touch safety or privacy, or rewrite memory, go to Sonnet. Everything else
 // (talk, teaching, TV, reminders, taxi, groceries) stays on Haiku, guarded by CLAIMS.
 const SMART_WORDS =
-  /아파|아프|어지|숨이|가슴|넘어|쓰러|말하지 마|비밀|아니야|아니,|말고|고쳐|틀렸|hurt|pain|dizzy|chest|breathe|\bfell\b|don't tell|secret|\bno,? not\b|not .* but|actually it'?s|that'?s wrong/i;
+  /아파|아프|어지|숨이|가슴|넘어|쓰러|말하지 마|비밀|아니야|아니,|말고|고쳐|틀렸|hurt|pain|dizzy|chest|breathe|\bfell\b|don't tell|secret|\bno,? not\b|^\s*no[,.!]|not .* but|actually it'?s|that'?s wrong/i;
 const SECRET_WORDS = /말하지 마|비밀|don't tell|secret|between us/i;
 
 function pickModel(req: AgentRequest): string {
@@ -312,6 +314,19 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   const nowIso = now.toISOString();
   const memory = await getMemory();
   const session = getSession(Date.now());
+  // A new demo day (the clock was fast-forwarded overnight) starts a fresh conversation,
+  // so this morning's "Yes, please" is not read as an answer to yesterday's question.
+  const dayKey = (() => {
+    const p = kstParts(now);
+    return `${p.year}-${p.month}-${p.day}`;
+  })();
+  const sessionDay = session as unknown as { day?: string };
+  if (sessionDay.day && sessionDay.day !== dayKey) {
+    session.messages = [];
+    session.awaitingFamilyReply = null;
+    shared.offer = undefined;
+  }
+  sessionDay.day = dayKey;
   const ctx: AgentContext = { now, memory, actions: [], private: false };
 
   if (req.source === "family") {
@@ -374,7 +389,8 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
 
   // Pull memory up front so most turns need no recall step.
   const all = await memory.all();
-  const personal = all.filter((f) => !isLesson(f));
+  const personal = all.filter((f) => !isLesson(f) && f.category !== "skill");
+  const skills = skillsOf(all);
   const relevant = req.source === "proactive" ? [] : await memory.recall(req.text, 4);
   const recentTaught = personal.filter((f) => f.source !== "seed").slice(-5);
   const facts = [...new Map([...personal.filter((f) => f.source === "seed"), ...recentTaught, ...relevant].map((f) => [f.id, f])).values()];
@@ -384,7 +400,12 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   // personal), so yesterday's teaching shows up this morning.
   const taughtNewest = all.filter((f) => f.source !== "seed").slice(-1)[0];
   let focusLine = "";
-  if (req.source === "proactive" && /^(morning-checkin|evening-checkin)$/.test(req.text.trim()) && taughtNewest) {
+  const sundaySkill = kstParts(now).weekday === 0 ? skills.find((k) => /sunday|일요일/i.test(k.name)) : undefined;
+  if (req.source === "proactive" && /^(morning-checkin|routine:sunday|routine:groceries)$/.test(req.text.trim()) && sundaySkill) {
+    focusLine = EN
+      ? ` It's Sunday and she taught you how she does "${sundaySkill.name}". Offer it in one short line, like "It's Sunday. Want your usual groceries?" That offer is your one question.`
+      : ` 오늘은 일요일이고 할머니가 "${sundaySkill.name}" 하는 법을 가르쳐 주셨다. "일요일이에요. 늘 하시던 장보기 해 드릴까요?" 처럼 한 줄로 제안한다.`;
+  } else if (req.source === "proactive" && /^(morning-checkin|evening-checkin)$/.test(req.text.trim()) && taughtNewest) {
     focusLine = EN
       ? ` Open with what she taught you most recently: "${taughtNewest.text}". Turn it into one warm, useful offer for today (for example, if family is coming for dinner: "Sarah's staying tonight, want me to get groceries for two?"). That offer is your one question. Do not just repeat the fact: make the offer. Mention the 8 AM pill only as a short reminder, not a question.`
       : ` 할머니가 최근에 가르쳐 주신 것으로 시작한다: "${taughtNewest.text}". 그걸로 오늘 쓸모 있는 제안 하나를 한다(예: 가족이 저녁에 오면 "오늘 수진이 오니까 장 좀 봐 드릴까요?"). 질문은 그 제안 하나. 약은 짧게 알려 드리기만 한다.`;
@@ -393,7 +414,9 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   const offer = shared.offer;
   shared.offer = undefined;
   const yesToOffer = !!offer && req.source === "voice" && /\b(yes|yeah|sure|please|ok|okay|go ahead)\b|그래|응|네|좋아/i.test(req.text);
-  if (yesToOffer && offer) {
+  if (yesToOffer && offer?.kind === "skill") {
+    task += ` She said yes. Do "${offer.basis}" now with skill_run, then say "Done, just the way you like it" with the items.`;
+  } else if (yesToOffer && offer) {
     task += EN
       ? ` She just said yes to your offer "${offer.said}" (based on: "${offer.basis}"). Do it now with errand_order: a small, sensible order for it (for dinner for two, e.g. 1 chicken, 1 bag of salad, 1 loaf of bread). Then say in one short sentence what you ordered.`
       : ` 할머니가 방금 제안("${offer.said}")에 좋다고 하셨다. errand_order 로 바로 적당히 주문한다(예: 두 사람 저녁이면 닭 1, 채소 1, 두부 1). 무엇을 주문했는지 짧게 말씀드린다.`;
@@ -415,6 +438,9 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
     `${L.facts}:\n${facts.map((f) => `- (${f.id}) ${f.text}`).join("\n")}`,
     recentTaught.length ? `${L.recent}:\n${recentTaught.map((f) => `- (${f.id}) ${f.text}`).join("\n")}` : "",
     L.lessons(lessons.length),
+    skills.length
+      ? `${EN ? "Skills she taught you (when she asks, do them exactly this way with skill_run; if she changes a step, skill_correct)" : "할머니가 가르쳐 준 하는 법 (요청하시면 skill_run 으로 그대로, 바꾸시면 skill_correct)"}:\n${skills.map((k) => `- ${k.name} (${k.action}): ${k.steps.join("; ")}`).join("\n")}`
+      : "",
     shared.lastLater?.length
       ? `${L.later}:\n${shared.lastLater.map((l) => `- ${L.chan(l.channel, l.channelName)} "${l.title}" ${l.startsAt} (${l.startISO})`).join("\n")}`
       : "",
@@ -433,11 +459,27 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   const model = opts.model ?? (focusLine && !process.env.HYODO_MODEL ? SMART : pickModel(req));
   // Force the one tool this turn clearly needs (Haiku only: Sonnet always thinks,
   // and Anthropic rejects a forced tool choice with thinking on).
-  const force: "family_notify" | "memory_remember" | "health_checkin" | "lessons_show" | "tv_play" | "errand_order" | null =
+  // Sunday morning with a Sunday skill: say the offer as is (the model kept talking
+  // about the pill instead) and remember it, so "Yes, please" runs the skill.
+  if (sundaySkill && focusLine && req.source === "proactive") {
+    const line = EN ? `Good morning, June. It's Sunday. Want your usual groceries?` : `할머니, 좋은 아침이에요. 일요일이에요. 늘 하시던 장보기 해 드릴까요?`;
+    shared.offer = { kind: "skill", said: line, basis: sundaySkill.name };
+    logEvent("said", line, nowIso, { visibility: "summary", familyText: `${kstClock(now)} ${EN ? "Offered her usual Sunday groceries" : "일요일 장보기를 제안함"}` });
+    pushTurn(userTurn, line);
+    return { say: line, sayEn: EN ? line : "Good morning. It's Sunday. Want your usual groceries?", actions: [], meta: { ms: Date.now() - started, model: "none (sunday offer)", tools: [] } };
+  }
+  const runSkill = req.source === "voice" && !SKILL_TEACH.test(req.text) && !!findSkill(skills, req.text, true);
+  const force: "family_notify" | "memory_remember" | "health_checkin" | "lessons_show" | "tv_play" | "errand_order" | "skill_learn" | "skill_run" | null =
     req.source !== "voice"
       ? null
       : yesToOffer
-        ? "errand_order"
+        ? offer?.kind === "skill"
+          ? "skill_run"
+          : "errand_order"
+        : SKILL_TEACH.test(req.text)
+          ? "skill_learn"
+          : runSkill
+            ? "skill_run"
       : shared.confirmOrder && !/\b(no|cancel|never ?mind)\b|취소|아니/i.test(req.text)
         ? "errand_order"
         : replyingToFamily && !SECRET_WORDS.test(req.text)
@@ -524,7 +566,9 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   if (EN) sayEn ??= say;
 
   if (req.source === "proactive" && /\b(groceries|get you|pick up|order|shopping)\b|장 ?봐|주문|사다/i.test(say)) {
-    shared.offer = { kind: "errand", said: say, basis: taughtNewest?.text ?? "" };
+    shared.offer = sundaySkill && focusLine.includes(sundaySkill.name)
+      ? { kind: "skill", said: say, basis: sundaySkill.name }
+      : { kind: "errand", said: say, basis: taughtNewest?.text ?? "" };
   }
 
   const done = [...new Set(toolNames)].filter((n) => !["memory_recall", "info_weather", "info_news", "epg_search", "lessons_show", "wallet_balance"].includes(n));

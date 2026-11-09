@@ -3,6 +3,7 @@
 
 export type MemoryCategory =
   | "lesson" // wisdom she teaches that helps others too (recipes, remedies, local tips)
+  | "skill" // how to do something for her, step by step ("Teach him how to do it")
   | "likes"
   | "routine"
   | "health"

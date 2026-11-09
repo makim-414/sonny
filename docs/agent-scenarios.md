@@ -99,6 +99,25 @@
 
 - 넛지 이유는 오늘 기록에서만 고른다: 조용한 하루, 딸을 언급한 횟수, 엄마 메시지가 이틀째 없음, 오늘 배운 lesson. 할머니가 비밀로 하라고 한 말은 세지 않고, 내용도 쓰지 않는다. 이유가 없으면 전화하지 않는다.
 
+## "Teach him how to do it": 하는 법 가르치기 (11:55 실행)
+
+할머니가 절차를 말로 가르치면 GBrain 에 `skill` 사실로 저장된다. 이름, 동작 종류, 단계, 출처, 시각이 함께 남는다. 다음에 그 이름을 말하면 그 단계대로 한다.
+
+| 말 / 트리거 | 응답 | 결과 |
+|---|---|---|
+| "Let me teach you how I do my Sunday groceries: milk, a dozen eggs, the small rye bread, always from Green Market." | 3.5~5.0s Haiku, `skill_learn` | 카드 "Learned how to: Sunday groceries" 와 단계 목록. GBrain 에 `Sunday groceries (errand): milk; a dozen eggs; the small rye bread; store: Green Market` |
+| "Do my Sunday groceries" | 2.4s Haiku, `skill_run` | 저장된 단계대로 `errand_order` 와 같은 결제를 한 번 한다(용돈 규칙 그대로). "Done, just the way you like it: milk, a dozen eggs, and the small rye bread from Green Market." |
+| "No, the big rye now." | 8.4s Sonnet, `skill_correct` | GBrain `--replaces` 정정으로 기록된다. 카드 "Updated how to: Sunday groceries", 출처 "June corrected this, <ISO>" |
+| "When I say 'call Martha', send her a message that I'm fine and ask about her knee." | 4.4s Haiku, `skill_learn` | `call Martha (message): to: Martha; say: I'm fine; ask: How is your knee?` |
+| "Call Martha" | 2.1s Haiku, `skill_run` | 카드 "Message sent to Martha" (demo data). 가족 로그에 "Sonny sent Martha a message for Grandma: ..." |
+| 일요일 아침 `morning-checkin` | 0s (규칙) | "Good morning, June. It's Sunday. Want your usual groceries?" |
+| 이어서 "Yes, please" | 2.0~2.4s Haiku, `skill_run` | "Done, just the way you like it: milk, a dozen eggs, and the small rye bread from Green Market. They arrive today by 4 PM." |
+
+- "Call me a taxi" 는 "call Martha" 로 오인되지 않는다. 이름의 모든 낱말이 들렸을 때만 절차 실행을 강제한다.
+- 일요일 제안은 규칙으로 고정했다. Sonnet 이 제안 대신 약 이야기만 한 적이 있다.
+- 데모 시계로 날짜가 바뀌면 대화 기록을 비운다. 아침의 "Yes, please" 가 전날 택시 질문의 대답으로 읽힌 적이 있다.
+- 헤맴 감지는 시작 후 2시간 안에만 본다. 전날 미완료 택시 때문에 아침에 헤맴 전화가 걸린 적이 있다.
+
 ## 안전장치
 
 - Haiku 가 도구를 부르지 않고 행동을 말하면 같은 턴을 Sonnet 으로 다시 돌린다(`meta.rerun`). 예: "ordered", "on the way", "I'll remember", "turned it on".
