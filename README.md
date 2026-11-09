@@ -4,8 +4,20 @@
 
 Adult children spend 27 hours a week running errands for aging parents. With Sonny, grandma just asks out loud whenever she needs something, Sonny gets it done from an allowance the family loads, and mom only gets a call when grandma is stuck.
 
-- **Try it live:** https://sonny-nine.vercel.app/?demo=1 (grandma), https://sonny-nine.vercel.app/family?demo=1 (mom), https://sonny-nine.vercel.app/tv?demo=1 (TV)
-- Open grandma and mom on two devices to see a call go through.
+## Live demo
+
+| Who | Open this |
+|---|---|
+| Grandma's phone | https://sonny-nine.vercel.app/?demo=1 |
+| Mom's phone | https://sonny-nine.vercel.app/family?demo=1 |
+| Grandma's TV | https://sonny-nine.vercel.app/tv?demo=1 |
+
+Open grandma and mom on two devices, tap **Answer** on grandma's phone, and ask for a taxi. When grandma gets stuck, mom's phone rings. Demo video: see the submission form.
+
+## Built with GBrain and gstack
+
+- **GBrain is Sonny's long-term memory.** Every skill grandma teaches ("my Sunday groceries", "my usual ride to Dr. Lee") is stored in GBrain with its source, and can be corrected or withdrawn. Code: [`src/lib/memory/gbrain-store.ts`](src/lib/memory/gbrain-store.ts). Usage log: [`docs/gstack/gbrain-usage.md`](docs/gstack/gbrain-usage.md).
+- **gstack shaped the build.** We ran gstack `/office-hours` to pressure-test the idea ([`docs/gstack/office-hours.md`](docs/gstack/office-hours.md), [run log](docs/gstack/office-hours-run.md)) and gstack `/review` at the feature freeze, which found nine serious issues; we fixed the ones that could break the demo, including "No, don't approve" being heard as a yes ([`docs/gstack/review.md`](docs/gstack/review.md)).
 
 Sonny is an AI errand runner for parents who live alone: grandma says it, Sonny does it. She taps one icon and gives the orders out loud.
 Grandma builds new skills just by talking ("learn to get me my usual ride"). Anything that needs an account or a card, mom connects once from her phone, so grandma never types a password.

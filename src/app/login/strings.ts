@@ -12,6 +12,7 @@ const ko = {
   deviceTitle: "아직 연결되지 않은 기기예요",
   deviceBody: "가족이 관리 화면에서 '할머니 폰 연결'을 누르고, 나오는 QR을 이 폰으로 찍으면 바로 시작돼요.",
   deviceDemo: "데모로 시작하기",
+  deviceFamily: "가족이신가요? 로그인하고 이 폰 연결하기",
   pairBad: "연결 코드가 만료됐어요. 가족에게 새 QR을 받아 주세요.",
 };
 
@@ -27,6 +28,7 @@ const en: typeof ko = {
   deviceTitle: "This phone isn't connected yet",
   deviceBody: "Ask your family to tap 'Connect grandma's phone' in their admin and scan the QR code with this phone. That's all.",
   deviceDemo: "Start the demo",
+  deviceFamily: "Family? Sign in to connect this phone",
   pairBad: "This connection code has expired. Ask your family for a new QR code.",
 };
 
