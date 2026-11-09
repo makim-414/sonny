@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DEFAULT_PLAN, parsePlan, WEEKDAY_LIST, type HealthPlan as Plan, type Weekday } from "@/components/family/health";
+import { DEFAULT_PLAN, parsePlan, toAgentPlan, WEEKDAY_LIST, type HealthPlan as Plan, type Weekday } from "@/components/family/health";
 import { A } from "./strings";
 
 // Health check-ins on /admin: when Sonny calls grandma for a blood-pressure reading
@@ -13,7 +13,7 @@ async function save(plan: Plan): Promise<boolean> {
     const res = await fetch("/api/agent/health-plan", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(plan),
+      body: JSON.stringify(toAgentPlan(plan)),
     });
     return res.ok;
   } catch {
@@ -61,7 +61,7 @@ export default function HealthPlan() {
       const res = await fetch("/api/agent/health-check", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ kind }),
+        body: JSON.stringify({ kind: kind === "memory" ? "mind" : kind }),
       });
       setNote(res.ok ? A.healthCalling : A.healthUnavailable);
     } catch {

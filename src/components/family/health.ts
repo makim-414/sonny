@@ -32,19 +32,34 @@ export function bpFlag(systolic: number, diastolic: number): "high" | "low" | nu
   return null;
 }
 
+// The agent's plan shape: { plan: { bp: { on, time }, mind: { on, day: "Mon", time } } }.
+// Older shape { bp: { enabled }, memory: { enabled, day: "mon" } } is accepted too.
 export function parsePlan(json: unknown): HealthPlan {
-  const j = (json ?? {}) as { bp?: Partial<HealthPlan["bp"]>; memory?: Partial<HealthPlan["memory"]> };
+  const root = (json ?? {}) as { plan?: unknown };
+  const j = (root.plan ?? json ?? {}) as {
+    bp?: { on?: boolean; enabled?: boolean; time?: string };
+    mind?: { on?: boolean; day?: string; time?: string };
+    memory?: { enabled?: boolean; day?: string; time?: string };
+  };
+  const m = j.mind ?? j.memory;
+  const day = String((m as { day?: string } | undefined)?.day ?? "").slice(0, 3).toLowerCase();
   return {
     bp: {
-      enabled: Boolean(j.bp?.enabled),
+      enabled: Boolean(j.bp?.on ?? j.bp?.enabled),
       time: isTime(j.bp?.time) ? j.bp!.time! : DEFAULT_PLAN.bp.time,
     },
     memory: {
-      enabled: Boolean(j.memory?.enabled),
-      day: WEEKDAYS.find((d) => d === j.memory?.day) ?? DEFAULT_PLAN.memory.day,
-      time: isTime(j.memory?.time) ? j.memory!.time! : DEFAULT_PLAN.memory.time,
+      enabled: Boolean((m as { on?: boolean } | undefined)?.on ?? (m as { enabled?: boolean } | undefined)?.enabled),
+      day: WEEKDAYS.find((d) => d === day) ?? DEFAULT_PLAN.memory.day,
+      time: isTime(m?.time) ? m!.time! : DEFAULT_PLAN.memory.time,
     },
   };
+}
+
+// What POST /api/agent/health-plan expects.
+export function toAgentPlan(p: HealthPlan) {
+  const day = p.memory.day.charAt(0).toUpperCase() + p.memory.day.slice(1);
+  return { bp: { on: p.bp.enabled, time: p.bp.time }, mind: { on: p.memory.enabled, day, time: p.memory.time } };
 }
 
 function parseMemory(v: unknown): MemoryResult | null {
@@ -55,16 +70,38 @@ function parseMemory(v: unknown): MemoryResult | null {
   return { at: m.at, score, max };
 }
 
+type AgentReport = {
+  bloodPressure?: { readings?: { at: string; systolic: number; diastolic: number; pulse?: number; inRange?: boolean }[] };
+  memory?: { checks?: { at: string; recall: number; orientation?: number }[] };
+};
+
 export function parseReport(json: unknown): HealthReport {
-  const j = (json ?? {}) as { bp?: unknown; memory?: unknown; memoryLastWeek?: unknown };
-  const bp: BpReading[] = Array.isArray(j.bp)
-    ? j.bp
+  const j = (json ?? {}) as { bp?: unknown; memory?: unknown; memoryLastWeek?: unknown } & AgentReport;
+  // The agent's weeklyReport() shape: bloodPressure.readings and memory.checks.
+  const agentBp = j.bloodPressure?.readings;
+  const rawBp: unknown = Array.isArray(agentBp)
+    ? agentBp.map((r) => ({ ...r, flag: r.inRange === false ? undefined : null }))
+    : j.bp;
+  const checks = (j.memory as AgentReport["memory"])?.checks;
+  let memory: MemoryResult | null;
+  let memoryLastWeek: MemoryResult | null;
+  if (Array.isArray(checks)) {
+    const sorted = [...checks].sort((a, b) => a.at.localeCompare(b.at));
+    const toResult = (c?: { at: string; recall: number }) => (c ? { at: c.at, score: c.recall, max: 3 } : null);
+    memory = toResult(sorted[sorted.length - 1]);
+    memoryLastWeek = toResult(sorted[sorted.length - 2]);
+  } else {
+    memory = parseMemory(j.memory);
+    memoryLastWeek = parseMemory(j.memoryLastWeek);
+  }
+  const bp: BpReading[] = Array.isArray(rawBp)
+    ? rawBp
         .map((r): BpReading | null => {
           const x = r as Partial<BpReading>;
           const s = num(x.systolic);
           const d = num(x.diastolic);
           if (s === null || d === null || typeof x.at !== "string") return null;
-          const flag = x.flag === "high" || x.flag === "low" ? x.flag : bpFlag(s, d);
+          const flag = x.flag === "high" || x.flag === "low" ? x.flag : x.flag === null ? null : bpFlag(s, d);
           const pulse = num(x.pulse);
           return pulse === null ? { at: x.at, systolic: s, diastolic: d, flag } : { at: x.at, systolic: s, diastolic: d, pulse, flag };
         })
@@ -72,7 +109,7 @@ export function parseReport(json: unknown): HealthReport {
         .sort((a, b) => b.at.localeCompare(a.at))
         .slice(0, 3)
     : [];
-  return { bp, memory: parseMemory(j.memory), memoryLastWeek: parseMemory(j.memoryLastWeek) };
+  return { bp, memory, memoryLastWeek };
 }
 
 export const WEEKDAY_LIST = WEEKDAYS;

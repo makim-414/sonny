@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { T } from "@/components/family/strings";
 import { PAGES, useAdmin, type Page } from "./AdminShell";
 import HealthPlan from "./HealthPlan";
+import WeekDashboard from "@/components/family/WeekDashboard";
 import { A } from "./strings";
 
 // /admin : today's summary and one big card per page.
@@ -40,6 +41,7 @@ export default function Overview() {
         {s?.reassure && <p className={`fa-reassure fa-reassure-${s.reassure.tone}`}>{s.reassure.text}</p>}
         <p className="fa-summary-line">{s ? s.sentence : T.loading}</p>
       </section>
+      <WeekDashboard wide />
       <ul className="ad-cards">
         {PAGES.map((p) => (
           <li key={p}>
