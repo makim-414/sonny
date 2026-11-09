@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from "react";
-import type { AgentReply, AgentRequest, TvAction } from "@/lib/types";
+import type { AgentRequest, TvAction } from "@/lib/types";
 import { listenOnce, type Listener } from "@/lib/voice/listen";
 import { speak, splitSentences, stopSpeaking, unlockSpeech } from "@/lib/voice/speak";
 import { callAgent } from "./agent-client";
@@ -55,11 +55,6 @@ function pairEnglish(ko: string[], en?: string): (string | undefined)[] {
   if (!en?.trim()) return ko.map(() => undefined);
   const enParts = splitSentences(en);
   return enParts.length === ko.length ? enParts : ko.map(() => en.trim());
-}
-
-// The agent may flag a turn it kept from the family (contract: AgentReply.private).
-function isPrivateReply(reply: AgentReply): boolean {
-  return (reply as AgentReply & { private?: boolean }).private === true;
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -266,7 +261,7 @@ export function TvApp() {
           if (englishRef.current) await sleep(HEARD_EN_MS);
         }
         runActions(reply.actions);
-        if (isPrivateReply(reply)) toast("딸에게는 안 알려요", "private");
+        if (reply.private) toast("딸에게는 안 알려요", "private");
         await say(reply.say, reply.sayEn);
       });
     },
@@ -605,9 +600,15 @@ export function TvApp() {
           <p className="tv-caption-text">
             {mood === "listening" && !caption?.text
               ? "듣고 있어요. 말씀하세요"
-              : caption?.text || (mood === "thinking" ? "잠깐만요" : "")}
+              : caption?.text || (mood === "thinking" ? "잠깐만요, 생각하고 있어요" : "")}
           </p>
           {english && caption?.en && <p className="tv-caption-en">{caption.en}</p>}
+          {mood === "thinking" && userTurn && caption?.text && (
+            <p className="tv-caption-wait">
+              {ASSISTANT_NAME}: 잠깐만요, 생각하고 있어요
+              {english ? " · One moment, thinking" : ""}
+            </p>
+          )}
         </div>
       </section>
 

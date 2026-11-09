@@ -505,6 +505,14 @@
   overflow: hidden;
 }
 
+.tv-caption-wait {
+  margin: 0;
+  font-size: var(--t-sm);
+  font-weight: var(--w-semi);
+  color: var(--highlight);
+  animation: tv-twinkle 1.6s ease-in-out infinite;
+}
+
 .tv-qr {
   position: absolute;
   right: var(--gutter);
