@@ -24,15 +24,20 @@ const GBRAIN_HOME = process.env.GBRAIN_HOME ?? path.join(HOME, ".hyodo-tv/gbrain
 // and keeping old runs leaves an honest record.
 // One run file per conversation language so English and Korean demos never mix.
 const RUN_FILE = path.join(GBRAIN_HOME, APP_LANG === "en" ? "hyodo-run-en.json" : "hyodo-run.json");
-let ENTITY = APP_LANG === "en" ? "grandma-en-run-1" : "grandma-run-1";
+// Kept on globalThis: the reset route and the agent route can load separate copies of
+// this module, and a reset in one copy must move the other copy to the new run too.
+const GE = globalThis as unknown as { __sonnyEntity?: string };
+const DEFAULT_ENTITY = APP_LANG === "en" ? "grandma-en-run-1" : "grandma-run-1";
+const entity = () => GE.__sonnyEntity ?? DEFAULT_ENTITY;
 async function loadRun() {
   try {
-    ENTITY = (JSON.parse(await fs.readFile(RUN_FILE, "utf8")) as { entity: string }).entity;
+    GE.__sonnyEntity = (JSON.parse(await fs.readFile(RUN_FILE, "utf8")) as { entity: string }).entity;
   } catch {
-    await fs.writeFile(RUN_FILE, JSON.stringify({ entity: ENTITY }));
+    GE.__sonnyEntity = DEFAULT_ENTITY;
+    await fs.writeFile(RUN_FILE, JSON.stringify({ entity: DEFAULT_ENTITY }));
   }
 }
-export const currentEntity = () => ENTITY;
+export const currentEntity = () => entity();
 
 type GbFact = { id: number; fact: string; source: string | null; valid_from: string; created_at: string; expired_at: string | null; superseded_by: number | null };
 
@@ -81,16 +86,16 @@ function decode(f: GbFact): MemoryFact {
 const rawId = (id: string) => id.replace(/^gbrain-/, "");
 
 async function fetchAll(): Promise<GbFact[]> {
-  const out = JSON.parse(await gb(["recall", ENTITY, "--limit", "500", "--json"])) as { facts: GbFact[] };
+  const out = JSON.parse(await gb(["recall", entity(), "--limit", "500", "--json"])) as { facts: GbFact[] };
   return out.facts.filter((f) => !f.expired_at && !f.superseded_by);
 }
 
 async function seed() {
   const items = [
-    ...SEED_FACTS.map((f) => ({ fact: encode(f.text, f.category), entity: ENTITY, provenance: "seed (demo data)" })),
+    ...SEED_FACTS.map((f) => ({ fact: encode(f.text, f.category), entity: entity(), provenance: "seed (demo data)" })),
     ...SEED_LESSONS.map((l) => ({
       fact: encode(l.text, "lesson"),
-      entity: ENTITY,
+      entity: entity(),
       provenance: SEED_PROVENANCE,
       valid_from: new Date(l.at).toISOString(),
     })),
@@ -131,7 +136,7 @@ export async function createGbrainMemory(): Promise<MemoryStore> {
     backend: "gbrain",
     async remember({ text, category = "taught", source = "grandma", provenance, at }) {
       const prov = provenance ?? `${source}: ${new Date().toISOString()}`;
-      const args = ["remember", encode(text, category), "--entity", ENTITY, "--provenance", prov, "--content-origin", "user_said", "--json"];
+      const args = ["remember", encode(text, category), "--entity", entity(), "--provenance", prov, "--content-origin", "user_said", "--json"];
       if (at) args.push("--valid-from", at);
       const out = JSON.parse(await gb(args)) as { id?: string; status?: string };
       if (out.status === "duplicate" && out.id) {
@@ -150,7 +155,7 @@ export async function createGbrainMemory(): Promise<MemoryStore> {
       const old = (await load()).find((f) => f.id === id);
       if (!old) return null;
       const prov = provenance ?? `correction: ${new Date().toISOString()}`;
-      await gb(["remember", encode(text, old.category), "--entity", ENTITY, "--provenance", prov, "--replaces", rawId(id), "--content-origin", "user_said", "--json"]);
+      await gb(["remember", encode(text, old.category), "--entity", entity(), "--provenance", prov, "--replaces", rawId(id), "--content-origin", "user_said", "--json"]);
       const fact = await newest(text);
       wrote();
       return fact;
@@ -174,8 +179,9 @@ export async function createGbrainMemory(): Promise<MemoryStore> {
 // Demo reset: start a new run entity and seed it. Nothing is forgotten.
 export async function resetGbrainMemory() {
   await loadRun();
-  const n = Number(ENTITY.match(/(\d+)$/)?.[1] ?? 1) + 1;
-  ENTITY = APP_LANG === "en" ? `grandma-en-run-${n}` : `grandma-run-${n}`;
-  await fs.writeFile(RUN_FILE, JSON.stringify({ entity: ENTITY }));
+  const n = Number(entity().match(/(\d+)$/)?.[1] ?? 1) + 1;
+  GE.__sonnyEntity = APP_LANG === "en" ? `grandma-en-run-${n}` : `grandma-run-${n}`;
+  await fs.writeFile(RUN_FILE, JSON.stringify({ entity: entity() }));
   await seed();
+  bumpMemVersion(); // every copy drops its cache and reads the new run
 }
