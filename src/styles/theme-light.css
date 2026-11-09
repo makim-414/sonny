@@ -1,0 +1,68 @@
+/* ============================================================
+   Theme: neutral light surface.
+   Import after tokens.css. Rebinds surface, text and border tokens to light values.
+   Activate with <html data-theme="light"> or the .theme-light class.
+   It is a parallel surface layer, not a downgrade of the dark core.
+   Two traps handled here: the base --card is 5% white and would vanish on a light
+   page, so every surface is opaque; and the --brand fallback is ink, not white,
+   so emphasis does not disappear on a white background.
+   ============================================================ */
+:root[data-theme="light"],
+.theme-light {
+  color-scheme: light;
+
+  /* Surfaces, all opaque */
+  --background: oklch(0.993 0.001 95);   /* off-white paper */
+  --bg: var(--background);
+  --card: oklch(1 0 0);
+  --bg-elev: var(--card);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.005 280);
+  --muted: oklch(0.965 0.002 95);
+  --bg-sunken: var(--muted);
+  --secondary: oklch(0.95 0.002 95);
+  --secondary-foreground: oklch(0.22 0.005 280);
+
+  /* Text (ink) */
+  --foreground: oklch(0.22 0.006 280);
+  --text: var(--foreground);
+  --card-foreground: var(--foreground);
+  --muted-foreground: oklch(0.46 0.006 280);
+  --text-muted: var(--muted-foreground);
+  --text-subtle: oklch(0.52 0.006 280);   /* 4.5:1 on paper, --muted and --secondary */
+
+  /* Borders (ink with alpha) */
+  --border: oklch(0.25 0.01 280 / 13%);
+  --border-soft: oklch(0.25 0.01 280 / 7%);
+  --input: oklch(0.25 0.01 280 / 18%);
+
+  /* Emphasis slot falls back to ink */
+  --brand: oklch(0.24 0.006 280);
+  --accent: var(--brand);
+  --accent-fg: oklch(0.99 0 0);
+  --accent-soft: oklch(0.24 0.006 280 / 7%);
+  --highlight: oklch(0.45 0.006 280);
+  --ring: oklch(0.24 0.01 280 / 30%);
+
+  /* Semantic colors tuned for light surfaces */
+  --success: oklch(0.52 0.13 160);
+  --success-foreground: oklch(0.99 0 0);
+  --warning: oklch(0.60 0.12 62);
+  --warning-foreground: oklch(0.22 0 0);
+  --danger: oklch(0.55 0.20 25);
+  --destructive: var(--danger);
+  --delta-up: oklch(0.52 0.13 160);
+  --delta-down: oklch(0.55 0.20 25);
+
+  /* Data ramp (light: ink to gray to paper) */
+  --chart-1: oklch(0.24 0.006 280);
+  --chart-2: oklch(0.40 0.006 280);
+  --chart-3: oklch(0.56 0.006 280);
+  --chart-4: oklch(0.70 0.004 280);
+  --chart-5: oklch(0.82 0.003 280);
+  --chart-6: oklch(0.90 0.002 280);
+
+  /* Shadows (low alpha ink, no glow) */
+  --sh-card: 0 1px 2px oklch(0.24 0.02 280 / 6%), 0 1px 1px oklch(0.24 0.02 280 / 4%);
+  --sh-pop: 0 8px 24px oklch(0.24 0.04 280 / 12%);
+}
