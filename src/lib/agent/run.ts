@@ -362,8 +362,9 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   if (req.source === "proactive" && req.text.trim() === "family-nudge") {
     return quickReply(onNudge(now, (t) => SECRET_TEXT.test(t)), "[family-nudge]", nowIso);
   }
-  if (req.source === "proactive" && req.text.trim() === "idle-checkin") {
-    const r = onIdle(now);
+  const idle = req.source === "proactive" ? req.text.trim().match(/^idle-checkin(?::(\d+))?$/) : null;
+  if (idle) {
+    const r = onIdle(now, idle[1] ? Number(idle[1]) : 1);
     if (r !== "ask-model") return quickReply(r, "[idle-checkin]", nowIso);
   }
 

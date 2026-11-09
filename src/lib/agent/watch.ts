@@ -75,9 +75,11 @@ export function taskDone() {
 }
 
 /** "idle-checkin": first one gets a gentle hello from the model; a second one with no reply alerts the family silently. */
-export function onIdle(now: Date): Quick | "ask-model" {
+export function onIdle(now: Date, attempt = 1): Quick | "ask-model" {
   const t = now.getTime();
-  if (watch.idleSince === undefined) {
+  // "idle-checkin:2" from the screen is the second try even if the first one was missed.
+  if (attempt >= 2) watch.idleSince ??= t;
+  else if (watch.idleSince === undefined) {
     watch.idleSince = t;
     return "ask-model";
   }
