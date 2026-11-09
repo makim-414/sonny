@@ -7,7 +7,8 @@ Language: every string on the phone lives in `src/components/family/strings.ts` 
 
 ## Sign-in (src/proxy.ts, src/lib/auth/**)
 
-- Guardian pages and data (`/admin`, `/admin/data`, `/family`, `/api/family`, `/api/events`) need the guardian cookie. Pages redirect to `/login`, APIs answer 401.
+- Admin pages: `/admin` (overview) and `/admin/today`, `/admin/taught`, `/admin/routines`, `/admin/allowance`, `/admin/privacy`, `/admin/device`, all in one shared frame (`src/app/admin/layout.tsx`).
+- Guardian pages and data (`/admin/**`, `/admin/data`, `/family`, `/api/family`, `/api/events`) need the guardian cookie. Pages redirect to `/login`, APIs answer 401.
 - Grandma's side (`/`, `/tv`, `/remote`, `/api/agent/**`, `/api/family/inbox`) needs a paired device cookie or a guardian cookie. Pages redirect to `/login/device`.
 - `?demo=1` on any of them signs in as the demo guardian or demo device. `?pair=<token>` (from the admin QR) pairs a device. `AUTH_MODE=off` disables all checks.
 - The TV and grandma's phone keep polling `/api/family/inbox`; that works as long as the device was paired or opened with `?demo=1` once.

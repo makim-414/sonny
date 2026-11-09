@@ -27,6 +27,7 @@ export async function GET() {
   }
 
   const view = familyView(store.events);
+  const today = summarize(store.events, store.currentChannel);
   const summaryOnly = view.events.filter((e) => e.visibility === "summary").length;
 
   return Response.json({
@@ -35,6 +36,8 @@ export async function GET() {
     routines: familyState.routines,
     wallet: { ...store.wallet, ledger: [...store.wallet.ledger].reverse().slice(0, 30), stripe: stripeEnabled() },
     privacy: { shown: view.events.length - summaryOnly, summaryOnly, hidden: view.hiddenCount },
-    device: { paired: familyState.devices, lastTalk: summarize(store.events, store.currentChannel).lastTalk },
+    device: { paired: familyState.devices, lastTalk: today.lastTalk },
+    today,
+    waiting: store.wallet.ledger.filter((e) => e.status === "pending_approval").length + store.calls.filter((c) => c.status === "ringing").length,
   });
 }

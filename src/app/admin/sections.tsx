@@ -1,31 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { encode } from "uqr";
 import FamilyApp from "@/components/family/FamilyApp";
-import IncomingCall from "@/components/family/IncomingCall";
-import LightPage from "@/components/family/LightPage";
 import { clock } from "@/components/family/derive";
 import { T } from "@/components/family/strings";
 import type { WalletEntry } from "@/lib/types";
 import type { Routine } from "@/app/api/family/state";
-import { logout } from "../login/actions";
 import { addRoutine, confirmTopUp, createPairLink, decideSpend, removeRoutine, topUp, updateLimit } from "./actions";
+import { useAdmin, type AdminData } from "./AdminShell";
 import { A } from "./strings";
-
-const TABS = ["today", "taught", "routines", "allowance", "privacy", "device"] as const;
-type Tab = (typeof TABS)[number];
-
-type AdminData = {
-  guardian: { name: string; email: string };
-  taught: { lessons: { id: string; text: string; at: string; provenance?: string }[]; personalCount: number; memoryBackend: string };
-  routines: Routine[];
-  wallet: { currency: "usd" | "krw"; balance: number; perSpendLimit: number; ledger: WalletEntry[]; stripe: boolean };
-  privacy: { shown: number; summaryOnly: number; hidden: number };
-  device: { paired: { id: string; pairedAt: string; label: string }[]; lastTalk: string };
-};
-
-const POLL_MS = 3000;
 
 function money(cents: number, currency: "usd" | "krw") {
   return new Intl.NumberFormat(T.locale, { style: "currency", currency: currency.toUpperCase(), maximumFractionDigits: currency === "krw" ? 0 : 2 }).format(
@@ -48,113 +32,8 @@ function Qr({ text }: { text: string }) {
   );
 }
 
-export default function AdminApp() {
-  const [tab, setTab] = useState<Tab>("today");
-  const [data, setData] = useState<AdminData | null>(null);
-  const [notice, setNotice] = useState("");
-  const [pending, startTransition] = useTransition();
-
-  const refresh = useCallback(async () => {
-    try {
-      const res = await fetch("/admin/data", { cache: "no-store" });
-      if (res.status === 401) {
-        window.location.href = "/login?next=/admin";
-        return;
-      }
-      if (res.ok) setData((await res.json()) as AdminData);
-    } catch {
-      // keep the last data on screen
-    }
-  }, []);
-
-  // Tab from the URL, and the Stripe return trip (?checkout=cs_...).
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const t = params.get("tab");
-    const fromUrl = TABS.find((x) => x === t);
-    const checkout = params.get("checkout");
-    const id = setTimeout(() => {
-      if (fromUrl) setTab(fromUrl);
-      if (checkout) void confirmTopUp(checkout).then(() => refresh());
-    }, 0);
-    return () => clearTimeout(id);
-  }, [refresh]);
-
-  useEffect(() => {
-    const first = setTimeout(refresh, 0);
-    const id = setInterval(refresh, POLL_MS);
-    return () => {
-      clearTimeout(first);
-      clearInterval(id);
-    };
-  }, [refresh]);
-
-  useEffect(() => {
-    if (!notice) return;
-    const id = setTimeout(() => setNotice(""), 2500);
-    return () => clearTimeout(id);
-  }, [notice]);
-
-  const choose = (t: Tab) => {
-    setTab(t);
-    const url = new URL(window.location.href);
-    url.searchParams.set("tab", t);
-    url.searchParams.delete("checkout");
-    window.history.replaceState(null, "", url);
-  };
-
-  const run = (fn: () => Promise<unknown>, ok?: string) =>
-    startTransition(async () => {
-      try {
-        await fn();
-        if (ok) setNotice(ok);
-      } catch {
-        setNotice(A.error);
-      }
-      await refresh();
-    });
-
-  return (
-    <div className="fa ad theme-light">
-      <LightPage />
-      <IncomingCall />
-      <header className="fa-header ad-header">
-        <div>
-          <h1 className="fa-title">{A.title}</h1>
-          <p className="fa-sub">{data ? A.signedInAs(data.guardian.name) : T.loading}</p>
-        </div>
-        <form action={logout}>
-          <button className="ad-link" type="submit">
-            {A.signOut}
-          </button>
-        </form>
-      </header>
-
-      <nav className="ad-tabs" aria-label={A.title}>
-        {TABS.map((t) => (
-          <button key={t} className={t === tab ? "ad-tab is-on" : "ad-tab"} aria-current={t === tab ? "page" : undefined} onClick={() => choose(t)}>
-            {A.tabs[t]}
-          </button>
-        ))}
-      </nav>
-
-      {notice && (
-        <p className="fa-notice ad-notice" role="status">
-          {notice}
-        </p>
-      )}
-
-      {tab === "today" && <FamilyApp embedded />}
-      {tab === "taught" && data && <Taught data={data} />}
-      {tab === "routines" && data && <Routines data={data} busy={pending} run={run} />}
-      {tab === "allowance" && data && <Allowance data={data} busy={pending} run={run} />}
-      {tab === "privacy" && data && <Privacy data={data} />}
-      {tab === "device" && data && <Device data={data} />}
-    </div>
-  );
-}
-
 type RunFn = (fn: () => Promise<unknown>, ok?: string) => void;
+
 
 function Taught({ data }: { data: AdminData }) {
   const { lessons, personalCount, memoryBackend } = data.taught;
@@ -428,5 +307,79 @@ function Device({ data }: { data: AdminData }) {
         </div>
       )}
     </section>
+  );
+}
+
+// ---------- pages: each reads the shared admin data from the shell ----------
+
+function PageTitle({ children }: { children: string }) {
+  return <h1 className="ad-page-title">{children}</h1>;
+}
+
+export function TodayPage() {
+  return (
+    <>
+      <PageTitle>{A.tabs.today}</PageTitle>
+      <FamilyApp embedded />
+    </>
+  );
+}
+
+export function TaughtPage() {
+  const { data } = useAdmin();
+  return (
+    <>
+      <PageTitle>{A.tabs.taught}</PageTitle>
+      {data ? <Taught data={data} /> : <p className="fa-empty">{T.loading}</p>}
+    </>
+  );
+}
+
+export function RoutinesPage() {
+  const { data, busy, run } = useAdmin();
+  return (
+    <>
+      <PageTitle>{A.tabs.routines}</PageTitle>
+      {data ? <Routines data={data} busy={busy} run={run} /> : <p className="fa-empty">{T.loading}</p>}
+    </>
+  );
+}
+
+export function AllowancePage() {
+  const { data, busy, run, refresh } = useAdmin();
+  // Stripe sends mom back here with ?checkout=cs_...; credit it once.
+  useEffect(() => {
+    const checkout = new URLSearchParams(window.location.search).get("checkout");
+    if (!checkout) return;
+    void confirmTopUp(checkout).then(() => {
+      window.history.replaceState(null, "", window.location.pathname);
+      void refresh();
+    });
+  }, [refresh]);
+  return (
+    <>
+      <PageTitle>{A.tabs.allowance}</PageTitle>
+      {data ? <Allowance data={data} busy={busy} run={run} /> : <p className="fa-empty">{T.loading}</p>}
+    </>
+  );
+}
+
+export function PrivacyPage() {
+  const { data } = useAdmin();
+  return (
+    <>
+      <PageTitle>{A.tabs.privacy}</PageTitle>
+      {data ? <Privacy data={data} /> : <p className="fa-empty">{T.loading}</p>}
+    </>
+  );
+}
+
+export function DevicePage() {
+  const { data } = useAdmin();
+  return (
+    <>
+      <PageTitle>{A.tabs.device}</PageTitle>
+      {data ? <Device data={data} /> : <p className="fa-empty">{T.loading}</p>}
+    </>
   );
 }

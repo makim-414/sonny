@@ -32,8 +32,8 @@ Start all recordings together and clap once in front of every device for sync.
 ## Before the first take
 
 1. Integration session restarts the server so the feed, wallet ($80, $30 limit) and calls start clean.
-2. Pair Phone G: on a laptop sign in to `<SITE>/admin` (demo account `mom@sonny.demo` / `grandma-demo`), Device tab, "Connect grandma's phone", scan the QR with Phone G, then Chrome menu, Add to Home screen. Hide every other app from that home screen.
-3. Open mom's side at `<SITE>/admin?demo=1`. Check the three big buttons and the Allowance tab load.
+2. Pair Phone G: on a laptop sign in to `<SITE>/admin` (demo account `mom@sonny.demo` / `grandma-demo`), Device page (`/admin/device`), "Connect grandma's phone", scan the QR with Phone G, then Chrome menu, Add to Home screen. Hide every other app from that home screen.
+3. Open mom's side at `<SITE>/admin?demo=1`. Check the three big buttons and the Allowance page (`/admin/allowance`) load.
 4. Test grandma's mic once with a throwaway line; then restart the server again.
 
 ## Cuts
@@ -60,7 +60,7 @@ curl -s -X POST '<SITE>/api/events?demo=1' -H 'content-type: application/json' -
 ### Cut 4. "Call me a taxi" (0:21 to 0:31)
 1. Press `F` four times on grandma's window (about 9:50 AM).
 2. Grandma: "I have a doctor's appointment. Can you call me a taxi?" If Sonny asks where: "Dr. Kim's clinic, right now."
-3. Hold 3 seconds on the plate number (grandma) and the Taxi line plus the lower balance (mom, Allowance tab).
+3. Hold 3 seconds on the plate number (grandma) and the Taxi line plus the lower balance (mom, Allowance page (`/admin/allowance`)).
 
 ### Cut 5. 2,000 hamburgers (0:31 to 0:47)
 1. Grandma: "Order two thousand hamburgers for the temple party."
@@ -98,7 +98,7 @@ curl -s -X POST '<SITE>/api/events?demo=1' -H 'content-type: application/json' -
 ```
 
 ### Cut 9. Set up once, and what's next (1:17 to 1:30)
-1. Screen A: mom's admin, Device tab, "Connect grandma's phone", the QR on screen; Phone G scans it (re-pairing is fine).
+1. Screen A: mom's admin, Device page (`/admin/device`), "Connect grandma's phone", the QR on screen; Phone G scans it (re-pairing is fine).
 2. Camera B: a hand plugs an HDMI dongle into a TV showing `<SITE>/tv?boot&noqr&demo=1` (the 3 second "connected" boot screen, then Sonny on the big screen).
 3. Two QR codes: "Be grandma" (`<SITE>/?demo=1`) and "Be her daughter" (`<SITE>/family?demo=1`).
 - Edit: roadmap strip, narration, end card with "Sonny", https://github.com/makim-414/sonny and the open source line.

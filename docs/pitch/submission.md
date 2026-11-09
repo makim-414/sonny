@@ -67,7 +67,7 @@ The current README has the one-liner and run steps. Before submitting, make sure
 - [ ] Market line: launches in English for English-speaking seniors first; the founder's Korean grandmother is the origin story. The app language is one switch, `APP_LANG` in `src/lib/brand.ts`.
 - [ ] Demo accounts section (test values only, from `src/lib/auth/users.ts`):
   - Family admin: `/login`, email `mom@sonny.demo`, password `grandma-demo`.
-  - Grandma's phone: pair from the admin, Device tab, "Connect grandma's phone", scan the QR. Or open `/?demo=1`.
+  - Grandma's phone: pair from the admin, Device page (`/admin/device`), "Connect grandma's phone", scan the QR. Or open `/?demo=1`.
   - Skip sign-in anywhere with `?demo=1` (`/admin?demo=1`, `/family?demo=1`, `/?demo=1`).
   - Note: sessions are signed cookies; set `AUTH_SECRET` in any real deployment. `AUTH_MODE=off` turns sign-in off.
 - [ ] Family admin and allowance: "Mom sets it up once from the admin: scans one QR on grandma's phone, done." and "Mom tops up an allowance; grandma spends it by voice; anything big waits for Mom's OK." Top-ups are demo credits until `STRIPE_SECRET_KEY` is set, then Stripe Checkout in test mode.

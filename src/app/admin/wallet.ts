@@ -30,8 +30,8 @@ export async function startTopUp(amount: number, origin: string): Promise<TopUpR
   }
   const body = new URLSearchParams({
     mode: "payment",
-    success_url: `${origin}/admin?tab=allowance&checkout={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/admin?tab=allowance`,
+    success_url: `${origin}/admin/allowance?checkout={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/admin/allowance`,
     "line_items[0][quantity]": "1",
     "line_items[0][price_data][currency]": store.wallet.currency,
     "line_items[0][price_data][unit_amount]": String(amount),
