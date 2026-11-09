@@ -1,25 +1,28 @@
 /* TV screen styles. Every color, size and duration lives in the token block below. */
 
 .tv-root {
+  /* Colors come only from the DS core (src/styles/tokens.css) and the Sonny theme
+     (src/styles/theme-sonny.css: --brand, --chart-*). Shades and alpha via color-mix. */
+  --dark: var(--background);
+  --light: var(--foreground);
   /* surfaces */
-  --bg: #000000;
-  --bg-elev: #15171c;
-  --bg-caption: rgba(8, 9, 12, 0.9);
-  --border: #3a3d45;
-  --border-strong: #8a8f9a;
+  --bg: var(--dark);
+  --bg-elev: var(--popover); /* opaque: cards sit on a busy picture */
+  --bg-caption: color-mix(in oklab, var(--dark) 90%, transparent);
+  --border: var(--secondary);
+  --border-strong: var(--ring);
   /* text */
-  --text: #ffffff;
-  --text-muted: #c9ccd3;
-  --text-ink: #111216;
-  --highlight: #ffd84a;
-  --user-text: #9fe0ff;
+  --text: var(--light);
+  --text-muted: color-mix(in oklab, var(--light) 80%, var(--dark));
+  --text-ink: var(--accent-fg);
+  --highlight: var(--brand);
+  --user-text: var(--chart-2);
   /* meaning */
-  --danger: #ff5a4e;
-  --private: #b9a6ff;
-  --qr-light: #ffffff;
-  --qr-dark: #000000;
+  --private: var(--chart-15);
+  --qr-light: var(--light);
+  --qr-dark: var(--dark);
   --t-tag: 22px;
-  /* type scale (body never below 40px) */
+  /* type scale for a TV across the room (body never below 40px) */
   --t-display: clamp(96px, 9vw, 180px);
   --t-h1: clamp(64px, 5.2vw, 104px);
   --t-h2: clamp(52px, 4vw, 80px);
@@ -30,90 +33,82 @@
   --w-bold: 800;
   --lh-tight: 1.15;
   --lh-snug: 1.3;
-  /* spacing */
-  --sp-2: 8px;
-  --sp-3: 12px;
-  --sp-4: 16px;
-  --sp-6: 24px;
-  --sp-8: 32px;
-  --sp-12: 48px;
   --gutter: clamp(16px, 2.6vw, 56px);
   /* radius and shadow */
-  --r-md: 12px;
-  --r-card: 28px;
-  --r-pill: 999px;
-  --sh-pop: 0 24px 80px rgba(0, 0, 0, 0.6);
+  --r-md: var(--r-xl);
+  --r-card: var(--r-4xl);
+  --sh-pop: 0 24px 80px color-mix(in oklab, var(--dark) 60%, transparent);
   /* motion */
-  --dur-fast: 180ms;
-  --dur-modal: 420ms;
-  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: var(--dur-dropdown);
   /* layout */
   --mic-size: clamp(150px, 12vw, 230px);
   --avatar-size: clamp(170px, 15vw, 290px);
 
   /* avatar */
-  --av-skin: #ffd9b8;
-  --av-hair: #3b2a22;
-  --av-ink: #2a1d18;
-  --av-cheek: #ff9f9f;
-  --av-shirt: #ffc93c;
-  --av-collar: #ffffff;
-  --av-mouth: #b8404a;
+  --av-skin: var(--chart-16);
+  --av-hair: var(--chart-17);
+  --av-ink: color-mix(in oklab, var(--chart-17) 80%, var(--dark));
+  --av-cheek: var(--chart-14);
+  --av-shirt: var(--brand);
+  --av-collar: var(--light);
+  --av-mouth: color-mix(in oklab, var(--chart-4) 70%, var(--chart-14));
+  --av-shadow: color-mix(in oklab, var(--dark) 35%, transparent);
 
   /* broadcast scenes */
-  --news-a: #0b2a5b;
-  --news-b: #123f86;
-  --news-line: rgba(160, 200, 255, 0.35);
-  --news-anchor: #0a1a38;
-  --news-desk: #e9eef7;
-  --news-ticker: #c8102e;
-  --trot-a: #3a0b58;
-  --trot-b: #a0157a;
-  --trot-beam: rgba(255, 240, 180, 0.22);
-  --trot-spark: #fff3b0;
-  --trot-stage: #1b0629;
-  --trot-singer: #12031c;
-  --drama-a: #ff9a5a;
-  --drama-b: #a8406a;
-  --drama-sun: #ffe2a0;
-  --drama-house: #3a1b2e;
-  --drama-window: #ffd27a;
-  --drama-people: #22101c;
-  --nature-a: #8fd3ff;
-  --nature-b: #e4f6ff;
-  --nature-sun: #fff2b0;
-  --nature-far: #8fb6a0;
-  --nature-mid: #4f9a6a;
-  --nature-near: #2c6e45;
-  --nature-river: #5fb4e8;
-  --nature-bird: #2a3b44;
-  --temple-a: #f7c873;
-  --temple-b: #fde9c8;
-  --temple-mtn: #b48a5e;
-  --temple-roof: #4a2a1a;
-  --temple-door: #a8322b;
-  --lantern-0: #ff6f7d;
-  --lantern-1: #ffb347;
-  --lantern-2: #7ad1a0;
-  --health-a: #0f8f8a;
-  --health-b: #5fd3c6;
-  --health-ring: rgba(255, 255, 255, 0.25);
-  --health-coach: #063b39;
-  --health-floor: #0a5f5a;
-  --bar-0: #c0c0c0;
-  --bar-1: #c0c000;
-  --bar-2: #00c0c0;
-  --bar-3: #00c000;
-  --bar-4: #c000c0;
-  --bar-5: #c00000;
-  --bar-6: #0000c0;
+  --news-a: var(--chart-3);
+  --news-b: color-mix(in oklab, var(--chart-3) 75%, var(--chart-2));
+  --news-line: color-mix(in oklab, var(--chart-2) 35%, transparent);
+  --news-anchor: color-mix(in oklab, var(--chart-3) 60%, var(--dark));
+  --news-desk: color-mix(in oklab, var(--light) 92%, var(--chart-2));
+  --news-ticker: var(--chart-4);
+  --trot-a: var(--chart-5);
+  --trot-b: var(--chart-6);
+  --trot-beam: color-mix(in oklab, var(--chart-1) 22%, transparent);
+  --trot-spark: var(--chart-1);
+  --trot-stage: color-mix(in oklab, var(--chart-5) 45%, var(--dark));
+  --trot-singer: color-mix(in oklab, var(--chart-5) 25%, var(--dark));
+  --drama-a: var(--chart-7);
+  --drama-b: var(--chart-8);
+  --drama-sun: var(--chart-1);
+  --drama-house: var(--chart-9);
+  --drama-window: color-mix(in oklab, var(--brand) 70%, var(--chart-7));
+  --drama-people: color-mix(in oklab, var(--chart-9) 60%, var(--dark));
+  --nature-a: var(--chart-11);
+  --nature-b: color-mix(in oklab, var(--chart-11) 25%, var(--light));
+  --nature-sun: var(--chart-1);
+  --nature-far: color-mix(in oklab, var(--chart-10) 60%, var(--light));
+  --nature-mid: var(--chart-10);
+  --nature-near: color-mix(in oklab, var(--chart-10) 65%, var(--dark));
+  --nature-river: color-mix(in oklab, var(--chart-2) 70%, var(--chart-11));
+  --nature-bird: color-mix(in oklab, var(--chart-3) 40%, var(--dark));
+  --temple-a: color-mix(in oklab, var(--brand) 60%, var(--chart-7));
+  --temple-b: color-mix(in oklab, var(--chart-1) 60%, var(--light));
+  --temple-mtn: var(--chart-12);
+  --temple-roof: color-mix(in oklab, var(--chart-12) 40%, var(--dark));
+  --temple-door: var(--chart-4);
+  --lantern-0: var(--chart-14);
+  --lantern-1: var(--chart-7);
+  --lantern-2: color-mix(in oklab, var(--chart-10) 60%, var(--light));
+  --health-a: var(--chart-13);
+  --health-b: color-mix(in oklab, var(--chart-13) 60%, var(--light));
+  --health-ring: color-mix(in oklab, var(--light) 25%, transparent);
+  --health-coach: color-mix(in oklab, var(--chart-13) 35%, var(--dark));
+  --health-floor: color-mix(in oklab, var(--chart-13) 65%, var(--dark));
+  /* test card bars */
+  --bar-0: var(--chart-2);
+  --bar-1: var(--brand);
+  --bar-2: var(--chart-11);
+  --bar-3: var(--chart-10);
+  --bar-4: var(--chart-6);
+  --bar-5: var(--chart-4);
+  --bar-6: var(--chart-3);
 
   position: fixed;
   inset: 0;
   overflow: hidden;
   background: var(--bg);
   color: var(--text);
-  font-family: "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  font-family: var(--font-geist-sans), "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
   word-break: keep-all;
   cursor: default;
@@ -370,7 +365,7 @@
 
 .tv-avatar { position: relative; width: var(--avatar-size); flex: none; }
 .tv-avatar-svg { width: 100%; display: block; overflow: visible; }
-.tv-av-shadow { fill: rgba(0, 0, 0, 0.35); }
+.tv-av-shadow { fill: var(--av-shadow); }
 .tv-av-skin { fill: var(--av-skin); }
 .tv-av-hair { fill: var(--av-hair); }
 .tv-av-ink { fill: var(--av-ink); }

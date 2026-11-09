@@ -63,3 +63,8 @@
 
 ## Not verified
 - Real mic and speaker on a physical machine (headless browser only). Chrome needs one key press or click before it will speak.
+
+## Design tokens
+- All Sonny screens read the DS core (`src/styles/tokens.css`) plus `src/styles/theme-sonny.css`, which only overrides `--brand` and `--chart-*` for product colors (orb gold, channel pictures, the character). Shades and transparency come from `color-mix()`. The theme is scoped to `.tv-root`, `.orb-root`, `.rm-root` and imported by those pages, so the family app keeps the plain core.
+- Check: `grep -rnoE '#[0-9a-fA-F]{3,8}\b|rgba?\(' src/app/tv src/components/orb src/app/remote` gives 0. Hex lives only in `theme-sonny.css` and `src/app/manifest.ts` (`THEME_COLOR`, manifest needs hex).
+- Contrast on the orb (390 px, measured): Start 15.4:1, faint caption 6.4:1, grandma's words 7.2:1.

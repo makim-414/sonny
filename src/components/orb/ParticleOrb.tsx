@@ -24,6 +24,7 @@ const TARGETS: Record<OrbMode, Target> = {
 };
 
 const COUNT_DESKTOP = 1400;
+const GLOW_ALPHA = 0.16;
 const COUNT_PHONE = 1000;
 
 // Colors live as CSS tokens in orb.css; the canvas reads them once.
@@ -128,12 +129,14 @@ export function ParticleOrb({ signal }: { signal: React.RefObject<OrbSignal> }) 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
 
-      // Soft glow behind the orb.
+      // Soft glow behind the orb (brand color, faded here so the token stays a plain color).
       const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, base * 1.9);
       g.addColorStop(0, glow);
       g.addColorStop(1, "transparent");
+      ctx.globalAlpha = GLOW_ALPHA;
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, w, h);
+      ctx.globalAlpha = 1;
 
       const dot = Math.max(1.2, Math.min(w, h) / 420);
       for (let i = 0; i < n; i++) {
