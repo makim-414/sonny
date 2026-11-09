@@ -8,7 +8,7 @@ import { callAgent } from "./agent-client";
 import { Avatar, type AvatarMood } from "./Avatar";
 import { BroadcastScreen } from "./BroadcastScreen";
 import { APP_LANG } from "@/lib/brand";
-import { ASSISTANT_NAME, PRODUCT_NAME, PRODUCT_NAME_EN, USER_TITLE } from "./brand";
+import { ASSISTANT_NAME, PRODUCT_NAME, PRODUCT_NAME_EN } from "./brand";
 import { CHANNELS, channelForNumber, programTitle } from "./channels";
 import { fetchGuide, programAt, sceneFor, surfChannels, type Guide } from "./epg-client";
 import { QrCode } from "./QrCode";
@@ -16,6 +16,60 @@ import { formatDate, formatTime, useDemoClock } from "./use-demo-clock";
 
 type Caption = { who: "assistant" | "user"; text: string; en?: string };
 type Card = { title: string; body?: string; imageUrl?: string };
+
+const LANG = APP_LANG === "en" ? "en-US" : "ko-KR";
+
+// Screen words in the conversation language (brand.ts APP_LANG).
+const COPY = {
+  en: {
+    switching: (n: number) => `Switching to channel ${n}.`,
+    reminderSet: "Reminder set",
+    familyNotified: "Family notified",
+    private: "Kept private from family",
+    micFail: "The mic is not working. Please type instead",
+    learnedTitle: (n: number) => `Learned ${n} things from Grandma this month`,
+    learnedSay: (n: number) => `Grandma, you taught me ${n} things this month. Thank you!`,
+    regular: "On air",
+    ducked: "TV volume lowered",
+    taught: "What Grandma taught me",
+    closeHint: "Press OK to close",
+    qrPhone: "Grandma",
+    qrFamily: "Family",
+    userSays: "Grandma",
+    listening: "I'm listening. Go ahead",
+    thinking: "One moment, thinking",
+    talk: "Talk",
+    listeningShort: "Listening",
+    typePlaceholder: "Type what Grandma says",
+    typeLabel: "Type instead of speaking",
+    nextDay: "Next morning",
+    nextDayTime: "8:00 AM",
+  },
+  ko: {
+    switching: (n: number) => `${n}번으로 바꿀게요.`,
+    reminderSet: "알림을 맞췄어요",
+    familyNotified: "가족에게 알렸어요",
+    private: "딸에게는 안 알려요",
+    micFail: "마이크가 안 돼요. 글로 적어 주세요",
+    learnedTitle: (n: number) => `이번 달 배운 것 ${n}개`,
+    learnedSay: (n: number) => `할머니, 이번 달에 저한테 ${n}가지를 가르쳐 주셨어요. 고마워요!`,
+    regular: "정규 방송",
+    ducked: "TV 소리 줄였어요",
+    taught: "할머니가 가르쳐 주신 것",
+    closeHint: "OK 버튼을 누르면 닫혀요",
+    qrPhone: "할머니 폰",
+    qrFamily: "가족 앱",
+    userSays: "할머니 말씀",
+    listening: "듣고 있어요. 말씀하세요",
+    thinking: "잠깐만요, 생각하고 있어요",
+    talk: "말하기",
+    listeningShort: "듣는 중",
+    typePlaceholder: "할머니 말씀을 글로 적어 주세요",
+    typeLabel: "말 대신 글로 입력",
+    nextDay: "다음 날 아침",
+    nextDayTime: "오전 8:00",
+  },
+}[APP_LANG];
 
 const BOOT_MS = 3000;
 const LEARNED_CARD_MS = 4500;
@@ -77,7 +131,7 @@ function inboxItems(json: unknown): InboxItem[] {
 function spokenForTimer(t: Timer): string {
   const a = t.action;
   if (a.type === "showCard") return [t.label, a.body].filter(Boolean).join(". ");
-  if (a.type === "tune") return `${t.label}. ${a.channel}번으로 바꿀게요.`;
+  if (a.type === "tune") return `${t.label}. ${COPY.switching(a.channel)}`;
   return t.label;
 }
 
@@ -252,7 +306,7 @@ export function TvApp() {
         if (sayGenRef.current !== gen) return;
         showCaption({ who: "assistant", text: sentences[i], en: english[i] });
         setMood("speaking");
-        await speak(sentences[i]);
+        await speak(sentences[i], LANG);
       }
       if (sayGenRef.current !== gen) return;
       setMood("idle");
@@ -280,11 +334,11 @@ export function TvApp() {
             const at = new Date(a.at).getTime();
             if (Number.isNaN(at)) break;
             addTimer({ id: idRef.current++, at, label: a.label, action: a.action });
-            toast(`알림을 맞췄어요 · ${formatTime(new Date(at))} ${a.label}`);
+            toast(`${COPY.reminderSet} · ${formatTime(new Date(at))} ${a.label}`);
             break;
           }
           case "notifyFamily":
-            toast("가족에게 알렸어요", a.level === "urgent" ? "urgent" : "info");
+            toast(COPY.familyNotified, a.level === "urgent" ? "urgent" : "info");
             break;
         }
       }
@@ -306,7 +360,7 @@ export function TvApp() {
           if (englishRef.current) await sleep(HEARD_EN_MS);
         }
         runActions(reply.actions);
-        if (reply.private) toast("딸에게는 안 알려요", "private");
+        if (reply.private) toast(COPY.private, "private");
         await say(reply.say, reply.sayEn);
       });
     },
@@ -353,7 +407,7 @@ export function TvApp() {
         if (code === "no-speech" || code === "aborted") return;
         console.warn("[tv] listen error", code);
         setTextOpen(true);
-        toast("마이크가 안 돼요. 글로 적어 주세요");
+        toast(COPY.micFail);
       },
       onEnd: () => {
         listeningRef.current = false;
@@ -361,7 +415,7 @@ export function TvApp() {
         setMood((m) => (m === "listening" ? "idle" : m));
         setCaption((c) => (c && c.who === "user" && !c.text ? null : c));
       },
-    });
+    }, LANG);
     if (!listenerRef.current) {
       listeningRef.current = false;
       setMood("idle");
@@ -399,9 +453,9 @@ export function TvApp() {
         // fall back to the demo count below
       }
       const n = lessons > 0 ? lessons : LEARNED_FALLBACK;
-      openCard({ title: `이번 달 배운 것 ${n}개` });
+      openCard({ title: COPY.learnedTitle(n) });
       await say(
-        `할머니, 이번 달에 저한테 ${n}가지를 가르쳐 주셨어요. 고마워요!`,
+        COPY.learnedSay(n),
         `Grandma, you taught me ${n} things this month. Thank you!`,
       );
     });
@@ -587,7 +641,7 @@ export function TvApp() {
   const guideName = guide?.channels.find((c) => c.number === channel)?.name;
   const guideProgram = guide ? programAt(guide, channel, now) : undefined;
   const chName = guideName ?? local.name;
-  const title = guideProgram?.title ?? (guide ? "정규 방송" : programTitle(local, now));
+  const title = guideProgram?.title ?? (guide ? COPY.regular : programTitle(local, now));
   const scene = guide ? sceneFor(title, chName) : local.scene;
 
   const nextTimer = timers[0];
@@ -617,7 +671,7 @@ export function TvApp() {
       {ducked && (
         <span className="tv-duck">
           <SpeakerLowIcon />
-          TV 소리 줄였어요
+          {COPY.ducked}
         </span>
       )}
 
@@ -643,7 +697,7 @@ export function TvApp() {
         <section className="tv-card is-learned" role="dialog" aria-label={card.title}>
           <span className="tv-learned-num">{learned}</span>
           <span className="tv-learned-text">
-            <span className="tv-learned-label">{english ? "What grandma taught me" : `${USER_TITLE}${subjectParticle(USER_TITLE)} 가르쳐 주신 것`}</span>
+            <span className="tv-learned-label">{APP_LANG === "ko" && english ? "What grandma taught me" : COPY.taught}</span>
             <h2 className="tv-card-title">{card.title}</h2>
             {card.body && <p className="tv-card-body">{card.body}</p>}
           </span>
@@ -659,7 +713,7 @@ export function TvApp() {
           )}
           <h2 className="tv-card-title">{card.title}</h2>
           {card.body && <p className="tv-card-body">{card.body}</p>}
-          <p className="tv-card-hint">OK 버튼을 누르면 닫혀요</p>
+          <p className="tv-card-hint">{COPY.closeHint}</p>
           <span className="tv-demo-tag tv-card-tag">demo data</span>
         </section>
       )}
@@ -669,11 +723,11 @@ export function TvApp() {
           <figure className="tv-qr-item">
             {/* ?demo=1 signs the judge's phone in as the demo device or guardian. */}
             <QrCode text={`${origin}/?demo=1`} className="tv-qr-code" />
-            <figcaption>{english ? "Grandma's phone" : "할머니 폰"}</figcaption>
+            <figcaption>{english && APP_LANG === "ko" ? "Grandma's phone" : COPY.qrPhone}</figcaption>
           </figure>
           <figure className="tv-qr-item">
             <QrCode text={`${origin}/family?demo=1`} className="tv-qr-code" />
-            <figcaption>{english ? "Family app" : "가족 앱"}</figcaption>
+            <figcaption>{english && APP_LANG === "ko" ? "Family app" : COPY.qrFamily}</figcaption>
           </figure>
         </aside>
       )}
@@ -681,16 +735,16 @@ export function TvApp() {
       <section className={`tv-caption ${captionVisible ? "is-open" : ""} ${userTurn ? "is-user" : ""}`} aria-live="polite">
         <Avatar mood={mood} />
         <div className="tv-caption-bubble">
-          <span className="tv-caption-who">{userTurn ? `${USER_TITLE} 말씀` : ASSISTANT_NAME}</span>
+          <span className="tv-caption-who">{userTurn ? COPY.userSays : ASSISTANT_NAME}</span>
           <p className="tv-caption-text">
             {mood === "listening" && !caption?.text
-              ? "듣고 있어요. 말씀하세요"
-              : caption?.text || (mood === "thinking" ? "잠깐만요, 생각하고 있어요" : "")}
+              ? COPY.listening
+              : caption?.text || (mood === "thinking" ? COPY.thinking : "")}
           </p>
           {english && caption?.en && <p className="tv-caption-en">{caption.en}</p>}
           {mood === "thinking" && userTurn && caption?.text && (
             <p className="tv-caption-wait">
-              {ASSISTANT_NAME}: 잠깐만요, 생각하고 있어요
+              {ASSISTANT_NAME}: {COPY.thinking}
               {english ? " · One moment, thinking" : ""}
             </p>
           )}
@@ -703,10 +757,10 @@ export function TvApp() {
         tabIndex={-1}
         onMouseDown={(e) => e.preventDefault()}
         onClick={startListening}
-        aria-label="말하기"
+        aria-label={COPY.talk}
       >
         <MicIcon />
-        <span className="tv-mic-label">{mood === "listening" ? "듣는 중" : "말하기"}</span>
+        <span className="tv-mic-label">{mood === "listening" ? COPY.listeningShort : COPY.talk}</span>
       </button>
 
       {textOpen && (
@@ -722,8 +776,8 @@ export function TvApp() {
             className="tv-type-input"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="할머니 말씀을 글로 적어 주세요"
-            aria-label="말 대신 글로 입력"
+            placeholder={COPY.typePlaceholder}
+            aria-label={COPY.typeLabel}
           />
         </form>
       )}
@@ -747,9 +801,9 @@ export function TvApp() {
 
       {nextDay && (
         <div className="tv-nextday" aria-live="polite">
-          <span className="tv-nextday-title">다음 날 아침</span>
+          <span className="tv-nextday-title">{COPY.nextDay}</span>
           <span className="tv-nextday-sub">
-            {nextDay} · {english ? "Next morning, 8:00" : "오전 8:00"}
+            {nextDay} · {COPY.nextDayTime}
           </span>
         </div>
       )}

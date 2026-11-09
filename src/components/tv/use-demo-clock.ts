@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { APP_LANG } from "@/lib/brand";
 
 // Demo clock: real time plus an offset that the hidden F key pushes forward.
 // Start time can be set with ?t=08:00 so the demo can open in the morning.
@@ -44,6 +45,7 @@ export function useDemoClock() {
 }
 
 export function formatTime(d: Date): string {
+  if (APP_LANG === "en") return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
   const h = d.getHours();
   const m = d.getMinutes().toString().padStart(2, "0");
   const half = h < 12 ? "오전" : "오후";
@@ -54,5 +56,6 @@ export function formatTime(d: Date): string {
 const DAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 export function formatDate(d: Date): string {
+  if (APP_LANG === "en") return d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
   return `${d.getMonth() + 1}월 ${d.getDate()}일 ${DAYS[d.getDay()]}요일`;
 }
