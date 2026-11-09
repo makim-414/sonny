@@ -14,6 +14,7 @@ Built at c0mpiled-17 Seoul, 2026-11-09 (YC Request for Startups, Fall 2026: AI f
 2. **Sonny calls first.** One icon on her phone, no app to learn. Sonny opens every moment as a phone call she only has to answer: pills, weather, the day ahead.
 3. **Teach it once.** Grandma teaches Sonny how she likes things done ("my Sunday groceries", "a note to Martha", "learn to get me my usual ride"), once, and Sonny does it her way from then on. Her lessons become its long-term memory. Anything that needs an account or a card, mom connects once from her phone, so grandma never types a password.
 4. **Mom only when it matters.** When grandma gets stuck, Sonny doesn't make her feel slow; it quietly calls mom ("Book it for her" or "I'll call her"). A strange order gets a double-check, then a call. And when grandma has been quiet, Sonny nudges mom to call, with something to talk about.
+5. **Health check-ins.** Sonny calls for a daily blood-pressure reading and a weekly two-minute memory check, then sends mom a simple report. A wellness check, not a diagnosis.
 
 Mom sees what got done, never what was said: grandma's private conversations are redacted on the server, and "don't tell my daughter" stays between them. There is no camera.
 

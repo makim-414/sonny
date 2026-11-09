@@ -84,3 +84,14 @@ From the raw log: last time grandma spoke (`heard`, ignoring proactive triggers)
 - `approve`: tvInbox "Mom approved call <id>: book it for grandma now and tell her it's done."
 - `decline`: tvInbox "Mom declined call <id>: Mom will call grandma to help. Tell grandma "Mom's going to call you."".
 - Demo: `POST /api/family/calls/demo?demo=1 { "reason": "struggle", "script"? }`.
+
+## Health check-ins (UI here, API in the agent brain)
+
+The family screens read these routes; until they exist the UI shows "No check-ins yet" and disabled toggles, with no errors besides the 404 in the network log.
+
+- `GET /api/agent/health-plan` -> `{ bp: { enabled: boolean, time: "08:00" }, memory: { enabled: boolean, day: "sun"|"mon"|...|"sat", time: "10:00" } }`
+- `POST /api/agent/health-plan` with the same shape (the admin sends the whole plan on every change).
+- `POST /api/agent/health-check { kind: "bp" | "memory" }` -> 200 when Sonny starts the call (demo "Call now").
+- `GET /api/agent/health-report` -> `{ bp: [{ at: ISO, systolic: number, diastolic: number, pulse?: number, flag?: "high" | "low" | null }], memory: { at: ISO, score: number, max: number } | null, memoryLastWeek: { at, score, max } | null }`
+  - The card shows the newest three blood-pressure readings. If `flag` is missing it uses 140/90 or above as high and below 90/60 as low (display only, not a diagnosis).
+- UI: `src/app/admin/HealthPlan.tsx` (on `/admin`), `src/components/family/HealthCard.tsx` (on `/family` and `/admin/today`), parsing in `src/components/family/health.ts`.

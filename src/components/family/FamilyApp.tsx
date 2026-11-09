@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ActivityEvent } from "@/lib/types";
 import { clock, toFeedItem, type FeedItem, type Summary } from "./derive";
+import HealthCard from "./HealthCard";
 import IncomingCall from "./IncomingCall";
 import LightPage from "./LightPage";
 import { T } from "./strings";
@@ -147,6 +148,8 @@ export default function FamilyApp({ embedded = false }: { embedded?: boolean }) 
           </div>
         </dl>
       </section>
+
+      <HealthCard />
 
       {pending.length > 0 && (
         <section className="fa-approvals" aria-label={T.approvalsLabel}>
