@@ -440,8 +440,9 @@ export function OrbApp() {
         setMode("listening");
         vadRef.current.start();
       } else {
+        // No recognizer and no way to capture her words for the server: typing is the only way in.
         setMode("idle");
-        if (!sttOkRef.current || hasFlag("novad")) setTyping(true);
+        setTyping(true);
       }
       return;
     }
