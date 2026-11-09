@@ -78,7 +78,7 @@ More: [architecture](docs/ARCHITECTURE.md), [open source credits and licenses](d
 ## Built with GBrain and gstack
 
 - **GBrain is Sonny's long-term memory.** Every skill grandma teaches ("my usual ride to Dr. Lee", "a note to Martha") is stored in GBrain with its source, and can be corrected or withdrawn. Code: [`src/lib/memory/gbrain-store.ts`](src/lib/memory/gbrain-store.ts). Usage log: [`docs/gstack/gbrain-usage.md`](docs/gstack/gbrain-usage.md).
-- **gstack shaped the build.** We ran gstack `/office-hours` to pressure-test the idea ([`docs/gstack/office-hours.md`](docs/gstack/office-hours.md), [run log](docs/gstack/office-hours-run.md)) and gstack `/review` at the feature freeze, which found nine serious issues; we fixed the ones that could break the demo, including "No, don't approve" being heard as a yes ([`docs/gstack/review.md`](docs/gstack/review.md)).
+- **gstack shaped the build.** We ran gstack `/office-hours` to pressure-test the idea ([`docs/gstack/office-hours.md`](docs/gstack/office-hours.md), [run log](docs/gstack/office-hours-run.md)) and gstack `/review` at the feature freeze, which found eight critical issues; we fixed the ones that could break the demo, including "No, don't approve" being heard as a yes ([`docs/gstack/review.md`](docs/gstack/review.md)).
 
 ## What's real, what's mocked
 
