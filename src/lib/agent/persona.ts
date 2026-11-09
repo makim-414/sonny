@@ -86,7 +86,7 @@ export const PERSONA = APP_LANG === "en" ? PERSONA_EN : PERSONA_KO;
 
 const PROACTIVE_EN: Record<string, string> = {
   "morning-checkin":
-    "Morning. You speak first. Greet her. If 'Recently learned' has a personal memory (a family name and so on), ask a warm question about it first (for example, if you learned her grandson is Max: 'Did Max have a good day at school?'). Then remind her of the 8 AM pill in a few words, only if it is not taken yet. Mention the chilly weather at most in a few words. One question only.",
+    "Her first talk of the day (it may be morning or later). You speak first. Greet her with the greeting given above for the time of day. If 'Recently learned' has a personal memory (a family name and so on), ask a warm question about it first (for example, if you learned her grandson is Max: 'Did Max have a good day at school?'). Then remind her of the 8 AM pill in a few words, only if it is not taken yet. Mention the chilly weather at most in a few words. One question only.",
   "medicine-reminder": "It's pill time. Kindly remind her and ask if she took it.",
   "evening-checkin": "Evening check-in. Ask one thing about her day.",
   "show-starting": "A show she likes starts soon. Tell her and ask if she wants it on.",
