@@ -32,6 +32,7 @@ function first(ctx: AgentContext, name: string) {
 }
 
 export const DEMO = T.demo;
+const EN_SAY = T.done === "done";
 
 // Requests waiting for mom's approval in the family app.
 export type PendingRequest =
@@ -46,6 +47,8 @@ type Shared = {
   lastLater?: LaterShow[];
   // An order Sonny asked grandma to double-check ("2 or 2,000?").
   confirmOrder?: { items: { name: string; qty?: number }[]; question: string };
+  // An offer Sonny made while speaking first ("want me to get groceries for two?").
+  offer?: { kind: "errand"; said: string; basis: string };
 };
 const g = globalThis as unknown as { __hyodoAgent?: Shared };
 export const shared: Shared = g.__hyodoAgent ?? (g.__hyodoAgent = { health: [], requests: [] });
@@ -336,15 +339,22 @@ export function createTools(ctx: AgentContext) {
       }),
       execute: async ({ medicineTaken, feeling, symptoms = [], severity }) => {
         shared.health.push({ at: ctx.now.toISOString(), medicineTaken, feeling, symptoms, severity });
-        const med = medicineTaken === undefined ? "" : medicineTaken ? T.medTaken(clock()) : T.medNotTaken;
         // "딸한테 말하지 마" keeps it private, unless it is an emergency.
         const hush = ctx.private && severity !== "urgent";
-        log(ctx, "memory", T.health(med, feeling), { visibility: hush ? "private" : "family" });
+        // Pills get their own fixed line: the family app's Pills summary looks for
+        // "took ... pill" and is thrown off by words like "not" in the feeling text.
+        if (medicineTaken) log(ctx, "memory", T.pillTaken(clock()), { visibility: hush ? "private" : "family" });
+        if (!medicineTaken || severity !== "ok")
+          log(ctx, "memory", T.health(medicineTaken === false ? T.medNotTaken : "", feeling), { visibility: hush ? "private" : "family" });
         if (hush) return { recorded: true, familyAlerted: false, keptPrivate: true };
         if (severity === "warn" || severity === "urgent") {
           alertFamily(ctx, T.healthAlert(feeling, symptoms.join(", ")), severity);
         }
-        return { recorded: true, familyAlerted: severity === "warn" || severity === "urgent" };
+        return {
+          recorded: true,
+          familyAlerted: severity === "warn" || severity === "urgent",
+          say: medicineTaken ? (EN_SAY ? "Say only something short like: Great, I'll let Sarah know." : "짧게: 잘하셨어요, 따님께 알려 드릴게요.") : undefined,
+        };
       },
     }),
 

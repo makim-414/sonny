@@ -28,7 +28,7 @@ const TEACH_WORDS =
   /기억해|이름은|이름이|비법|가르쳐|알려 줄게|해야 (해|돼|한다)|하면 (돼|좋아)|절여|넣어야|remember (this|that)|\bname is\b|\bnamed\b|recipe|the trick is|the secret is|you (have|need) to|always (put|use|add)|never (put|use)/i;
 const ORDER_NOW = /\b(order|buy|get me|pick up)\b.{2,}|시켜|주문해|사다 줘|사 줘/i;
 const PLAY_EN = /\b(turn on|put on|play|watch|switch to)\b/i;
-const MED_WORDS = /약.{0,6}(먹었|먹음|먹을게|드셨|챙겨 먹|안 먹)|\b(took|taken|had|take)\b.{0,12}\b(pills?|medicine|meds)\b/i;
+const MED_WORDS = /약.{0,6}(먹었|먹음|먹을게|드셨|챙겨 먹|안 먹)|\b(took|taken|had|take)\b.{0,12}\b(pills?|medicine|meds)\b|\bI (took|have taken|had) (it|them|that)\b/i;
 const LESSON_COUNT_WORDS = /배운 (거|게|것).{0,8}(몇|얼마)|how many .*(learn|taught)/i;
 // Haiku sometimes claims an action without calling the tool. Rerun those on Sonnet.
 const CLAIMS = [
@@ -37,6 +37,7 @@ const CLAIMS = [
   { words: /기억할게|기억해 둘게|기억해 두었|기억했|\bI('ll| will) remember\b|\bI('ve| have) (saved|noted) that\b/i, tools: ["memory_remember", "memory_correct"] },
   { words: /틀어 드렸|틀었어|찾아볼게|찾아 드릴게|\bI('ve| have)? (turned|put) (it |that )?on\b|\blet me find\b/i, tools: ["tv_play", "tv_tune", "epg_search"] },
   { words: /틀어 드릴게|알려 드릴게|예약했|예약해 둘게|\bI('ll| will) remind\b|\bI('ve| have)? set (a|the) reminder\b/i, tools: ["schedule_at", "tv_play"] },
+  { words: /\b(I'll|I will|I've|I have) (record|recorded|written|write|noted|note)\b.{0,30}\b(pill|medicine)/i, tools: ["health_checkin"] },
   { words: /\basked your daughter\b|\bsent (it )?to your daughter\b|\bcalling (sarah|your daughter)\b/i, tools: ["ride_request", "errand_order"] },
   { words: /알렸어|전해 드렸|전했어|전해 드릴게|전할게|\bI('ve| have)? (told|let) your daughter\b|\bI('ll| will) (tell|let) your daughter\b/i, tools: ["family_notify", "health_checkin", "ride_request", "errand_order"] },
 ];
@@ -141,6 +142,21 @@ function parseFamily(text: string) {
 const tag = (s: string, t: string) => s.match(new RegExp(`<${t}>([\\s\\S]*?)</${t}>`))?.[1]?.trim();
 const clean = (s: string) => s.replace(/<[^>]+>/g, "").replace(/\[[^\]]*\]/g, "").replace(/\s*\n+\s*/g, " ").trim();
 const sayTag = (raw: string) => tag(raw, "say") ?? tag(raw, "ko");
+
+// Speech that looks like tool arguments or a log line ("... said yes ok true").
+const LEAK = /\b(true|false|null|undefined)\b|severity|medicineTaken|symptoms|feeling:|\bok true\b|Health check:|건강 기록:|[{}]|\w+_\w+\(/i;
+function safeLine(ran: string[]): string {
+  if (EN) {
+    if (ran.includes("health_checkin")) return "Great, I've noted it. I'll let Sarah know.";
+    if (ran.includes("memory_remember")) return "Thank you, I'll remember that.";
+    if (ran.includes("errand_order")) return "Okay, I've taken care of the groceries.";
+    if (ran.includes("schedule_at")) return "Okay, I'll remind you.";
+    return "Okay, June.";
+  }
+  if (ran.includes("health_checkin")) return "잘하셨어요, 기록해 둘게요.";
+  if (ran.includes("memory_remember")) return "고마워요, 꼭 기억할게요.";
+  return "네, 할머니.";
+}
 
 // Older listeners: at most two sentences on stage (the prompt asks for about 15 words each).
 function twoSentences(s: string): string {
@@ -301,6 +317,25 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   const facts = [...new Map([...personal.filter((f) => f.source === "seed"), ...recentTaught, ...relevant].map((f) => [f.id, f])).values()];
   const lessons = await lessonsThisMonth(memory, now);
 
+  // Speaking first: build the greeting around the newest thing she taught (lesson or
+  // personal), so yesterday's teaching shows up this morning.
+  const taughtNewest = all.filter((f) => f.source !== "seed").slice(-1)[0];
+  let focusLine = "";
+  if (req.source === "proactive" && /morning|checkin|idle|evening/.test(req.text) && taughtNewest) {
+    focusLine = EN
+      ? ` Open with what she taught you most recently: "${taughtNewest.text}". Turn it into one warm, useful offer for today (for example, if family is coming for dinner: "Sarah's staying tonight, want me to get groceries for two?"). That offer is your one question. Do not just repeat the fact: make the offer. Mention the 8 AM pill only as a short reminder, not a question.`
+      : ` 할머니가 최근에 가르쳐 주신 것으로 시작한다: "${taughtNewest.text}". 그걸로 오늘 쓸모 있는 제안 하나를 한다(예: 가족이 저녁에 오면 "오늘 수진이 오니까 장 좀 봐 드릴까요?"). 질문은 그 제안 하나. 약은 짧게 알려 드리기만 한다.`;
+  }
+  // She said yes to the offer made while speaking first: carry it out.
+  const offer = shared.offer;
+  shared.offer = undefined;
+  const yesToOffer = !!offer && req.source === "voice" && /\b(yes|yeah|sure|please|ok|okay|go ahead)\b|그래|응|네|좋아/i.test(req.text);
+  if (yesToOffer && offer) {
+    task += EN
+      ? ` She just said yes to your offer "${offer.said}" (based on: "${offer.basis}"). Do it now with errand_order: a small, sensible order for it (for dinner for two, e.g. 1 chicken, 1 bag of salad, 1 loaf of bread). Then say in one short sentence what you ordered.`
+      : ` 할머니가 방금 제안("${offer.said}")에 좋다고 하셨다. errand_order 로 바로 적당히 주문한다(예: 두 사람 저녁이면 닭 1, 채소 1, 두부 1). 무엇을 주문했는지 짧게 말씀드린다.`;
+  }
+
   const today = kstParts(now);
   const tookMeds = shared.health.some((h) => {
     const p = kstParts(new Date(h.at));
@@ -324,17 +359,22 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
     shared.confirmOrder && req.source === "voice"
       ? `You just asked her: "${shared.confirmOrder.question}" about this order: ${JSON.stringify(shared.confirmOrder.items)}. Her words now are the answer. Call errand_order with the amounts she means now and confirmed=true. If she says no or cancel, do not order.`
       : "",
+    focusLine ? `MOST IMPORTANT for this greeting:${focusLine}` : "",
     L.format,
   ]
     .filter(Boolean)
     .join("\n\n");
 
-  const model = opts.model ?? pickModel(req);
+  // The greeting built on what she taught must make an offer; Haiku often only
+  // restated the fact (1 of 3), so this speak-first turn goes to Sonnet.
+  const model = opts.model ?? (focusLine && !process.env.HYODO_MODEL ? SMART : pickModel(req));
   // Force the one tool this turn clearly needs (Haiku only: Sonnet always thinks,
   // and Anthropic rejects a forced tool choice with thinking on).
   const force: "family_notify" | "memory_remember" | "health_checkin" | "lessons_show" | "tv_play" | "errand_order" | null =
     req.source !== "voice"
       ? null
+      : yesToOffer
+        ? "errand_order"
       : shared.confirmOrder && !/\b(no|cancel|never ?mind)\b|취소|아니/i.test(req.text)
         ? "errand_order"
         : replyingToFamily && !SECRET_WORDS.test(req.text)
@@ -366,11 +406,13 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
       providerOptions: { anthropic: providerOptions(m) },
       // A forced turn needs exactly one tool call; afterwards only the spoken answer
       // (Haiku once saved the same lesson twice and the count jumped by two).
+      // After a forced call the forced tool is taken away (no double saves), but tool
+      // choice stays auto: with "none", Haiku wrote its tool arguments out as speech.
       prepareStep: ({ stepNumber }) =>
         force && m.includes("haiku")
           ? stepNumber === 0
             ? { toolChoice: { type: "tool" as const, toolName: force } }
-            : { toolChoice: "none" as const }
+            : { toolChoice: "auto" as const, activeTools: Object.keys(createTools(ctx)).filter((n) => n !== force) as (keyof ReturnType<typeof createTools>)[] }
           : { toolChoice: "auto" as const },
     });
   let usedModel = model;
@@ -396,7 +438,12 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
     for (const st of result.steps)
       for (const c of st.content)
         if (c.type === "tool-error") console.warn("[agent] tool error:", c.toolName, String((c as { error?: unknown }).error));
-    const spoken = clean(sayTag(raw) ?? raw.split(/<(en|heard|family)>/)[0]);
+    let spoken = clean(sayTag(raw) ?? raw.split(/<(en|heard|family)>/)[0]);
+    // Never read tool arguments or log text out loud.
+    if (LEAK.test(spoken)) {
+      console.warn("[agent] replaced a leaked tool-looking reply:", JSON.stringify(spoken));
+      spoken = safeLine(ran);
+    }
     if (spoken.length >= 4) say = EN ? twoSentences(spoken) : spoken;
     if (EN) sayEn = say;
     else sayEn = tag(raw, "en") ? clean(tag(raw, "en")!) : undefined;
@@ -412,6 +459,10 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   // Korean mode: the model sometimes drops the <en> tag; subtitles must not go blank on stage.
   if (!sayEn && say !== L.fallbackSay) sayEn = await translate(say);
   if (EN) sayEn ??= say;
+
+  if (req.source === "proactive" && /\b(groceries|get you|pick up|order|shopping)\b|장 ?봐|주문|사다/i.test(say)) {
+    shared.offer = { kind: "errand", said: say, basis: taughtNewest?.text ?? "" };
+  }
 
   const done = [...new Set(toolNames)].filter((n) => !["memory_recall", "info_weather", "info_news", "epg_search", "lessons_show", "wallet_balance"].includes(n));
   pushTurn(userTurn, done.length ? `${say} ${L.doneNote(done.join(", "))}` : say);
