@@ -32,7 +32,7 @@
 - Boot screen: the first visit on a browser shows 'TV에 손주가 연결됐어요' for 3 s, then the broadcast. Force it again with `/tv?boot`.
 - Learned counter: a `showCard` whose title has 배운 or 가르쳐 and a number (for example '이번 달 배운 것 12개') gets the big-number style. It shows '할머니가 가르쳐 주신 것', is tagged 'demo count', and closes after 4.5 s.
 - L: the same card from `GET /api/agent/memory` (count of `category: "lesson"` facts), and the TV thanks her out loud. Falls back to 37 only if the memory API is unreachable.
-- Q: hide or show the two QR codes (phone remote `/remote`, family app `/family`, both from window.location.origin). Start hidden: `/tv?noqr`. They also hide while a caption is up.
+- Q: hide or show the two QR codes (grandma's phone app `/?demo=1`, family app `/family?demo=1`, both from window.location.origin). Start hidden: `/tv?noqr`. They also hide while a caption is up.
 - While listening, thinking or speaking the broadcast dims and shrinks and 'TV 소리 줄였어요' shows (no real broadcast audio exists).
 
 ## Phone remote `/remote`

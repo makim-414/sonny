@@ -667,11 +667,12 @@ export function TvApp() {
       {showQr && !captionVisible && (
         <aside className="tv-qr">
           <figure className="tv-qr-item">
-            <QrCode text={`${origin}/remote`} className="tv-qr-code" />
-            <figcaption>{english ? "Phone remote" : "폰 리모컨"}</figcaption>
+            {/* ?demo=1 signs the judge's phone in as the demo device or guardian. */}
+            <QrCode text={`${origin}/?demo=1`} className="tv-qr-code" />
+            <figcaption>{english ? "Grandma's phone" : "할머니 폰"}</figcaption>
           </figure>
           <figure className="tv-qr-item">
-            <QrCode text={`${origin}/family`} className="tv-qr-code" />
+            <QrCode text={`${origin}/family?demo=1`} className="tv-qr-code" />
             <figcaption>{english ? "Family app" : "가족 앱"}</figcaption>
           </figure>
         </aside>
