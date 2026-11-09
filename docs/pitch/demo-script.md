@@ -43,6 +43,10 @@ Everything else (temple day, evening pills, her favorite show, mom's message and
 ### 1. Mom is already grandma's agent (0:00 to 0:08)
 
 - Screen: a living room, the TV on, an empty chair. Then mom's phone with a call log full of calls to grandma, morning, noon, night (staged, labelled "demo data").
+- Title cards over it, one per beat, each with its source in small type:
+  1. "63 million Americans are family caregivers, up 45% since 2015." (NAC and AARP, 2025)
+  2. "Americans 75 and older watch 4.4 hours of TV a day and socialize about 34 minutes." (BLS ATUS, 2025)
+  3. "Americans 60+ lost $4.9 billion to fraud in 2024." (FBI IC3, 2024)
 - Narration: "My grandmother lives alone. My mom is already her agent: she books her rides from her own phone and calls all day to check. Sonny takes that job."
 
 ### 2. One icon. Sonny speaks first. (0:08 to 0:19)

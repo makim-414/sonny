@@ -40,7 +40,7 @@ Start all recordings together and clap once in front of every device for sync.
 
 ### Cut 1. Mom is already grandma's agent (0:00 to 0:08)
 - Camera B: 6 seconds of the room. No faces, no address, no family photos.
-- Edit: narration and a staged call log card labelled "demo data".
+- Edit: narration, a staged call log card labelled "demo data", and the three stat cards from the script with their sources in small type (NAC and AARP 2025; BLS ATUS 2025; FBI IC3 2024).
 
 ### Cut 2. One icon, Sonny speaks first (0:08 to 0:19)
 1. Phone G home screen: tap the Sonny icon.
