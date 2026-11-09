@@ -147,8 +147,8 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     const U: Record<string, WebGLUniformLocation | null> = {};
     for (const n of ["R", "C", "K", "Q", "A", "P", "Y", "X", "T", "S", "B", "Bl", "W", "H", "M", "L", "D", "Z", "G", "N"]) U[n] = gl.getUniformLocation(prog, n);
-    // Reading glasses are on by default; ?acc=none takes them off.
-    gl.uniform1f(U.N, new URLSearchParams(window.location.search).get("acc") === "none" ? 0 : 1);
+    // Reading glasses were cancelled (owner, 11/9): off by default, ?acc=glasses puts them on.
+    gl.uniform1f(U.N, new URLSearchParams(window.location.search).get("acc") === "glasses" ? 1 : 0);
     gl.uniform3fv(U.C, rgb(canvas, "--brand"));
     gl.uniform3fv(U.K, rgb(canvas, "--chart-1"));
     gl.uniform3fv(U.Q, rgb(canvas, "--dark"));
