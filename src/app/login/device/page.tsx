@@ -27,9 +27,12 @@ export default function DevicePage({ searchParams }: PageProps<"/login/device">)
           <Expired searchParams={searchParams} />
         </Suspense>
         <p className="lg-body">{L.deviceBody}</p>
+        <Link className="lg-submit lg-link-button" href="/?demo=1" prefetch={false}>
+          {L.deviceDemo}
+        </Link>
         <p className="lg-demo">
-          <Link href="/?demo=1" prefetch={false}>
-            {L.deviceDemo}
+          <Link href="/login?next=%2Fadmin%2Fdevice" prefetch={false}>
+            {L.deviceFamily}
           </Link>
         </p>
       </main>
