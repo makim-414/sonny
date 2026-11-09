@@ -5,6 +5,7 @@ import type { AgentRequest, TvAction } from "@/lib/types";
 import { isListenSupported, listenOnce, type Listener } from "@/lib/voice/listen";
 import { splitSentences, unlockSpeech } from "@/lib/voice/speak";
 import { speakSentences, stopVoice, unlockAudio, voiceLevel, warmTts } from "@/lib/tts/player";
+import { createVad, type Vad } from "@/lib/voice/vad";
 import { APP_LANG } from "@/lib/brand";
 import { callAgent } from "@/components/tv/agent-client";
 import { formatTime, useDemoClock } from "@/components/tv/use-demo-clock";
@@ -91,6 +92,7 @@ export function OrbApp() {
   const listenOkRef = useRef(true);
   const startedRef = useRef(false);
   const timersRef = useRef<Timer[]>([]);
+  const vadRef = useRef<Vad | null>(null);
   const cardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -163,6 +165,8 @@ export function OrbApp() {
     (job: () => Promise<void>) => {
       pendingRef.current++;
       stopListening();
+      // Never listen while the assistant thinks or talks, so it cannot hear itself.
+      vadRef.current?.pause();
       queueRef.current = queueRef.current
         .then(job)
         .catch((err) => console.warn("[orb] turn failed", err))
@@ -223,6 +227,7 @@ export function OrbApp() {
     }, LANG);
     listenerRef.current = self;
     if (!self) setMode("idle");
+    else vadRef.current?.start();
   }, [setMode, turn]);
 
   useEffect(() => {
@@ -238,6 +243,21 @@ export function OrbApp() {
     unlockSpeech();
     setStarted(true);
     turn({ text: "morning-checkin", source: "proactive" });
+    // Silero VAD decides when a turn ends (0.7 s of silence), then Web Speech hands over the words.
+    if (!hasFlag("novad")) {
+      void createVad({
+        onSpeechStart: () => {
+          signal.current.pulse = 1;
+        },
+        onSpeechEnd: () => listenerRef.current?.stop(),
+        onLevel: (lv) => {
+          if (signal.current.mode === "listening") signal.current.pulse = Math.max(signal.current.pulse, lv);
+        },
+      }).then((v) => {
+        vadRef.current = v;
+        if (v && pendingRef.current === 0 && listenerRef.current) v.start();
+      });
+    }
   }, [turn]);
 
   // A tap after start interrupts the voice, closes a card and goes back to listening.
@@ -372,6 +392,7 @@ export function OrbApp() {
       startedRef.current = false;
       stopListening();
       stopVoice();
+      vadRef.current?.destroy();
     },
     [stopListening],
   );
