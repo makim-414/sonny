@@ -29,20 +29,20 @@ mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,s,0.,-s,c,0.,0.,0.,1.);}
 float soft(float d,float w){return 1.-smoothstep(-w,w,d);}
 // Dot eye; happy turns it into a small upside-down U (^).
 float eye(vec2 q, vec2 c){
-  float r=.075*(1.+W*.3);
-  float dotE=soft(length((q-c)/vec2(1.,max(1.-Bl,.1)))-r,.008);
-  float x=(q.x-c.x)/.085, arc=c.y+.045*(1.-x*x);
-  float hap=soft(abs(q.y-arc)-.012,.006)*step(abs(x),1.);
+  float r=.055*(1.+W*.3);                       // about 5.5% of the diameter
+  float dotE=soft(length((q-c)/vec2(1.,max(1.-Bl,.1)))-r,.006);
+  float x=(q.x-c.x)/.06, arc=c.y+.032*(1.-x*x);
+  float hap=soft(abs(q.y-arc)-.009,.005)*step(abs(x),1.);
   return mix(dotE,hap,H);
 }
 // Small mouth: idle smile, a pea-sized o with the voice, a little D when happy.
 float mouth(vec2 q){
-  vec2 m=q-vec2(0.,-.06);
-  float x=m.x/.15;
-  float smile=soft(abs(m.y-(-.03+.035*x*x))-.011,.005)*step(abs(x),1.);
-  float o=soft(length(m/vec2(.75,1.))-.045*M,.006)*step(.05,M);
-  float dTop=step(m.y,0.)*step(abs(m.x),.07);
-  float dShape=soft(length(m)-.07,.006)*dTop;
+  vec2 m=q-vec2(0.,-.065);                       // just under the eyes
+  float x=m.x/.065;                              // narrower than the eye spacing
+  float smile=soft(abs(m.y-(-.012+.018*x*x))-.007,.004)*step(abs(x),1.);
+  float o=soft(length(m/vec2(.8,1.))-.028*M,.005)*step(.05,M);
+  float dTop=step(m.y,0.)*step(abs(m.x),.045);
+  float dShape=soft(length(m)-.045,.005)*dTop;
   float idle=smile*(1.-step(.05,M));
   return mix(max(idle,o),dShape,H);
 }
@@ -74,9 +74,10 @@ void main(){
     base+=K*rim*.35+pow(max(dot(reflect(-l,n),-rd),0.),30.)*.25;
     float face=step(0.,q.z);
     vec2 f=q.xy+vec2(0.,-L*.07);
-    float blush=soft(length((f-vec2(-.4,0.))/vec2(1.,.6))-.07,.04)+soft(length((f-vec2(.4,0.))/vec2(1.,.6))-.07,.04);
+    float blush=soft(length((f-vec2(-.3,-.05))/vec2(1.,.6))-.055,.035)+soft(length((f-vec2(.3,-.05))/vec2(1.,.6))-.055,.035);
     base=mix(base,P,blush*.35*face);
-    float ink=max(max(eye(f,vec2(-.24,.14)),eye(f,vec2(.24,.14))),mouth(f))*face;
+    // eyes close together (spacing 15% of the diameter), a little above the middle
+    float ink=max(max(eye(f,vec2(-.15,.05)),eye(f,vec2(.15,.05))),mouth(f))*face;
     col=vec4(mix(base,Q,ink*.94),1.);
   }
   gl_FragColor=vec4(col.rgb*col.a,col.a);
