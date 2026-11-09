@@ -9,6 +9,8 @@ export type OrbSignal = {
   mode: OrbMode;
   // 0..1, bumped by speech activity (interim results while listening); decays by itself.
   pulse: number;
+  // Real loudness of the assistant's voice (WebAudio analyser), or null when unknown.
+  level?: () => number | null;
 };
 
 type Target = { radius: number; spin: number; wobble: number; spread: number };
@@ -29,7 +31,7 @@ function readColor(el: HTMLElement, name: string) {
   return getComputedStyle(el).getPropertyValue(name).trim() || "white";
 }
 
-// Speech synthesis gives no volume, so fake a talking rhythm from a few sines.
+// Browser speechSynthesis gives no volume, so this rhythm is only the fallback.
 function speechEnvelope(t: number) {
   const syllables = Math.abs(Math.sin(t * 7.1) * Math.sin(t * 2.3 + 0.7));
   const phrase = 0.6 + 0.4 * Math.sin(t * 0.9);
@@ -83,6 +85,7 @@ export function ParticleOrb({ signal }: { signal: React.RefObject<OrbSignal> }) 
 
     const cur: Target = { ...TARGETS.idle };
     let angle = 0;
+    let voice = 0; // smoothed voice loudness
     let last = performance.now();
     let raf = 0;
 
@@ -102,10 +105,18 @@ export function ParticleOrb({ signal }: { signal: React.RefObject<OrbSignal> }) 
       const motion = reduced ? 0.25 : 1;
       angle += cur.spin * dt * motion;
       const breath = s.mode === "idle" ? Math.sin(t * 0.9) * 0.04 * motion : 0;
-      const talk = s.mode === "speaking" ? speechEnvelope(t) : 0;
+      let talk = 0;
+      if (s.mode === "speaking") {
+        const real = s.level?.() ?? null;
+        const raw = real ?? speechEnvelope(t);
+        voice += (raw - voice) * (1 - Math.exp(-dt * (raw > voice ? 30 : 10)));
+        talk = voice;
+      } else {
+        voice *= 0.9;
+      }
       const tremble = s.mode === "listening" ? s.pulse * 0.12 : 0;
 
-      const base = Math.min(w, h) * 0.3 * (cur.radius + breath);
+      const base = Math.min(w, h) * 0.3 * (cur.radius + breath + talk * 0.12 * motion);
       const cx = w / 2;
       const cy = h / 2;
       const cosA = Math.cos(angle);
