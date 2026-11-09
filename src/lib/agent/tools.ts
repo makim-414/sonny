@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { channelName, nowOn, searchEpg } from "@/lib/epg";
+import { liveSearch, TVMAZE_ATTRIBUTION, type LiveHit } from "@/lib/epg/live";
 import { isLesson, type MemoryFact, type MemoryStore } from "@/lib/memory";
 import { addSchedule, kstClock, kstParts } from "@/lib/scheduler";
 import { logEvent, store } from "@/lib/store";
@@ -10,7 +11,7 @@ import { orderErrand, type ErrandOrder } from "./services/errand";
 import { newsToday, weatherToday } from "./services/info";
 import { requestRide, type RideBooking } from "./services/ride";
 import { T } from "./strings";
-import { spend, walletSnapshot } from "./wallet";
+import { ringGuardian, spend, walletSnapshot } from "./wallet";
 
 // One request's context. Tools push TV actions here; the route returns them.
 export type AgentContext = {
@@ -18,7 +19,17 @@ export type AgentContext = {
   memory: MemoryStore;
   actions: TvAction[];
   private: boolean; // this turn was kept from the family
+  once?: Set<string>; // tools that may act only once per turn (Haiku sometimes calls twice in parallel)
 };
+
+const AGAIN = { ok: false, note: "Already done in this turn. Do not call it again; just answer her." };
+/** True the first time a once-per-turn tool runs in this turn. */
+function first(ctx: AgentContext, name: string) {
+  ctx.once ??= new Set();
+  if (ctx.once.has(name)) return false;
+  ctx.once.add(name);
+  return true;
+}
 
 export const DEMO = T.demo;
 
@@ -29,7 +40,13 @@ export type PendingRequest =
 
 type HealthRecord = { at: string; medicineTaken?: boolean; feeling: string; severity: string; symptoms: string[] };
 type LaterShow = { channel: number; channelName: string; title: string; startISO: string; startsAt: string; startsInMin: number };
-type Shared = { health: HealthRecord[]; requests: PendingRequest[]; lastLater?: LaterShow[] };
+type Shared = {
+  health: HealthRecord[];
+  requests: PendingRequest[];
+  lastLater?: LaterShow[];
+  // An order Sonny asked grandma to double-check ("2 or 2,000?").
+  confirmOrder?: { items: { name: string; qty?: number }[]; question: string };
+};
 const g = globalThis as unknown as { __hyodoAgent?: Shared };
 export const shared: Shared = g.__hyodoAgent ?? (g.__hyodoAgent = { health: [], requests: [] });
 
@@ -60,6 +77,35 @@ const innerAction = z
   ])
   .describe("시간이 되면 TV가 할 일. 프로그램이면 tune, 그 밖엔 showCard");
 
+/** Step 2 of the safety net: Sonny phones the guardian about a spend over the limit. */
+function callGuardian(ctx: AgentContext, pay: ReturnType<typeof spend>, what: string, cost: string) {
+  const reason = pay.reason === "over_limit" ? "over_limit" : "low_balance";
+  const script = T.callScript(what, cost, T.usd(store.wallet.perSpendLimit), reason, T.usd(pay.balance));
+  const call = ringGuardian(pay.entry, script, reason, ctx.now.toISOString());
+  ctx.actions.push({ type: "showCard", title: T.callCardTitle, body: `${T.callCardBody(what, cost)}\n${DEMO}` });
+  log(ctx, "call", `${T.callLog(cost, what)} (call ${call.id})`, { visibility: "family" });
+  return call;
+}
+
+/** English demo: answer from live TVmaze listings (no channel numbers in the US, so a card, not a tune). */
+function liveAnswer(ctx: AgentContext, hits: LiveHit[]) {
+  const top = hits[0];
+  ctx.actions.push({
+    type: "showCard",
+    title: `${top.show} on ${top.network}`,
+    body: `${top.when} (US Eastern)\n${top.guest ? "Guest" : top.role}\n${TVMAZE_ATTRIBUTION}`,
+  });
+  shared.lastLater = hits
+    .filter((h) => h.status === "later")
+    .slice(0, 2)
+    .map((h) => ({ channel: 0, channelName: h.network, title: h.show, startISO: h.startISO, startsAt: h.when, startsInMin: h.startsInMin }));
+  return {
+    source: "live TV listings (TVmaze)",
+    results: hits.map((h) => ({ show: h.show, network: h.network, when: h.when, startISO: h.startISO, status: h.status, guest: h.guest })),
+    note: "No channel numbers for US live listings. Tell her the show, network and day/time, and offer a reminder: schedule_at with then=showCard at startISO.",
+  };
+}
+
 export function createTools(ctx: AgentContext) {
   const clock = () => kstClock(ctx.now);
   return {
@@ -73,6 +119,7 @@ export function createTools(ctx: AgentContext) {
         topic: z.enum(["likes", "routine", "health", "family", "place", "other"]).optional().describe("personal 일 때 분류"),
       }),
       execute: async ({ fact, kind, card, topic }) => {
+        if (!first(ctx, "memory_remember")) return AGAIN;
         const category = kind === "lesson" ? "lesson" : (topic ?? "taught");
         const provenance = `${TAUGHT_BY}, ${ctx.now.toISOString()}`;
         const saved = await ctx.memory.remember({ text: fact, category, source: "grandma", provenance, at: ctx.now.toISOString() });
@@ -169,7 +216,17 @@ export function createTools(ctx: AgentContext) {
             channel = hit.channel;
             ms = Date.parse(hit.start);
           } else if (!channelName(channel)) {
-            return { ok: false, error: "편성표에서 그 프로그램을 못 찾았어요. tv_play 로 먼저 찾아 주세요." };
+            // Live US listing (no channel number): remind with a card at its start instead.
+            const liveShow = shared.lastLater?.find((l) => l.channel === 0 && label.toLowerCase().includes(l.title.toLowerCase().slice(0, 6)));
+            if (liveShow) {
+              ms = Date.parse(liveShow.startISO);
+              const iso = new Date(ms).toISOString();
+              const inner: TvAction = { type: "showCard", title: `${liveShow.title} starts now on ${liveShow.channelName}`, body: TVMAZE_ATTRIBUTION };
+              ctx.actions.push(addSchedule(iso, label, inner));
+              log(ctx, "scheduled", `${liveShow.startsAt} ${label}`, { visibility: "family" });
+              return { ok: true, at: iso, spoken: liveShow.startsAt };
+            }
+            return { ok: false, error: "That show is not in the guide. Use tv_play first." };
           }
         }
         if (!Number.isFinite(ms)) return { ok: false, error: "시간 형식이 틀렸어요. ISO로 다시." };
@@ -186,11 +243,12 @@ export function createTools(ctx: AgentContext) {
       description:
         "택시를 요청한다(가짜 서비스, 실제 호출·결제 없음). 목적지와 시간을 할머니께 확인한 뒤 부른다. 따님 승인 요청과 TV 카드는 자동. 승인되면 차가 배정된다.",
       inputSchema: z.object({
-        to: z.string().describe("목적지. 예: '병원', '서울바른내과의원', '보현사'"),
+        to: z.string().describe("목적지. 예: '병원', '햇살내과의원', '햇살사'"),
         from: z.string().optional().describe("출발지, 없으면 집"),
         when: z.string().optional().describe("ISO 시각. 지금이면 비운다"),
       }),
       execute: async ({ to, from, when }) => {
+        if (!first(ctx, "ride_request")) return AGAIN;
         const ride = requestRide({ to, from, when, now: ctx.now });
         const cost = T.usd(ride.fareCents);
         const pay = spend(ride.fareCents, `Taxi to ${ride.destination.name} (${DEMO})`, ctx.now.toISOString());
@@ -207,10 +265,9 @@ export function createTools(ctx: AgentContext) {
           return { ok: true, status: "done", paid: cost, balanceLeft: T.usd(pay.balance), car: ride.carModel, plate: ride.plate, etaMin: ride.etaMin, destination: ride.destination.name };
         }
         shared.requests.push({ kind: "taxi", at: ctx.now.toISOString(), ride, walletEntryId: pay.entry.id });
-        ctx.actions.push({ type: "showCard", title: T.rideCardPending, body: `${T.ridePendingBody(ride.pickup.name, ride.destination.name)}\n${DEMO}` });
+        callGuardian(ctx, pay, T.whatRide(ride.destination.name), cost);
         ctx.actions.push({ type: "notifyFamily", message: T.notifyRide(ride.pickup.name, ride.destination.name), level: "warn" });
-        log(ctx, "task", T.logRidePending(cost, ride.pickup.name, ride.destination.name) + ` (${DEMO})`, { visibility: "family" });
-        return { ok: true, status: "pending_approval", cost, reason: pay.reason === "over_limit" ? `over the ${T.usd(store.wallet.perSpendLimit)} per-purchase limit` : `only ${T.usd(pay.balance)} left in the allowance`, destination: ride.destination.name, say: "Tell her you asked her daughter to OK this." };
+        return { ok: true, status: "calling_daughter", cost, reason: pay.reason === "over_limit" ? `over the ${T.usd(store.wallet.perSpendLimit)} per-purchase limit` : `only ${T.usd(pay.balance)} left in the allowance`, destination: ride.destination.name, say: "Tell her: I'm calling Sarah to check." };
       },
     }),
 
@@ -221,15 +278,28 @@ export function createTools(ctx: AgentContext) {
           .array(
             z.object({
               name: z.string().describe("item in plain words, e.g. 'milk', 'eggs', 'rice'"),
-              qty: z.number().int().min(1).max(20).optional().describe("number of packs as sold: a dozen eggs = 1, two gallons of milk = 2"),
+              qty: z.number().int().min(1).optional().describe("number of packs as sold: a dozen eggs = 1, two gallons of milk = 2. Use exactly the number she said, even if it is huge."),
             }),
           )
           .min(1),
+        confirmed: z.boolean().optional().describe("true only after she confirmed an unusual amount you asked about"),
       }),
-      execute: async ({ items }) => {
+      execute: async ({ items, confirmed }) => {
+        if (!first(ctx, "errand_order")) return AGAIN;
         const order = orderErrand({ items, now: ctx.now });
         const list = order.items.map((i) => T.qty(i.name, i.qty)).join(", ");
         const cost = T.usd(order.totalCents);
+        // Step 1 of the safety net: an unusual amount is checked with grandma first.
+        const odd = order.items.find((i) => i.qty > 10);
+        if (!confirmed && (odd || order.totalCents > 3 * store.wallet.perSpendLimit)) {
+          const item = odd ?? order.items.reduce((a, b) => (b.priceCents > a.priceCents ? b : a));
+          const small = String(item.qty).replace(/0+$/, "") || "1";
+          const question = T.confirmAsk(small === String(item.qty) ? "1" : small, item.qty.toLocaleString("en-US"), item.name);
+          shared.confirmOrder = { items, question };
+          log(ctx, "task", `Checking an unusual order with Grandma: ${list}, ${cost}`, { visibility: "family" });
+          return { ok: false, status: "needs_confirmation", total: cost, ask: question, say: `Ask her exactly: "${question}" Do not order yet.` };
+        }
+        shared.confirmOrder = undefined;
         const pay = spend(order.totalCents, `Groceries: ${list} (${DEMO})`, ctx.now.toISOString());
         if (pay.status === "done") {
           order.status = "paid";
@@ -239,10 +309,9 @@ export function createTools(ctx: AgentContext) {
           return { ok: true, status: "done", paid: cost, balanceLeft: T.usd(pay.balance), arrives: order.arrives };
         }
         shared.requests.push({ kind: "order", at: ctx.now.toISOString(), order, walletEntryId: pay.entry.id });
-        ctx.actions.push({ type: "showCard", title: T.orderCardPending, body: `${T.orderPendingBody(list, cost)}\n${DEMO}` });
+        callGuardian(ctx, pay, T.whatOrder(list), cost);
         ctx.actions.push({ type: "notifyFamily", message: T.notifyOrder(list), level: "warn" });
-        log(ctx, "task", T.logOrderPending(list, cost) + ` (${DEMO})`, { visibility: "family" });
-        return { ok: true, status: "pending_approval", cost, reason: pay.reason === "over_limit" ? `over the ${T.usd(store.wallet.perSpendLimit)} per-purchase limit` : `only ${T.usd(pay.balance)} left in the allowance`, say: "Tell her you asked her daughter to OK this." };
+        return { ok: true, status: "calling_daughter", cost, reason: pay.reason === "over_limit" ? `over the ${T.usd(store.wallet.perSpendLimit)} per-purchase limit` : `only ${T.usd(pay.balance)} left in the allowance`, say: "Tell her: I'm calling Sarah to check." };
       },
     }),
 
@@ -280,7 +349,7 @@ export function createTools(ctx: AgentContext) {
     }),
 
     family_notify: tool({
-      description: "가족(딸 민정)에게 메시지를 보낸다. 할머니 부탁이나 알릴 일. 가족 메시지에 대한 할머니 답이면 reply=true.",
+      description: "가족(딸 수진)에게 메시지를 보낸다. 할머니 부탁이나 알릴 일. 가족 메시지에 대한 할머니 답이면 reply=true.",
       inputSchema: z.object({
         message: z.string().describe("가족에게 보낼 한 줄 요약"),
         reply: z.boolean().optional().describe("가족 메시지에 대한 할머니 답 요약이면 true"),
@@ -331,6 +400,8 @@ export function createTools(ctx: AgentContext) {
         "프로그램을 찾아 지금 방송 중이면 바로 튼다. 곧 시작하는 것은 later 로 알려 준다(시작할 때 틀어 드릴지 여쭙고, 그러라고 하시면 schedule_at). TV 요청은 이 도구 하나면 된다.",
       inputSchema: z.object({ query: z.string().describe("사람 이름이나 제목. 예: '임영웅', '가요무대', '뉴스'") }),
       execute: async ({ query }) => {
+        const liveHits = await liveSearch(query, ctx.now);
+        if (liveHits) return liveAnswer(ctx, liveHits);
         const hits = searchEpg(query, ctx.now);
         const live = hits.find((h) => h.status === "now");
         const later = hits.filter((h) => h.status === "later").slice(0, 2).map((h) => ({
@@ -359,6 +430,8 @@ export function createTools(ctx: AgentContext) {
       description: "오늘 편성표만 찾아본다(틀지 않음). 틀어 달라는 요청엔 tv_play 를 쓴다.",
       inputSchema: z.object({ query: z.string().describe("예: '임영웅', '가요무대', '뉴스'") }),
       execute: async ({ query }) => {
+        const liveHits = await liveSearch(query, ctx.now);
+        if (liveHits) return liveAnswer(ctx, liveHits);
         const hits = searchEpg(query, ctx.now);
         shared.lastLater = hits
           .filter((h) => h.status === "later")

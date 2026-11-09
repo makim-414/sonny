@@ -66,6 +66,24 @@
 
 한국어로만 돌린 이전 17턴 결과는 커밋 `d3d505a` 의 이 문서에 있다.
 
+## 잘못된 주문 안전장치 (11:12 실행)
+
+`?demo=1` 쿠키로 같은 서버에서 돌렸다. 가족 앱의 `POST /api/family/calls` 와 `/api/family/inbox` 도 실제로 거쳤다.
+
+| 말 / 이벤트 | 응답 | 결과 |
+|---|---|---|
+| "Sonny, order two thousand burgers" | 4.0s Haiku | "Did you mean 2 burgers, or 2,000?" (결제 없음) |
+| "Oh no, I meant just two" | 2.6s Haiku | 2개 주문, 용돈에서 바로 결제 |
+| "Order five chickens for the church dinner" | 2.9s Haiku | $44.95 가 한도 $30 를 넘는다. ledger 는 `pending_approval` 이고 `store.calls` 에 `ringing` 이 생긴다. 말은 "I'm calling Sarah to check." |
+| 엄마가 전화 승인 → inbox "Mom approved call <id>" | 0s (모델 없음) | "Sarah said yes, it's ordered." + 주문 카드 |
+| "Order four big pizzas" → 엄마 거절 | 0s (모델 없음) | "Sarah said not this time, so I cancelled it." + Cancelled 카드 |
+| "Sonny, call a taxi to the clinic now" → "Yes" | 1.1s, 2.1s Haiku | 8분 거리, $4.50 이라 바로 결제. 차가 6분 뒤 도착 |
+
+- 전화 script 예: "Hi, it's Sonny. Grandma June wants to order 5 chicken for $44.95. That's over her $30 limit. Should I go ahead?"
+- 가족 앱의 `decide` 는 잔액보다 큰 금액의 승인을 거부한다("not enough balance"). 그래서 데모 주문은 잔액 안에서 한도만 넘는 금액으로 한다.
+- 고친 버그: Haiku 가 한 단계에서 `errand_order` 를 두 번 병렬로 불러 전화가 두 통 걸렸다. 지금은 주문, 택시, 기억 저장이 턴당 한 번만 실행된다.
+- 이름과 장소는 공개 전에 모두 가명으로 바꿨다(Grandma June, 할머니, 수진, 햇살시).
+
 ## 안전장치
 
 - Haiku 가 도구를 부르지 않고 행동을 말하면 같은 턴을 Sonnet 으로 다시 돌린다(`meta.rerun`). 예: "ordered", "on the way", "I'll remember", "turned it on".
@@ -107,7 +125,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Hello, Margaret! It's nice to hear from you. How can I help you this afternoon?",
+  "say": "Hello, June! It's nice to hear from you. How can I help you this afternoon?",
   "heardEn": "Hi Sonny",
   "actions": []
 }
@@ -119,7 +137,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Yes, Margaret! The Graduate is on right now on channel 30. Also, Dustin Hoffman is a guest on the Today show at 2:30 PM, on channel 4. Would you like me to remind you then?",
+  "say": "Yes, June! The Graduate is on right now on channel 30. Also, Dustin Hoffman is a guest on the Today show at 2:30 PM, on channel 4. Would you like me to remind you then?",
   "heardEn": "Is Dustin Hoffman on TV today?",
   "actions": [
     {
@@ -160,7 +178,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Thank you, Margaret. Your grandson Max is one I'll remember.",
+  "say": "Thank you, June. Your grandson Max is one I'll remember.",
   "heardEn": "My grandson's name is Max",
   "private": true,
   "actions": [
@@ -179,7 +197,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Good morning, Margaret! Did Max have a good day at school yesterday? Don't forget your blood pressure pill at 8 AM. It's chilly out, so bundle up.",
+  "say": "Good morning, June! Did Max have a good day at school yesterday? Don't forget your blood pressure pill at 8 AM. It's chilly out, so bundle up.",
   "actions": []
 }
 ```
@@ -190,7 +208,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Wonderful, Margaret! I've written down that you took your pill. Have a lovely morning.",
+  "say": "Wonderful, June! I've written down that you took your pill. Have a lovely morning.",
   "heardEn": "He's fine. And yes, I took my pill",
   "actions": []
 }
@@ -202,7 +220,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "You have 80 dollars left in your allowance, Margaret.",
+  "say": "You have 80 dollars left in your allowance, June.",
   "heardEn": "How much allowance do I have left?",
   "actions": [
     {
@@ -232,7 +250,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Your taxi is on the way, Margaret. A black Ford Fusion will be at your door in about 6 minutes.",
+  "say": "Your taxi is on the way, June. A black Ford Fusion will be at your door in about 6 minutes.",
   "heardEn": "Yes, now please",
   "actions": [
     {
@@ -300,7 +318,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Thank you, Margaret, that's a wonderful tip. I've saved it. This will help other people too.",
+  "say": "Thank you, June, that's a wonderful tip. I've saved it. This will help other people too.",
   "heardEn": "When you make pie crust, the butter and the water have to be ice cold",
   "actions": [
     {
@@ -318,7 +336,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Thank you, Margaret. I've fixed it, so bingo is on Wednesday and Friday now.",
+  "say": "Thank you, June. I've fixed it, so bingo is on Wednesday and Friday now.",
   "heardEn": "No, not Tuesday. Bingo is on Wednesday and Friday",
   "private": true,
   "actions": [
@@ -337,7 +355,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Okay, I won't tell your daughter. I'm sorry about your knee, Margaret. Please rest it today.",
+  "say": "Okay, I won't tell your daughter. I'm sorry about your knee, June. Please rest it today.",
   "heardEn": "My knee has been aching. But don't tell my daughter",
   "private": true,
   "actions": [
@@ -356,7 +374,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Sarah says she'll come over at 7 tonight for dinner together. Would you like to reply to her, Margaret?",
+  "say": "Sarah says she'll come over at 7 tonight for dinner together. Would you like to reply to her, June?",
   "heardEn": "I'll come over at 7 tonight. Let's have dinner together",
   "actions": [
     {
@@ -374,7 +392,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "I passed that on to Sarah, Margaret. She will be so happy about the pot roast!",
+  "say": "I passed that on to Sarah, June. She will be so happy about the pot roast!",
   "heardEn": "Wonderful, I'll make a pot roast",
   "actions": [
     {
@@ -392,7 +410,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Please sit down now and rest, Margaret. I've let Sarah know, and she will help you.",
+  "say": "Please sit down now and rest, June. I've let Sarah know, and she will help you.",
   "heardEn": "Oh, I've been dizzy since this morning and my head hurts",
   "actions": [
     {

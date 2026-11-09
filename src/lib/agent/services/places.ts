@@ -3,10 +3,10 @@ import { APP_LANG } from "@/lib/brand";
 // Known places for the mock services. Fake addresses, mirrored in seed memory.
 type Place = { name: string; address: string; aliases: string[] };
 const KO: Record<string, Place> = {
-  home: { name: "집", address: "서울 마포구 성미산로 12길 8", aliases: ["집", "우리집", "home"] },
-  hospital: { name: "서울바른내과의원", address: "서울 마포구 망원로 45", aliases: ["병원", "내과", "바른내과", "의원"] },
-  temple: { name: "보현사", address: "서울 마포구 성산로 3길 21", aliases: ["절", "보현사", "사찰"] },
-  market: { name: "망원시장", address: "서울 마포구 포은로8길 14", aliases: ["시장", "망원시장"] },
+  home: { name: "집", address: "햇살시 행복구 꽃길 12", aliases: ["집", "우리집", "home"] },
+  hospital: { name: "햇살내과의원", address: "햇살시 행복구 가상로 45", aliases: ["병원", "내과", "햇살내과", "의원"] },
+  temple: { name: "햇살사", address: "햇살시 행복구 절골길 21", aliases: ["절", "햇살사", "사찰"] },
+  market: { name: "햇살시장", address: "햇살시 행복구 장터길 14", aliases: ["시장", "햇살시장"] },
 };
 const EN: Record<string, Place> = {
   home: { name: "Home", address: "12 Maple Street, Apt 2B", aliases: ["home", "house", "my place"] },

@@ -37,7 +37,7 @@ const CLAIMS = [
   { words: /기억할게|기억해 둘게|기억해 두었|기억했|\bI('ll| will) remember\b|\bI('ve| have) (saved|noted) that\b/i, tools: ["memory_remember", "memory_correct"] },
   { words: /틀어 드렸|틀었어|찾아볼게|찾아 드릴게|\bI('ve| have)? (turned|put) (it |that )?on\b|\blet me find\b/i, tools: ["tv_play", "tv_tune", "epg_search"] },
   { words: /틀어 드릴게|알려 드릴게|예약했|예약해 둘게|\bI('ll| will) remind\b|\bI('ve| have)? set (a|the) reminder\b/i, tools: ["schedule_at", "tv_play"] },
-  { words: /\basked your daughter\b|\bsent (it )?to your daughter\b/i, tools: ["ride_request", "errand_order"] },
+  { words: /\basked your daughter\b|\bsent (it )?to your daughter\b|\bcalling (sarah|your daughter)\b/i, tools: ["ride_request", "errand_order"] },
   { words: /알렸어|전해 드렸|전했어|전해 드릴게|전할게|\bI('ve| have)? (told|let) your daughter\b|\bI('ll| will) (tell|let) your daughter\b/i, tools: ["family_notify", "health_checkin", "ride_request", "errand_order"] },
 ];
 // Turns that spend money, touch safety or privacy, or rewrite memory go to Sonnet.
@@ -124,7 +124,7 @@ const L = EN
       doneNote: (d: string) => `[한 일: ${d}]`,
       approvalTurn: (t: string) => `[가족 승인] ${t}`,
       brainError: "두뇌 오류",
-      mom: "딸 민정",
+      mom: "딸 수진",
     };
 
 const FALLBACK_EN = "One moment, let me ask you again.";
@@ -142,7 +142,49 @@ const tag = (s: string, t: string) => s.match(new RegExp(`<${t}>([\\s\\S]*?)</${
 const clean = (s: string) => s.replace(/<[^>]+>/g, "").replace(/\[[^\]]*\]/g, "").replace(/\s*\n+\s*/g, " ").trim();
 const sayTag = (raw: string) => tag(raw, "say") ?? tag(raw, "ko");
 
+// Older listeners: at most two sentences on stage (the prompt asks for about 15 words each).
+function twoSentences(s: string): string {
+  const parts = s.match(/[^.!?]+[.!?]+["')]?\s*/g);
+  return parts && parts.length > 2 ? parts.slice(0, 2).join("").trim() : s;
+}
+
 type Reply = AgentReply & { meta: Record<string, unknown> };
+
+/** Mom answered Sonny's call ("Mom approved call <id>"). The family app already settled the wallet. */
+function handleCallAnswer(text: string, now: Date): Reply | null {
+  const m = text.match(/\b(approved|declined|missed) call ([0-9a-f-]{8,})/i);
+  if (!m) return null;
+  const verdict = m[1].toLowerCase();
+  const call = store.calls.find((c) => c.id === m[2]);
+  const idx = call ? shared.requests.findIndex((r) => r.walletEntryId === call.walletEntryId) : -1;
+  const req = idx >= 0 ? shared.requests[idx] : undefined;
+  const at = now.toISOString();
+  const actions: TvAction[] = [];
+  let say: string;
+  if (verdict === "missed") {
+    say = T.missedSay;
+  } else if (!req) {
+    say = verdict === "approved" ? T.orderedSay : T.declinedSay("");
+  } else {
+    shared.requests.splice(idx, 1);
+    if (verdict === "declined") {
+      say = T.declinedSay("");
+      actions.push({ type: "showCard", title: T.declinedCard, body: req.kind === "taxi" ? T.whatRide(req.ride.destination.name) : req.order.items.map((i) => T.qty(i.name, i.qty)).join(", ") });
+    } else if (req.kind === "taxi") {
+      const r = req.ride;
+      say = T.rideOkSay(r.carModel, 5);
+      actions.push({ type: "showCard", title: T.rideCardTitle, body: `${T.rideBody(r.pickup.name, r.destination.name, r.carModel, r.plate, 5)}\n${T.approvedTag}\n${DEMO}` });
+    } else {
+      const o = req.order;
+      const list = o.items.map((i) => T.qty(i.name, i.qty)).join(", ");
+      say = T.orderedSay;
+      actions.push({ type: "showCard", title: T.orderCardTitle, body: `${T.orderBody(list, T.usd(o.totalCents), o.arrives)}\n${T.approvedTag}\n${DEMO}` });
+    }
+  }
+  logEvent("said", say, at, { visibility: "family" });
+  pushTurn(L.approvalTurn(text), `${say} ${L.doneNote(`call ${verdict}`)}`);
+  return { say, sayEn: EN ? say : undefined, actions, meta: { ms: 0, model: "none (call answer)", tools: [] } };
+}
 
 /** Mom approved a taxi or order in the family app. Deterministic, no model call. */
 function handleApproval(text: string, now: Date): Reply | null {
@@ -210,7 +252,7 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   const ctx: AgentContext = { now, memory, actions: [], private: false };
 
   if (req.source === "family") {
-    const approved = handleApproval(req.text, now);
+    const approved = handleCallAnswer(req.text, now) ?? handleApproval(req.text, now);
     if (approved) return { ...approved, meta: { ...approved.meta, ms: Date.now() - started, memory: memory.backend } };
   }
 
@@ -279,6 +321,9 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
       ? `${L.later}:\n${shared.lastLater.map((l) => `- ${L.chan(l.channel, l.channelName)} "${l.title}" ${l.startsAt} (${l.startISO})`).join("\n")}`
       : "",
     task ? `${L.task}: ${task.trim()}` : "",
+    shared.confirmOrder && req.source === "voice"
+      ? `You just asked her: "${shared.confirmOrder.question}" about this order: ${JSON.stringify(shared.confirmOrder.items)}. Her words now are the answer. Call errand_order with the amounts she means now and confirmed=true. If she says no or cancel, do not order.`
+      : "",
     L.format,
   ]
     .filter(Boolean)
@@ -290,7 +335,9 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   const force: "family_notify" | "memory_remember" | "health_checkin" | "lessons_show" | "tv_play" | "errand_order" | null =
     req.source !== "voice"
       ? null
-      : replyingToFamily && !SECRET_WORDS.test(req.text)
+      : shared.confirmOrder && !/\b(no|cancel|never ?mind)\b|취소|아니/i.test(req.text)
+        ? "errand_order"
+        : replyingToFamily && !SECRET_WORDS.test(req.text)
         ? "family_notify"
         : ORDER_NOW.test(req.text) && !/\b(taxi|cab|ride)\b|택시/i.test(req.text)
           ? "errand_order"
@@ -350,7 +397,7 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
       for (const c of st.content)
         if (c.type === "tool-error") console.warn("[agent] tool error:", c.toolName, String((c as { error?: unknown }).error));
     const spoken = clean(sayTag(raw) ?? raw.split(/<(en|heard|family)>/)[0]);
-    if (spoken.length >= 4) say = spoken;
+    if (spoken.length >= 4) say = EN ? twoSentences(spoken) : spoken;
     if (EN) sayEn = say;
     else sayEn = tag(raw, "en") ? clean(tag(raw, "en")!) : undefined;
     heardEn = heardEn ?? (tag(raw, "heard") ? clean(tag(raw, "heard")!) || undefined : undefined);

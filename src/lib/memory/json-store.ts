@@ -4,13 +4,14 @@ import path from "node:path";
 import { APP_LANG } from "@/lib/brand";
 import { SEED_FACTS, SEED_LESSONS, SEED_PROVENANCE } from "./seed";
 import { rankFacts } from "./search";
-import type { MemoryFact, MemoryStore } from "./types";
+import { bumpMemVersion, memVersion, type MemoryFact, type MemoryStore } from "./types";
 
 // File-backed memory, the safety net under GBrain. Lives outside the repo.
 const DATA_DIR = process.env.HYODO_DATA_DIR ?? path.join(os.homedir(), ".hyodo-tv");
 const FILE = path.join(DATA_DIR, APP_LANG === "en" ? "memory-en.json" : "memory.json");
 
 let cache: MemoryFact[] | null = null;
+let seen = memVersion("json");
 let writing: Promise<void> = Promise.resolve();
 
 export function seedFacts(): MemoryFact[] {
@@ -29,6 +30,8 @@ export function seedFacts(): MemoryFact[] {
 }
 
 async function load(): Promise<MemoryFact[]> {
+  if (seen !== memVersion("json")) cache = null;
+  seen = memVersion("json");
   if (cache) return cache;
   try {
     cache = JSON.parse(await fs.readFile(FILE, "utf8")) as MemoryFact[];
@@ -40,6 +43,8 @@ async function load(): Promise<MemoryFact[]> {
 }
 
 function save(): Promise<void> {
+  bumpMemVersion("json");
+  seen = memVersion("json");
   const snapshot = JSON.stringify(cache ?? [], null, 2);
   writing = writing.then(async () => {
     await fs.mkdir(DATA_DIR, { recursive: true });

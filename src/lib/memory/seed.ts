@@ -3,13 +3,13 @@ import type { MemoryFact } from "./types";
 
 // Demo grandma. Addresses and names are fake.
 const SEED_FACTS_KO: Omit<MemoryFact, "id" | "at">[] = [
-  { text: "할머니 성함은 김순자, 연세는 여든둘이시다", category: "family", source: "seed" },
+  { text: "할머니는 여든둘이시고 혼자 사신다", category: "family", source: "seed" },
   { text: "가수 임영웅을 아주 좋아하신다. 임영웅 나오는 프로그램은 꼭 보신다", category: "likes", source: "seed" },
-  { text: "절에는 매주 화요일과 금요일 아침에 가신다 (집 근처 보현사)", category: "routine", source: "seed" },
+  { text: "절에는 매주 화요일과 금요일 아침에 가신다 (집 근처 햇살사)", category: "routine", source: "seed" },
   { text: "혈압약을 매일 아침 8시에 드신다", category: "health", source: "seed" },
-  { text: "딸(민정)은 사흘에 한 번 와서 주무시고 간다", category: "family", source: "seed" },
-  { text: "다니는 병원은 서울바른내과의원, 주소는 서울 마포구 망원로 45 (가짜)", category: "place", source: "seed" },
-  { text: "집 주소는 서울 마포구 성미산로 12길 8, 2층 (가짜)", category: "place", source: "seed" },
+  { text: "딸(수진)은 사흘에 한 번 와서 주무시고 간다", category: "family", source: "seed" },
+  { text: "다니는 병원은 햇살내과의원, 주소는 햇살시 행복구 가상로 45 (가짜)", category: "place", source: "seed" },
+  { text: "집 주소는 햇살시 행복구 꽃길 12, 2층 (가짜)", category: "place", source: "seed" },
   { text: "무릎이 안 좋으셔서 오래 걷기 힘드시다", category: "health", source: "seed" },
   { text: "아침 드라마와 트로트 프로그램을 즐겨 보신다", category: "likes", source: "seed" },
 ];
@@ -23,7 +23,7 @@ const SEED_LESSONS_KO: { text: string; at: string }[] = [
   { text: "미역국은 참기름에 미역을 충분히 볶은 뒤 물을 부어야 국물이 뽀얗다", at: "2026-11-02T19:30:00+09:00" },
   { text: "감기 기운 있을 땐 배에 꿀과 생강을 넣고 중탕해 먹으면 목이 편하다", at: "2026-11-02T19:30:00+09:00" },
   { text: "콩나물국은 뚜껑을 처음부터 닫거나 열어 두고 끝까지 바꾸지 않아야 비린내가 안 난다", at: "2026-11-03T19:30:00+09:00" },
-  { text: "망원시장 생선가게는 화요일 아침에 들어온 고등어가 제일 싱싱하다", at: "2026-11-03T19:30:00+09:00" },
+  { text: "햇살시장 생선가게는 화요일 아침에 들어온 고등어가 제일 싱싱하다", at: "2026-11-03T19:30:00+09:00" },
   { text: "겨울엔 보일러를 외출 모드로 두면 동파를 막고 가스비도 아낀다", at: "2026-11-03T19:30:00+09:00" },
   { text: "무릎 아플 땐 계단 내려갈 때 아픈 다리를 먼저 내딛는다", at: "2026-11-04T19:30:00+09:00" },
   { text: "나물은 데친 뒤 찬물에 바로 헹궈야 색이 곱다", at: "2026-11-04T19:30:00+09:00" },
@@ -35,7 +35,7 @@ const SEED_LESSONS_KO: { text: string; at: string }[] = [
   { text: "깍두기는 무에 설탕을 조금 먼저 버무리면 물이 덜 생긴다", at: "2026-11-06T19:30:00+09:00" },
   { text: "멸치볶음은 마른 팬에 먼저 볶아 비린내를 날린 뒤 양념한다", at: "2026-11-06T19:30:00+09:00" },
   { text: "겨울 빨래는 신문지를 사이에 끼워 널면 빨리 마른다", at: "2026-11-06T19:30:00+09:00" },
-  { text: "보현사 가는 길 언덕은 오른쪽 골목으로 돌아가면 덜 가파르다", at: "2026-11-06T19:30:00+09:00" },
+  { text: "햇살사 가는 길 언덕은 오른쪽 골목으로 돌아가면 덜 가파르다", at: "2026-11-06T19:30:00+09:00" },
   { text: "떡국 떡은 찬물에 30분 불려야 쫄깃하고 국물이 탁하지 않다", at: "2026-11-07T19:30:00+09:00" },
   { text: "시금치는 뿌리째 데쳐야 단맛이 남는다", at: "2026-11-07T19:30:00+09:00" },
   { text: "고구마는 신문지에 싸서 서늘한 곳에 두면 겨우내 안 썩는다", at: "2026-11-07T19:30:00+09:00" },
@@ -50,7 +50,7 @@ const SEED_LESSONS_KO: { text: string; at: string }[] = [
 ];
 
 const SEED_FACTS_EN: Omit<MemoryFact, "id" | "at">[] = [
-  { text: "Grandma's name is Margaret Collins, she is 82 and lives alone", category: "family", source: "seed" },
+  { text: "Grandma's name is June, she is 82 and lives alone", category: "family", source: "seed" },
   { text: "She is a big Dustin Hoffman fan and never misses a show he is on", category: "likes", source: "seed" },
   { text: "She plays bingo at the Maple Grove senior center every Tuesday and Friday morning", category: "routine", source: "seed" },
   { text: "She takes her blood pressure pill every morning at 8", category: "health", source: "seed" },
@@ -96,6 +96,6 @@ const SEED_LESSONS_EN: { text: string; at: string }[] = [
 
 export const SEED_FACTS = APP_LANG === "en" ? SEED_FACTS_EN : SEED_FACTS_KO;
 export const SEED_LESSONS = APP_LANG === "en" ? SEED_LESSONS_EN : SEED_LESSONS_KO;
-export const SEED_PROVENANCE = APP_LANG === "en" ? "seed: Margaret taught this in a talk with Sonny (demo data)" : "seed: 김순자 할머니가 TV 대화에서 가르침 (demo data)";
-export const TAUGHT_BY = APP_LANG === "en" ? "Margaret taught this in a talk with Sonny" : "김순자 할머니가 TV 대화에서 가르침";
-export const CORRECTED_BY = APP_LANG === "en" ? "Margaret corrected this" : "김순자 할머니가 정정함";
+export const SEED_PROVENANCE = APP_LANG === "en" ? "seed: June taught this in a talk with Sonny (demo data)" : "seed: 할머니가 TV 대화에서 가르침 (demo data)";
+export const TAUGHT_BY = APP_LANG === "en" ? "June taught this in a talk with Sonny" : "할머니가 TV 대화에서 가르침";
+export const CORRECTED_BY = APP_LANG === "en" ? "June corrected this" : "할머니가 정정함";

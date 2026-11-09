@@ -46,9 +46,9 @@ export function requestRide(input: { from?: string; to: string; when?: string; n
     driver: car.driver,
     pickupAt: new Date(input.now.getTime() + etaMin * 60_000).toISOString(),
     etaMin,
-    tripMin: 14,
-    fareWon: 8700,
-    fareCents: 1200,
+    tripMin: 8, // shaped on a real morning ride: 8 minutes, card payment (values here are fake)
+    fareWon: 5900,
+    fareCents: 450,
     status: reserved ? "reserved" : "dispatched",
   };
 }
