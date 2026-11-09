@@ -36,7 +36,12 @@ const EN = {
   logOrderPaid: (cost: string, list: string, arrives: string) => `Order placed: paid ${cost} from allowance for ${list}, arrives ${arrives}`,
   logOrderPending: (list: string, cost: string) => `Order request: ${list}, ${cost}, needs your OK`,
   notifyOrder: (list: string) => `Order: ${list}`,
-  qty: (name: string, q: number) => `${q} ${name}`,
+  // "a dozen eggs" or "the small rye bread" already say how much: no number in front.
+  qty: (name: string, q: number) => {
+    const n = name.trim();
+    const cap = n.charAt(0).toUpperCase() + n.slice(1);
+    return q <= 1 || /^(a|an|the|one|two|three|some|\d+|half|a few|dozen)\b/i.test(n) ? cap : `${q} ${n}`;
+  },
   walletTitle: (bal: string) => `Allowance left: ${bal}`,
   skillLearnedTitle: (name: string) => `Learned how to: ${name}`,
   skillUpdatedTitle: (name: string) => `Updated how to: ${name}`,

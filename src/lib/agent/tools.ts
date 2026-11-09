@@ -115,7 +115,7 @@ export function createTools(ctx: AgentContext) {
   const clock = () => kstClock(ctx.now);
 
   // Shared by errand_order and skill_run: price, sanity check, allowance, guardian call.
-  const placeOrder = async (items: { name: string; qty?: number }[], confirmed?: boolean) => {
+  const placeOrder = async (items: { name: string; qty?: number }[], confirmed?: boolean, shop?: string) => {
         const order = orderErrand({ items, now: ctx.now });
         const list = order.items.map((i) => T.qty(i.name, i.qty)).join(", ");
         const cost = T.usd(order.totalCents);
@@ -133,7 +133,9 @@ export function createTools(ctx: AgentContext) {
         const pay = spend(order.totalCents, `Groceries: ${list} (${DEMO})`, ctx.now.toISOString());
         if (pay.status === "done") {
           order.status = "paid";
-          ctx.actions.push({ type: "showCard", title: T.orderCardTitle, body: `${T.orderBody(list, cost, order.arrives)}\n${DEMO}` });
+          // One item per line, then price and arrival, then the store and the demo mark.
+          const lines = order.items.map((i) => T.qty(i.name, i.qty)).join("\n");
+          ctx.actions.push({ type: "showCard", title: T.orderCardTitle, body: `${T.orderBody(lines, cost, order.arrives)}\n${[shop, DEMO].filter(Boolean).join(" · ")}` });
           ctx.actions.push({ type: "notifyFamily", message: T.notifyOrder(list), level: "info" });
           log(ctx, "family", T.logOrderPaid(cost, list, order.arrives) + ` (${DEMO})`, { visibility: "family" });
           return { ok: true, status: "done", paid: cost, balanceLeft: T.usd(pay.balance), arrives: order.arrives };
@@ -360,7 +362,7 @@ export function createTools(ctx: AgentContext) {
         if (sk.action === "errand") {
           const { items, store: shop } = errandParts(sk);
           ctx.once?.add("errand_order");
-          const res = await placeOrder(items, true);
+          const res = await placeOrder(items, true, shop);
           const list = items.map((i) => i.name).join(", ");
           return { ...res, skill: sk.name, steps: sk.steps, say: `Say: "Done, just the way you like it: ${list}${shop ? ` from ${shop}` : ""}." (if it is calling Sarah instead, say that)` };
         }
