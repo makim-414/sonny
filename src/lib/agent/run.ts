@@ -259,6 +259,22 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
     sayEn = FALLBACK_EN;
   }
 
+  // The model sometimes drops the <en> tag; subtitles must not go blank on stage.
+  if (!sayEn && say !== FALLBACK_SAY) {
+    try {
+      const t = await generateText({
+        model: anthropic(FAST),
+        instructions: "Translate the Korean line into natural, short English. Output only the translation.",
+        prompt: say,
+        maxOutputTokens: 200,
+        providerOptions: { anthropic: providerOptions(FAST) },
+      });
+      sayEn = t.text.trim() || undefined;
+    } catch {
+      sayEn = undefined;
+    }
+  }
+
   const done = [...new Set(toolNames)].filter((n) => !["memory_recall", "info_weather", "info_news", "epg_search", "lessons_show"].includes(n));
   pushTurn(userTurn, done.length ? `${say} [한 일: ${done.join(", ")}]` : say);
   logEvent(
