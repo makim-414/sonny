@@ -8,14 +8,17 @@ import { searchPerson, TVMAZE_ATTRIBUTION, warmTvmaze, type TvmazeAppearance } f
 export const LIVE_TIMEOUT_MS = 3_000;
 export { TVMAZE_ATTRIBUTION };
 
+// Module-level on purpose: the TVmaze cache lives in this module copy, and each Next
+// route bundle can have its own copy. Warm and read through the same route
+// (GET and POST /api/agent share one module), or the warm cache is not the one read.
 type WarmState = { started: number; done: number | null; error: string | null };
-const g = globalThis as unknown as { __sonnyTvmazeWarm?: WarmState };
+let warmState: WarmState | null = null;
 
 export function warmLiveGuide(): WarmState | null {
   if (APP_LANG !== "en") return null;
-  if (!g.__sonnyTvmazeWarm) {
+  if (!warmState) {
     const state: WarmState = { started: Date.now(), done: null, error: null };
-    g.__sonnyTvmazeWarm = state;
+    warmState = state;
     warmTvmaze(new Date().toISOString())
       .then(() => {
         state.done = Date.now();
@@ -23,10 +26,10 @@ export function warmLiveGuide(): WarmState | null {
       })
       .catch((err) => {
         state.error = String(err);
-        g.__sonnyTvmazeWarm = undefined; // allow a retry later
+        warmState = null; // allow a retry later
       });
   }
-  return g.__sonnyTvmazeWarm ?? null;
+  return warmState;
 }
 
 export type LiveHit = TvmazeAppearance & { status: "now" | "later"; startsInMin: number; when: string };
