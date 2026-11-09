@@ -119,6 +119,13 @@ More: architecture [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), family app cont
 
 **Demo video:** the live-action B-roll is AI-generated footage. Every app screen in it is the real product.
 
+## How Sonny gets into her home
+
+1. **Today, the family installs it:** mom sends one link, grandma taps once, and the icon sits on her home screen. No sign-up, no password, no app store for grandma. Sonny calls her first.
+2. **The TV she already watches:** the same Sonny as an Android TV and Samsung TV app the family installs remotely. Americans 75+ watch 4.4 hours of TV a day (BLS ATUS 2025), and 61% of U.S. internet homes stream mainly on the smart TV (Parks Associates 2026).
+3. **Who pays:** the family pays monthly. Next come the channels that already sit in her home: home-care agencies, senior living communities, and senior health plans that want the daily blood-pressure check-ins.
+4. **Then our own device:** a small box or speaker that ships pre-paired to the family.
+
 ## Roadmap
 
 1. **Today:** a one-icon web app on grandma's phone, set up by mom with one QR.
