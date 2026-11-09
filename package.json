@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node scripts/copy-vad.mjs && NODE_OPTIONS=--network-family-autoselection-attempt-timeout=2000 ANTHROPIC_API_KEY=\"$(security find-generic-password -s anthropic-hackathon-key -w)\" next dev",
+    "dev": "node scripts/copy-vad.mjs && NODE_OPTIONS=--network-family-autoselection-attempt-timeout=2000 ANTHROPIC_API_KEY=\"$(security find-generic-password -s anthropic-hackathon-key -w)\" OPENAI_API_KEY=\"$(security find-generic-password -s openai-gpt-image -w)\" next dev",
     "build": "node scripts/copy-vad.mjs && next build",
-    "start": "NODE_OPTIONS=--network-family-autoselection-attempt-timeout=2000 ANTHROPIC_API_KEY=\"$(security find-generic-password -s anthropic-hackathon-key -w)\" next start",
+    "start": "NODE_OPTIONS=--network-family-autoselection-attempt-timeout=2000 ANTHROPIC_API_KEY=\"$(security find-generic-password -s anthropic-hackathon-key -w)\" OPENAI_API_KEY=\"$(security find-generic-password -s openai-gpt-image -w)\" next start",
     "lint": "eslint"
   },
   "dependencies": {
