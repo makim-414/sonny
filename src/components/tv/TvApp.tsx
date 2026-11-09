@@ -40,9 +40,9 @@ function subjectParticle(word: string): string {
   return code % 28 === 0 ? "가" : "이";
 }
 
-// "이번 달 배운 것 12개" style cards get the big counter layout.
+// "이번 달 배운 것 12개" or "Learned 31 things from Grandma this month" get the big counter layout.
 function learnedCount(card: Card): string | null {
-  if (!/배운|가르쳐/.test(card.title)) return null;
+  if (!/배운|가르쳐|learned|taught/i.test(card.title)) return null;
   const m = `${card.title} ${card.body ?? ""}`.match(/(\d+)\s*(개|가지)?/);
   return m ? m[1] : null;
 }
