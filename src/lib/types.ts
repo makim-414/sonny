@@ -66,7 +66,8 @@ export type GuardianCall = {
   script: string; // what Sonny says to the guardian, plain English
   amount: number; // cents
   // "nudge": Sonny calls mom to suggest she checks in on grandma (no money involved).
-  reason: "over_limit" | "unusual_quantity" | "low_balance" | "nudge";
+  // "struggle": grandma has been stuck on a task (for example booking a ride) for a while.
+  reason: "over_limit" | "unusual_quantity" | "low_balance" | "nudge" | "struggle";
   status: "ringing" | "approved" | "declined" | "missed" | "done";
 };
 
