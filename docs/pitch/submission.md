@@ -18,7 +18,7 @@ git grep -n -I -E 'sk-ant-[A-Za-z0-9_-]{10,}|ANTHROPIC_API_KEY=[^\\"$]' $(git re
 Prints nothing when clean (checked 12:30 across all branches: clean).
 
 - [ ] No `.env*` files committed: `git ls-files | grep -i env` should print nothing.
-- [ ] No personal data about grandma: no real name, address, phone number, clinic name or face in code, seed data, screenshots or docs. The demo uses "서울내과" as a made-up clinic.
+- [ ] No personal data about grandma: no real name, address, phone number, clinic name or face in code, seed data, screenshots or docs. The demo uses "Dr. Kim's clinic" as a made-up clinic.
 - [ ] Check the first commit time is after 10:00 KST: `git log --reverse --format='%ci %s' | head -1`.
 - [ ] Every commit is on `build`; nothing important is left only on a session branch.
 
