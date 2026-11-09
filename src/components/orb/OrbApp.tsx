@@ -833,6 +833,7 @@ export function OrbApp() {
     lookParam === "smiley" ||
     lookParam === "classic" ||
     lookParam === "buddy" ||
+    lookParam === "parrot" ||
     lookParam === "orb"
       ? lookParam
       : params.get("eyes") === "1"
@@ -858,6 +859,7 @@ export function OrbApp() {
       {(look === "wave" || look === "bars" || look === "glow") && <AltLook look={look} signal={signal} />}
       {(look === "smiley" || look === "classic") && <FaceLook look={look} signal={signal} />}
       {look === "buddy" && <BuddyLook signal={signal} />}
+      {look === "parrot" && <BuddyLook signal={signal} parrot />}
       {look === "character" && <span className={`orb-character is-${mode}`} aria-hidden />}
       {(look === "eyes" || look === "character") && (
         <span className={`orb-eyes is-${mode} ${look === "character" ? "on-character" : ""}`} aria-hidden>
