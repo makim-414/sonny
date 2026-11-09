@@ -34,7 +34,13 @@ export function useDemoClock() {
     setNowMs(Date.now() + offsetRef.current);
   }, []);
 
-  return { now: nowMs > 0 ? new Date(nowMs) : null, getNow, forward };
+  // Moves the clock so it reads `target` right now (the hidden N key: next morning).
+  const jumpTo = useCallback((target: Date) => {
+    offsetRef.current = target.getTime() - Date.now();
+    setNowMs(target.getTime());
+  }, []);
+
+  return { jumpTo, now: nowMs > 0 ? new Date(nowMs) : null, getNow, forward };
 }
 
 export function formatTime(d: Date): string {

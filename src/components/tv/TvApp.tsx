@@ -1,28 +1,34 @@
 "use client";
 
 import { useCallback, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from "react";
-import type { AgentRequest, TvAction } from "@/lib/types";
+import type { AgentReply, AgentRequest, TvAction } from "@/lib/types";
 import { listenOnce, type Listener } from "@/lib/voice/listen";
 import { speak, splitSentences, stopSpeaking, unlockSpeech } from "@/lib/voice/speak";
 import { callAgent } from "./agent-client";
 import { Avatar, type AvatarMood } from "./Avatar";
 import { BroadcastScreen } from "./BroadcastScreen";
 import { ASSISTANT_NAME, USER_TITLE } from "./brand";
-import { CHANNELS, channelForNumber, findChannelIndex, programTitle } from "./channels";
+import { CHANNELS, channelForNumber, programTitle } from "./channels";
+import { fetchGuide, programAt, sceneFor, surfChannels, type Guide } from "./epg-client";
+import { QrCode } from "./QrCode";
 import { formatDate, formatTime, useDemoClock } from "./use-demo-clock";
 
-type Caption = { who: "assistant" | "user"; text: string };
+type Caption = { who: "assistant" | "user"; text: string; en?: string };
 type Card = { title: string; body?: string; imageUrl?: string };
-type Toast = { id: number; text: string; strong?: boolean };
+type Toast = { id: number; text: string; tone: "info" | "urgent" | "private" };
 type Timer = { id: number; at: number; label: string; action: TvAction };
 
 const OSD_MS = 4000;
 const CAPTION_LINGER_MS = 3500;
 const CARD_MS = 45_000;
 const TOAST_MS = 4500;
-const INBOX_POLL_MS = 3000;
+const HEARD_EN_MS = 1500;
+const NEXT_DAY_MS = 2600;
+const INBOX_POLL_MS = 1000; // fast enough for the phone remote's arrow keys
 const INBOX_MISSING_POLL_MS = 15_000;
+const GUIDE_REFRESH_MS = 10 * 60_000; // demo-clock time
 const FAST_FORWARD_MIN = 30;
+const MORNING_HOUR = 8;
 
 type InboxItem = { id?: string; from?: string; text?: string };
 
@@ -44,7 +50,25 @@ function spokenForTimer(t: Timer): string {
   return t.label;
 }
 
+// Pairs Korean sentences with English ones when the counts match, else shows the whole English line.
+function pairEnglish(ko: string[], en?: string): (string | undefined)[] {
+  if (!en?.trim()) return ko.map(() => undefined);
+  const enParts = splitSentences(en);
+  return enParts.length === ko.length ? enParts : ko.map(() => en.trim());
+}
+
+// The agent may flag a turn it kept from the family (contract: AgentReply.private).
+function isPrivateReply(reply: AgentReply): boolean {
+  return (reply as AgentReply & { private?: boolean }).private === true;
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const noopSubscribe = () => () => {};
+
+function readFlag(name: string): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).has(name);
+}
 
 function MicIcon() {
   return (
@@ -57,8 +81,26 @@ function MicIcon() {
   );
 }
 
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="tv-toast-icon" aria-hidden>
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </svg>
+  );
+}
+
+function SpeakerLowIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="tv-duck-icon" aria-hidden>
+      <path d="M4 9h4l5-4v14l-5-4H4z" />
+      <path d="M16.5 9.5a3.5 3.5 0 0 1 0 5" />
+    </svg>
+  );
+}
+
 export function TvApp() {
-  const { now, getNow, forward } = useDemoClock();
+  const { now, getNow, forward, jumpTo } = useDemoClock();
   const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const [channel, setChannel] = useState(CHANNELS[0].number);
   const [osdBig, setOsdBig] = useState(true);
@@ -69,18 +111,28 @@ export function TvApp() {
   const [timers, setTimers] = useState<Timer[]>([]);
   const [textOpen, setTextOpen] = useState(false);
   const [draft, setDraft] = useState("");
+  const [english, setEnglish] = useState(() => readFlag("en"));
+  const [showQr, setShowQr] = useState(() => !readFlag("noqr"));
+  const [guide, setGuide] = useState<Guide | null>(null);
+  const [nextDay, setNextDay] = useState<string | null>(null);
 
   const queueRef = useRef<Promise<void>>(Promise.resolve());
   const sayGenRef = useRef(0);
   const listenerRef = useRef<Listener | null>(null);
   const listeningRef = useRef(false);
   const timersRef = useRef<Timer[]>([]);
+  const englishRef = useRef(english);
+  const guideFetchedAt = useRef<number | null>(null);
   const idRef = useRef(1);
   const osdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const captionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const unlockedRef = useRef(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    englishRef.current = english;
+  }, [english]);
 
   // ---------- small UI helpers ----------
 
@@ -102,22 +154,24 @@ export function TvApp() {
     [flashOsd],
   );
 
+  const guideRef = useRef<Guide | null>(null);
   const stepChannel = useCallback(
     (dir: 1 | -1) => {
+      const list = surfChannels(guideRef.current);
       setChannel((cur) => {
-        const i = findChannelIndex(cur);
-        const base = i < 0 ? 0 : i;
-        return CHANNELS[(base + dir + CHANNELS.length) % CHANNELS.length].number;
+        const i = list.indexOf(cur);
+        if (i < 0) return list.find((n) => (dir > 0 ? n > cur : n < cur)) ?? list[0];
+        return list[(i + dir + list.length) % list.length];
       });
       flashOsd();
     },
     [flashOsd],
   );
 
-  const toast = useCallback((text: string, strong = false) => {
+  const toast = useCallback((text: string, tone: Toast["tone"] = "info") => {
     const id = idRef.current++;
-    setToasts((t) => [...t, { id, text, strong }]);
-    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), strong ? TOAST_MS * 2 : TOAST_MS);
+    setToasts((t) => [...t, { id, text, tone }]);
+    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), tone === "info" ? TOAST_MS : TOAST_MS * 2);
   }, []);
 
   const showCaption = useCallback((c: Caption | null) => {
@@ -136,16 +190,29 @@ export function TvApp() {
     if (c) cardTimer.current = setTimeout(() => setCard(null), CARD_MS);
   }, []);
 
+  // ---------- program guide from the agent ----------
+
+  const loadGuide = useCallback(async (at: Date) => {
+    guideFetchedAt.current = at.getTime();
+    const g = await fetchGuide(at);
+    if (g) {
+      guideRef.current = g;
+      setGuide(g);
+    }
+  }, []);
+
   // ---------- speaking and actions ----------
 
   const say = useCallback(
-    async (text: string) => {
+    async (text: string, en?: string) => {
       const gen = sayGenRef.current;
-      for (const sentence of splitSentences(text)) {
+      const sentences = splitSentences(text);
+      const english = pairEnglish(sentences, en);
+      for (let i = 0; i < sentences.length; i++) {
         if (sayGenRef.current !== gen) return;
-        showCaption({ who: "assistant", text: sentence });
+        showCaption({ who: "assistant", text: sentences[i], en: english[i] });
         setMood("speaking");
-        await speak(sentence);
+        await speak(sentences[i]);
       }
       if (sayGenRef.current !== gen) return;
       setMood("idle");
@@ -177,7 +244,7 @@ export function TvApp() {
             break;
           }
           case "notifyFamily":
-            toast("가족에게 알렸어요", a.level === "urgent");
+            toast("가족에게 알렸어요", a.level === "urgent" ? "urgent" : "info");
             break;
         }
       }
@@ -194,11 +261,25 @@ export function TvApp() {
       enqueue(async () => {
         setMood("thinking");
         const { reply } = await callAgent({ ...req, now: getNow().toISOString() });
+        if (req.source === "voice" && reply.heardEn) {
+          showCaption({ who: "user", text: req.text, en: reply.heardEn });
+          if (englishRef.current) await sleep(HEARD_EN_MS);
+        }
         runActions(reply.actions);
-        await say(reply.say);
+        if (isPrivateReply(reply)) toast("딸에게는 안 알려요", "private");
+        await say(reply.say, reply.sayEn);
       });
     },
-    [enqueue, getNow, runActions, say],
+    [enqueue, getNow, runActions, say, showCaption, toast],
+  );
+
+  // What grandma says, by mic, phone remote or the backup text box.
+  const userSays = useCallback(
+    (text: string) => {
+      showCaption({ who: "user", text });
+      ask({ text, source: "voice" });
+    },
+    [ask, showCaption],
   );
 
   // ---------- listening ----------
@@ -209,24 +290,25 @@ export function TvApp() {
     listeningRef.current = false;
   }, []);
 
+  const interrupt = useCallback(() => {
+    sayGenRef.current++;
+    stopSpeaking();
+  }, []);
+
   const startListening = useCallback(() => {
     if (listeningRef.current) {
       listenerRef.current?.stop();
       return;
     }
     // Barge in: grandma talking wins over the TV talking.
-    sayGenRef.current++;
-    stopSpeaking();
+    interrupt();
     listeningRef.current = true;
     setMood("listening");
     showCaption({ who: "user", text: "" });
 
     listenerRef.current = listenOnce({
       onInterim: (t) => showCaption({ who: "user", text: t }),
-      onFinal: (t) => {
-        showCaption({ who: "user", text: t });
-        ask({ text: t, source: "voice" });
-      },
+      onFinal: (t) => userSays(t),
       onError: (code) => {
         if (code === "no-speech" || code === "aborted") return;
         console.warn("[tv] listen error", code);
@@ -245,32 +327,55 @@ export function TvApp() {
       setMood("idle");
       showCaption(null);
     }
-  }, [ask, showCaption, toast]);
+  }, [interrupt, userSays, showCaption, toast]);
 
   const submitDraft = useCallback(() => {
     const t = draft.trim();
     if (!t) return;
     setDraft("");
     setTextOpen(false);
-    showCaption({ who: "user", text: t });
-    ask({ text: t, source: "voice" });
-  }, [draft, ask, showCaption]);
+    userSays(t);
+  }, [draft, userSays]);
 
   // ---------- OK button ----------
 
-  const pressOk = useCallback(() => {
-    if (card) {
-      openCard(null);
-      return;
-    }
-    flashOsd();
-  }, [card, openCard, flashOsd]);
+  const pressOk = () => {
+    if (card) openCard(null);
+    else flashOsd();
+  };
 
-  // ---------- schedule timers on the demo clock ----------
+  // ---------- next morning (hidden N key) ----------
+
+  const goNextMorning = useCallback(() => {
+    interrupt();
+    stopListening();
+    openCard(null);
+    showCaption(null);
+    setMood("idle");
+    const target = getNow();
+    target.setDate(target.getDate() + 1);
+    target.setHours(MORNING_HOUR, 0, 0, 0);
+    // Yesterday's reminders are over; do not fire them all at once.
+    timersRef.current = timersRef.current.filter((t) => t.at >= target.getTime());
+    setTimers(timersRef.current);
+    jumpTo(target);
+    setNextDay(formatDate(target));
+    void loadGuide(target);
+    enqueue(async () => {
+      await sleep(NEXT_DAY_MS);
+      setNextDay(null);
+    });
+    ask({ text: "morning-checkin", source: "proactive" });
+  }, [interrupt, stopListening, openCard, showCaption, getNow, jumpTo, loadGuide, enqueue, ask]);
+
+  // ---------- schedule timers and guide refresh on the demo clock ----------
 
   useEffect(() => {
     if (!now) return;
     const t = now.getTime();
+    if (guideFetchedAt.current === null || Math.abs(t - guideFetchedAt.current) > GUIDE_REFRESH_MS) {
+      void loadGuide(now);
+    }
     const due = timersRef.current.filter((x) => x.at <= t);
     if (due.length === 0) return;
     timersRef.current = timersRef.current.filter((x) => x.at > t);
@@ -281,9 +386,33 @@ export function TvApp() {
         await say(spokenForTimer(timer));
       });
     }
-  }, [now, enqueue, runActions, say]);
+  }, [now, enqueue, runActions, say, loadGuide]);
 
-  // ---------- family inbox polling ----------
+  // ---------- family inbox and phone remote ----------
+
+  const onRemote = useEffectEvent((text: string) => {
+    switch (text) {
+      case "key:up":
+        stepChannel(1);
+        return;
+      case "key:down":
+        stepChannel(-1);
+        return;
+      case "key:ok":
+        pressOk();
+        return;
+    }
+    if (text.startsWith("key:")) return;
+    interrupt();
+    userSays(text);
+  });
+
+  const onFamily = useEffectEvent((item: InboxItem) => {
+    const text = item.text?.trim();
+    if (!text) return;
+    if (item.from === "remote") onRemote(text);
+    else ask({ text: item.from ? `${item.from}: ${text}` : text, source: "family" });
+  });
 
   useEffect(() => {
     let stopped = false;
@@ -293,13 +422,7 @@ export function TvApp() {
       try {
         const res = await fetch("/api/family/inbox", { cache: "no-store" });
         if (res.status === 404) wait = INBOX_MISSING_POLL_MS;
-        else if (res.ok) {
-          for (const item of inboxItems(await res.json())) {
-            const text = item.text?.trim();
-            if (!text) continue;
-            ask({ text: item.from ? `${item.from}: ${text}` : text, source: "family" });
-          }
-        }
+        else if (res.ok) for (const item of inboxItems(await res.json())) onFamily(item);
       } catch {
         // Quietly ignore until the family API exists.
       }
@@ -310,7 +433,7 @@ export function TvApp() {
       stopped = true;
       clearTimeout(handle);
     };
-  }, [ask]);
+  }, []);
 
   // ---------- remote control keys ----------
 
@@ -351,8 +474,17 @@ export function TvApp() {
       case "KeyP":
         if (!e.repeat) ask({ text: "morning-checkin", source: "proactive" });
         break;
+      case "KeyN":
+        if (!e.repeat) goNextMorning();
+        break;
       case "KeyF":
         if (!e.repeat) forward(FAST_FORWARD_MIN);
+        break;
+      case "KeyE":
+        if (!e.repeat) setEnglish((v) => !v);
+        break;
+      case "KeyQ":
+        if (!e.repeat) setShowQr((v) => !v);
         break;
       case "KeyT":
         e.preventDefault();
@@ -385,23 +517,42 @@ export function TvApp() {
 
   if (!mounted || !now) return <main className="tv-root" />;
 
-  const ch = channelForNumber(channel);
-  const title = programTitle(ch, now);
+  const local = channelForNumber(channel);
+  const guideName = guide?.channels.find((c) => c.number === channel)?.name;
+  const guideProgram = guide ? programAt(guide, channel, now) : undefined;
+  const chName = guideName ?? local.name;
+  const title = guideProgram?.title ?? (guide ? "정규 방송" : programTitle(local, now));
+  const scene = guide ? sceneFor(title, chName) : local.scene;
+
   const nextTimer = timers[0];
   const captionVisible = caption !== null || mood === "thinking" || mood === "listening";
   const userTurn = caption?.who === "user";
+  const ducked = mood !== "idle";
+  const origin = window.location.origin;
 
   return (
-    <main className="tv-root">
-      <BroadcastScreen scene={ch.scene} />
-
-      <div className={`tv-osd ${osdBig ? "is-big" : ""}`}>
-        <span className="tv-osd-num">{ch.number}</span>
-        <span className="tv-osd-text">
-          <span className="tv-osd-name">{ch.name}</span>
-          <span className="tv-osd-title">{title}</span>
-        </span>
+    <main className={`tv-root ${ducked ? "is-ducked" : ""}`}>
+      <div className="tv-picture">
+        <BroadcastScreen scene={scene} />
       </div>
+
+      <div className="tv-osd-wrap">
+        <div className={`tv-osd ${osdBig ? "is-big" : ""}`}>
+          <span className="tv-osd-num">{channel}</span>
+          <span className="tv-osd-text">
+            <span className="tv-osd-name">{chName}</span>
+            <span className="tv-osd-title">{title}</span>
+          </span>
+        </div>
+        <span className="tv-demo-tag">demo data</span>
+      </div>
+
+      {ducked && (
+        <span className="tv-duck">
+          <SpeakerLowIcon />
+          TV 소리 줄였어요
+        </span>
+      )}
 
       <div className="tv-clock">
         <span className="tv-clock-time">{formatTime(now)}</span>
@@ -413,7 +564,8 @@ export function TvApp() {
         )}
         <span className="tv-toasts" role="status" aria-live="polite">
           {toasts.map((t) => (
-            <span key={t.id} className={`tv-toast ${t.strong ? "is-strong" : ""}`}>
+            <span key={t.id} className={`tv-toast is-${t.tone}`}>
+              {t.tone === "private" && <LockIcon />}
               {t.text}
             </span>
           ))}
@@ -429,7 +581,21 @@ export function TvApp() {
           <h2 className="tv-card-title">{card.title}</h2>
           {card.body && <p className="tv-card-body">{card.body}</p>}
           <p className="tv-card-hint">OK 버튼을 누르면 닫혀요</p>
+          <span className="tv-demo-tag tv-card-tag">demo data</span>
         </section>
+      )}
+
+      {showQr && (
+        <aside className="tv-qr">
+          <figure className="tv-qr-item">
+            <QrCode text={`${origin}/remote`} className="tv-qr-code" />
+            <figcaption>{english ? "Phone remote" : "폰 리모컨"}</figcaption>
+          </figure>
+          <figure className="tv-qr-item">
+            <QrCode text={`${origin}/family`} className="tv-qr-code" />
+            <figcaption>{english ? "Family app" : "가족 앱"}</figcaption>
+          </figure>
+        </aside>
       )}
 
       <section className={`tv-caption ${captionVisible ? "is-open" : ""} ${userTurn ? "is-user" : ""}`} aria-live="polite">
@@ -441,6 +607,7 @@ export function TvApp() {
               ? "듣고 있어요. 말씀하세요"
               : caption?.text || (mood === "thinking" ? "잠깐만요" : "")}
           </p>
+          {english && caption?.en && <p className="tv-caption-en">{caption.en}</p>}
         </div>
       </section>
 
@@ -473,6 +640,15 @@ export function TvApp() {
             aria-label="말 대신 글로 입력"
           />
         </form>
+      )}
+
+      {nextDay && (
+        <div className="tv-nextday" aria-live="polite">
+          <span className="tv-nextday-title">다음 날 아침</span>
+          <span className="tv-nextday-sub">
+            {nextDay} · {english ? "Next morning, 8:00" : "오전 8:00"}
+          </span>
+        </div>
       )}
     </main>
   );
