@@ -71,7 +71,8 @@ function dirtySlots(): string[] {
 
 /** Push changed slots to Redis. */
 export async function persistShared() {
-  if (!sharedEnabled()) return;
+  // Never write before this instance has read the shared copy once, or its seed would win.
+  if (!sharedEnabled() || meta.version < 0) return;
   const dirty = dirtySlots();
   if (!dirty.length) return;
   const values = dirty.map((s) => snap(s) as string);
@@ -95,10 +96,11 @@ export async function syncShared() {
     const [ver] = await redis([["GET", VERSION_KEY]]);
     const version = Number(ver ?? 0);
     if (version === meta.version) return;
-    // Local changes not yet written win over the remote copy for that slot.
-    const dirty = new Set(dirtySlots());
+    // Local changes not yet written win over the remote copy for that slot. A fresh
+    // instance has nothing of its own yet, so it takes every slot from Redis.
+    const dirty = new Set(meta.version < 0 ? [] : dirtySlots());
     const pull = SLOTS.filter((s) => !dirty.has(s));
-    const values = await redis(pull.map((s) => ["GET", PREFIX + s]));
+    const values = pull.length ? await redis(pull.map((s) => ["GET", PREFIX + s])) : [];
     pull.forEach((s, i) => {
       const raw = values[i];
       if (typeof raw !== "string") {
