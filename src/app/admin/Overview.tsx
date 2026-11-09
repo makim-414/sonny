@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { T } from "@/components/family/strings";
 import { PAGES, useAdmin, type Page } from "./AdminShell";
 import HealthPlan from "./HealthPlan";
+import StuckDemo from "./StuckDemo";
 import WeekDashboard from "@/components/family/WeekDashboard";
 import { A } from "./strings";
 
@@ -36,6 +37,7 @@ export default function Overview() {
   return (
     <>
       <h1 className="ad-page-title">{A.overview}</h1>
+      <StuckDemo />
       <section className="fa-summary ad-overview-summary" aria-label={T.todayTitle}>
         <h2 className="fa-summary-title">{T.todayTitle}</h2>
         {s?.reassure && <p className={`fa-reassure fa-reassure-${s.reassure.tone}`}>{s.reassure.text}</p>}

@@ -16,12 +16,15 @@ type FamilyState = {
   approvedIds: string[]; // event ids of requests mom approved
   devices: Device[];
   routines: Routine[];
+  // Who answered each Sonny call first (every family phone rings; the first answer wins).
+  handled: Record<string, { by: string; status: string; at: string }>;
 };
 
 const g = globalThis as unknown as { __hyodoFamily?: FamilyState };
 
-export const familyState: FamilyState = g.__hyodoFamily ?? (g.__hyodoFamily = { approvedIds: [], devices: [], routines: [] });
+export const familyState: FamilyState = g.__hyodoFamily ?? (g.__hyodoFamily = { approvedIds: [], devices: [], routines: [], handled: {} });
 familyState.devices ??= [];
 familyState.routines ??= [];
+familyState.handled ??= {};
 
 export const FAMILY_SENDER = T.mom;
