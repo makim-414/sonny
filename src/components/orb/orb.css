@@ -65,7 +65,8 @@
 /* Resting (no talk for a while): very dim breathing orb that slowly wanders, so a phone
    left on its charger does not burn the same pixels in. */
 .orb-root .orb-canvas { transition: opacity 3s var(--ease-out); }
-.orb-root.is-resting .orb-canvas { opacity: 0.3; animation: orb-drift 240s ease-in-out infinite alternate; }
+/* Not the buddy: it already floats and moves, and dimming turned its yellow a muddy olive. */
+.orb-root.is-resting .orb-canvas:not(.buddy-canvas) { opacity: 0.3; animation: orb-drift 240s ease-in-out infinite alternate; }
 
 .orb-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 /* The WebGL orb draws points only; its soft glow is this gradient behind them. */
