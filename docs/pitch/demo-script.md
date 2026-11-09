@@ -55,6 +55,7 @@ Two pillars to land:
 - The screen goes dark, one particle blooms in the middle and ripples as it speaks:
   - Agent: "Good morning, grandma. Did you sleep well?"
 - Narration: "So she doesn't have to. No buttons. No menus. One icon, like the call button she already knows."
+- Lower third: "Mom set it up once from her admin: scanned one QR on grandma's phone, done."
 
 ### 3. Morning: pills and weather (0:17 to 0:27)
 
@@ -97,7 +98,7 @@ Two pillars to land:
 
 Fast cards, about 2 seconds each, clock overlay jumping forward. Corner label on all: "demo data".
 
-1. 3:20 PM, groceries: "Your daughter is coming tonight. Groceries for two: tofu, zucchini, eggs?" Approval card on mom's phone, mom taps Approve. (It used what she taught in scene 5.)
+1. 3:20 PM, groceries from her allowance: "Your daughter is coming tonight. Groceries for two: tofu, zucchini, eggs?" It is over the $30 per-purchase limit, so an approval card appears in mom's admin (Allowance tab); mom taps Approve. (It used what she taught in scene 5.) Caption: "Mom tops up an allowance; grandma spends it by voice; anything big waits for Mom's OK."
 2. 6:00 PM, temple: "Tomorrow is a temple day. The bus is at 9:40."
 3. 7:55 PM, her show: "Your favorite singer is on in five minutes."
 4. 9:00 PM, evening pills: "Time for your evening pills."
@@ -109,7 +110,7 @@ Fast cards, about 2 seconds each, clock overlay jumping forward. Corner label on
 
 - Screen: a five-step strip that lights up left to right: "0. Phone icon (today)" / "1. HDMI stick" / "2. Android and Google TV app" / "3. Pass-through box over the set-top box" / "4. The TV itself".
 - During steps 1 to 4: a hand plugs an HDMI stick into a TV; the TV plays its "connected" boot screen (`/tv?boot`) and the same agent appears on the big screen.
-- Then two QR codes side by side: "Be grandma" (`/`) and "Be her daughter" (`/family`).
+- Then two QR codes side by side: "Be grandma" (`/?demo=1`) and "Be her daughter" (`/family?demo=1`). `?demo=1` signs the scanner in as the demo device or demo family account, so nobody types a password.
 - Narration: "Pickle covers your whole workday through Zoom. We cover grandma's whole day. Today one icon on her phone, next the TV she watches all day. Scan the first code and be grandma. Scan the second and be her daughter."
 - End card: `[NAME]`, GitHub URL, "Built in 5 hours at c0mpiled-17 Seoul on open source: Kokoro, Silero VAD, three.js, GBrain, gstack".
 
@@ -117,7 +118,7 @@ Fast cards, about 2 seconds each, clock overlay jumping forward. Corner label on
 
 Office hours rule: watch, don't demo. Put the phone in the judge's hand.
 
-1. On the table: a printed card or a screen with two QR codes. "Be grandma" opens `/`. "Be her daughter" opens `/family`.
+1. On the table: a printed card or a screen with two QR codes. "Be grandma" opens `/?demo=1`. "Be her daughter" opens `/family?demo=1` (or `/admin?demo=1` to show the full admin).
 2. Judge one scans "Be grandma". The particle blooms and greets them. They just talk, in English.
 3. Judge two (or the presenter) scans "Be her daughter" and taps "I'll be there at 7 tonight". Grandma's phone reads it out.
 4. Judge one answers. Within seconds, judge two's phone shows "Grandma's reply" with the summary.

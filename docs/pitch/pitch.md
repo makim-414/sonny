@@ -17,10 +17,10 @@ She's in Korea, but this is everywhere: in the US, one in four people over 65 li
 She will never learn a new app. So we built a screen with nothing to learn. No buttons. No menus. One icon, like the call button she already knows. She taps it, and her assistant is already talking: "Did you take your pills? Take an umbrella to the temple."
 
 **Pillar one: she hands things off (0:35)**
-This morning my mom booked grandma a taxi to the hospital from her own phone. Now grandma just says "call me a taxi", and the plate number shows up in huge letters. Groceries, her favorite show, all by voice.
+This morning my mom booked grandma a taxi to the hospital from her own phone. Now grandma just says "call me a taxi", and the plate number shows up in huge letters. Mom tops up an allowance; grandma spends it by voice; anything big waits for Mom's OK.
 
 **Pillar two: mom stops calling (0:48)**
-Mom sees what got done, not what was said. Pills taken, taxi on its way, groceries waiting for her one-tap approval. When grandma says "don't tell my daughter", it doesn't.
+Mom sets it up once from the admin: scans one QR on grandma's phone, done. Then she sees what got done, not what was said. When grandma says "don't tell my daughter", it doesn't.
 
 **Why she keeps using it (1:00)**
 I ran an art gallery for years. Most of my regulars were retired, and what they loved most was teaching me. Care devices get abandoned because they say "you're old". Ours says "teach me". Everything she teaches becomes its memory, and with her consent, anonymized, it helps make AI better for everyone.
@@ -55,7 +55,7 @@ Scan the first code and be grandma. Scan the second and be her daughter.
 3. **"How is this different from Ato, Alexa or the voice remote she already has?"**
    Those take commands or make check-in calls. Ours needs no new device, starts with one tap, acts for her, learns from her, and closes the loop with the family without exposing what she said in private.
 4. **"Who pays?"**
-   The adult child, as a monthly family subscription, because the pain we remove is theirs: the calls to check. Later, bundled by pay-TV operators with their set-top box. (Price not validated yet. If mom gives us a number today, use it here.)
+   The adult child, as a monthly family subscription, because the pain we remove is theirs: the calls to check. The same account funds grandma's allowance (Stripe Checkout, test mode in the demo), and every spend over the limit waits for her OK. Later, bundled by pay-TV operators with their set-top box. (Price not validated yet. If mom gives us a number today, use it here.)
 
 ## Open source we build on (technical implementation)
 
@@ -68,6 +68,13 @@ Full list with stars and licenses: `docs/OPEN_SOURCE.md` (every project 1,000+ s
 - GBrain (MIT): grandma's long-term memory with provenance, corrections and withdrawal, local PGLite.
 - gstack (MIT): office hours and review during the build.
 - Claude through the Vercel AI SDK: the agent loop with tool calling. This is the one hosted piece.
+
+## Family admin and allowance (say it when asked "how does it get set up" or "who controls the money")
+
+- Mom signs in once (`/login`). In the admin she taps "Connect grandma's phone" and scans one QR with grandma's phone. That phone stays signed in for good; grandma never sees a login screen.
+- Tabs: Today (what got done, the "no need to call" line, approvals), Taught (her lessons and the real counter), Routines (pills, outings, doctor; saved into her memory), Allowance, Privacy, Device.
+- Allowance: Mom tops up (demo credit today, Stripe Checkout in test mode once the key is set). Grandma spends by voice. Anything over the per-purchase limit (default $30) waits for Mom's Approve or Decline.
+- Judges skip the login with the demo QR codes (`?demo=1`).
 
 ## Privacy and consent (say this whenever data comes up)
 

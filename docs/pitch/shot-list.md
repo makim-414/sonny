@@ -31,6 +31,7 @@ Hide the dock and notifications (Do Not Disturb). Close other tabs.
 
 ## Before the first take
 
+0. Sign-in: the app now has family sign-in and device pairing. For recording, open grandma's side as `<SITE>/?demo=1` and mom's side as `<SITE>/family?demo=1` (or `<SITE>/admin?demo=1`). For Phone G, pair it properly: sign in to `<SITE>/admin` as the demo account, open the Device tab, tap "Connect grandma's phone" and scan the QR with Phone G, then "Add to Home Screen". The `curl` fallbacks below carry `?demo=1` so they pass the sign-in check.
 1. Integration session restarts the server so the activity log starts empty (`/family` shows "Nothing yet...").
 2. Open both windows. On `/family` the three big buttons are visible without scrolling.
 3. Test the mic on `/` once with a throwaway line, then restart the server again to clear it.
@@ -57,7 +58,7 @@ Hide the dock and notifications (Do Not Disturb). Close other tabs.
 - Fallback if it does not turn green within 5 seconds:
 
 ```bash
-curl -s -X POST <SITE>/api/events -H 'content-type: application/json' -d '{"kind":"memory","text":"Health record: took her morning pills","visibility":"family"}'
+curl -s -X POST '<SITE>/api/events?demo=1' -H 'content-type: application/json' -d '{"kind":"memory","text":"Health record: took her morning pills","visibility":"family"}'
 ```
 
 ### Cut 4. Hospital taxi (0:27 to 0:39)
@@ -85,26 +86,26 @@ curl -s -X POST <SITE>/api/events -H 'content-type: application/json' -d '{"kind
 - Fallback if no reply within 10 seconds:
 
 ```bash
-curl -s -X POST <SITE>/api/events -H 'content-type: application/json' -d '{"kind":"family","text":"Grandma'"'"'s reply: 7 is fine. Take the kimchi home.","visibility":"family"}'
+curl -s -X POST '<SITE>/api/events?demo=1' -H 'content-type: application/json' -d '{"kind":"family","text":"Grandma'"'"'s reply: 7 is fine. Take the kimchi home.","visibility":"family"}'
 ```
 
 - Edit: clock overlay 5:30 PM.
 
 ### Cut 8. The rest of her day in 10 seconds (1:08 to 1:18)
 Record each as a 3 second clip; the edit keeps about 2 seconds each. Label "demo data" on all.
-1. Groceries: grandma, "Can you order tofu, zucchini and eggs?" Then tap "Approve" on mom's "Order" card.
+1. Groceries: grandma, "Can you order tofu, zucchini and eggs?" If it is over the $30 limit, tap "Approve" in mom's admin, Allowance tab (or on the "Order" card in Today).
 2. Temple: grandma, "Tomorrow is my temple day. Remind me in the morning."
 3. Her show: grandma, "When is my favorite singer on?"
 4. Evening pills: title card in the edit ("Time for your evening pills").
 5. Safety: run the command below and film mom's window.
 
 ```bash
-curl -s -X POST <SITE>/api/events -H 'content-type: application/json' -d '{"kind":"alert","text":"[warn] Grandma has not talked at her usual time","visibility":"family"}'
+curl -s -X POST '<SITE>/api/events?demo=1' -H 'content-type: application/json' -d '{"kind":"alert","text":"[warn] Grandma has not talked at her usual time","visibility":"family"}'
 ```
 
 ### Cut 9. Phone today, her TV next (1:18 to 1:30)
 1. Camera B: a hand plugs an HDMI stick (or the laptop's HDMI cable) into a TV. On the laptop, open `<SITE>/tv?boot&noqr` just before plugging in: `?boot` forces the 3 second "connected" boot screen even if this browser has seen it before, then the agent appears on the big screen. To film it again, reload the same URL.
-2. Screen A: two QR codes side by side, "Be grandma" (`<SITE>/`) and "Be her daughter" (`<SITE>/family`). Use the printed card for the judging table or the `/tv` QR overlay (`Q`) if it already points to `/`.
+2. Screen A: two QR codes side by side, "Be grandma" (`<SITE>/?demo=1`) and "Be her daughter" (`<SITE>/family?demo=1`). Use the printed card for the judging table or the `/tv` QR overlay (`Q`) if it already points to `/`.
 - Edit: the five-step strip (0 Phone icon today, 1 HDMI stick, 2 Android and Google TV app, 3 Pass-through box, 4 The TV itself), narration, end card with `[NAME]`, GitHub URL and "Built in 5 hours at c0mpiled-17 Seoul on open source: Kokoro, Silero VAD, three.js, GBrain, gstack".
 
 ## Edit checklist
