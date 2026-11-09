@@ -7,6 +7,7 @@ import { isListenSupported, listenOnce, type Listener } from "@/lib/voice/listen
 import { splitSentences, unlockSpeech } from "@/lib/voice/speak";
 import { setVoiceVolume, speakSentences, stopVoice, unlockAudio, voiceLevel, warmTts } from "@/lib/tts/player";
 import { createVad, type Vad } from "@/lib/voice/vad";
+import { startRing, stopRing } from "@/lib/tts/ringer";
 import { getSettings } from "./settings";
 import { loadRoutines, useWakeLock, type Routine } from "./always-on";
 import { isTurnComplete, transcribe } from "@/lib/voice/stt";
@@ -35,6 +36,8 @@ const IDLE_DEFAULT_MS = 3 * 60 * 60_000;
 const IDLE_RETRY_MAX_MS = 10 * 60_000;
 // The orb dims and drifts (screen burn-in) after this long without talking (?rest= seconds).
 const REST_DEFAULT_MS = 45_000;
+// Sonny's call rings this long; unanswered it counts as a missed second check-in.
+const CALL_RING_MS = 30_000;
 
 function secondsParam(name: string, fallbackMs: number): number {
   if (typeof window === "undefined") return fallbackMs;
@@ -94,6 +97,10 @@ const COPY_BY = {
     channel: "Changed the channel",
     channelBody: (n: number) => `Channel ${n}`,
     taught: "What grandma taught me",
+    calling: "Sonny is calling",
+    callSub: "Answer to talk with Sonny",
+    answer: "Answer",
+    missed: "Missed call from Sonny",
     nextDay: "Next morning",
   },
   ko: {
@@ -106,6 +113,10 @@ const COPY_BY = {
     channel: "채널을 바꿨어요",
     channelBody: (n: number) => `${n}번`,
     taught: "할머니가 가르쳐 주신 것",
+    calling: "Sonny 에게서 전화가 왔어요",
+    callSub: "받으면 Sonny 와 이야기해요",
+    answer: "받기",
+    missed: "Sonny 부재중 전화",
     nextDay: "다음 날 아침",
   },
 };
@@ -164,6 +175,8 @@ export function OrbApp() {
   const idleTriedAtRef = useRef(0);
   const lastActivityRef = useRef(0); // real ms, for dimming the resting orb
   const [resting, setResting] = useState(false);
+  const [calling, setCalling] = useState(false);
+  const answerRef = useRef<((answered: boolean) => void) | null>(null);
   const cardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -189,6 +202,8 @@ export function OrbApp() {
 
   const say = useCallback(
     async (text: string, en?: string) => {
+      // The agent may answer with nothing to say (e.g. a quiet second check-in): stay silent.
+      if (!text.trim()) return;
       const gen = sayGenRef.current;
       const parts = splitSentences(text);
       const eng = getSettings().lang === "en" ? parts.map(() => undefined) : pairEnglish(parts, en);
@@ -444,6 +459,7 @@ export function OrbApp() {
 
   // A tap after start interrupts the voice, closes a card and goes back to listening.
   const onTap = () => {
+    if (answerRef.current) return; // while ringing only the Answer button (or OK) answers
     if (!startedRef.current) {
       start();
       return;
@@ -489,14 +505,46 @@ export function OrbApp() {
 
   // ---------- always on: routines and idle check-ins ----------
 
+  // Sonny speaks first by calling: a full-screen "Sonny is calling" with a ringtone and one
+  // big Answer button. Answered: the agent's line plays and the talk goes on. Not answered in
+  // 30 s: missed, sent as the second idle check-in; the agent decides on a family alert.
+  const placeCall = useCallback(
+    (text: string) => {
+      enqueue(async () => {
+        setMode("idle");
+        setCalling(true);
+        startRing();
+        const answered = await new Promise<boolean>((resolve) => {
+          const timer = setTimeout(() => resolve(false), secondsParam("ring", CALL_RING_MS));
+          answerRef.current = (yes) => {
+            clearTimeout(timer);
+            resolve(yes);
+          };
+        });
+        answerRef.current = null;
+        stopRing();
+        setCalling(false);
+        unlockAudio();
+        if (answered) {
+          lastHeardRef.current = getNow().getTime();
+          await runTurn({ text, source: "proactive" });
+        } else {
+          showToast(copy().missed);
+          idleTriesRef.current = 2;
+          await runTurn({ text: "idle-checkin:2", source: "proactive" });
+        }
+      });
+    },
+    [enqueue, getNow, runTurn, setMode, showToast],
+  );
+
   const idleCheckin = useCallback(
     (attempt: 1 | 2) => {
       idleTriesRef.current = attempt;
       idleTriedAtRef.current = getNow().getTime();
-      // The agent decides what to say and, after the second try, whether to alert the family.
-      turn({ text: attempt === 1 ? "idle-checkin" : "idle-checkin:2", source: "proactive" });
+      placeCall(attempt === 1 ? "idle-checkin" : "idle-checkin:2");
     },
-    [getNow, turn],
+    [getNow, placeCall],
   );
 
   useEffect(() => {
@@ -512,7 +560,7 @@ export function OrbApp() {
       const at = new Date(now);
       at.setHours(r.hour, r.minute, 0, 0);
       if (prev < at.getTime() && at.getTime() <= t) {
-        turn({ text: `routine:${r.name}`, source: "proactive" });
+        placeCall(`routine:${r.name}`);
         return;
       }
     }
@@ -521,7 +569,7 @@ export function OrbApp() {
     const heard = lastHeardRef.current ?? t;
     if (idleTriesRef.current === 0 && t - heard >= idleMs) idleCheckin(1);
     else if (idleTriesRef.current === 1 && t - idleTriedAtRef.current >= Math.min(idleMs, IDLE_RETRY_MAX_MS)) idleCheckin(2);
-  }, [now, turn, idleCheckin]);
+  }, [now, placeCall, idleCheckin]);
 
   useWakeLock(started);
 
@@ -591,7 +639,11 @@ export function OrbApp() {
       case "NumpadEnter":
       case "Space":
         e.preventDefault();
-        onTap(); // remote OK: start, or interrupt the voice and listen
+        if (answerRef.current) answerRef.current(true); // remote OK answers Sonny's call
+        else onTap(); // remote OK: start, or interrupt the voice and listen
+        break;
+      case "KeyC":
+        if (startedRef.current && !answerRef.current) idleCheckin(1); // demo: Sonny calls now
         break;
       case "KeyE":
         setEnglish((v) => !v);
@@ -608,7 +660,7 @@ export function OrbApp() {
         forward(30);
         break;
       case "KeyI":
-        if (startedRef.current) idleCheckin(1);
+        if (startedRef.current && !answerRef.current) idleCheckin(1);
         break;
       case "KeyN": {
         const target = getNow();
@@ -740,6 +792,22 @@ export function OrbApp() {
       )}
 
       {toast && <p className="orb-toast">{toast}</p>}
+
+      {calling && (
+        <section className="orb-call" role="dialog" aria-modal="true" aria-label={copy().calling} onPointerDown={(e) => e.stopPropagation()}>
+          <div className="orb-call-top">
+            <span className="orb-call-orb" aria-hidden />
+            <h2 className="orb-call-title">{copy().calling}</h2>
+            <p className="orb-call-sub">{copy().callSub}</p>
+          </div>
+          <button type="button" className="orb-call-answer" onClick={() => answerRef.current?.(true)}>
+            <svg viewBox="0 0 24 24" className="orb-call-icon" aria-hidden>
+              <path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z" />
+            </svg>
+            <span>{copy().answer}</span>
+          </button>
+        </section>
+      )}
 
       {getSettings().captions && (
         <div className="orb-line" aria-live="polite">
