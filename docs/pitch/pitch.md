@@ -1,36 +1,35 @@
 # Sonny: pitch (under 2 minutes, English)
 
-Spoken script first, about 310 words (about 1:56 at 160 words per minute; rehearse with a timer and drop the gallery sentence if it runs over). Then the judging map, answers to the hard questions, sources, and the evidence for the gstack and GBrain prize.
+Spoken script first (v3, matches `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V3.md`), about 220 words (about 1:25 at 160 words per minute, leaving room for pauses; rehearse with a timer; the gallery story is in the Q&A now). Then the judging map, answers to the hard questions, sources, and the evidence for the gstack and GBrain prize. Ten judge questions with two-sentence answers: `docs/pitch/qa.md`.
 
 - **Customer:** the daughter (45 to 60) of a parent who lives alone pays. Grandma uses it. Speak to mom, and to every judge who has an aging parent.
-- **Insight:** mom is already grandma's agent. Sonny takes that job.
+- **Insight:** "Mom is already grandma's assistant. Sonny takes the job."
 - **Language:** English. The founder's Korean grandmother is the origin story; we launch with English-speaking seniors.
 
 ## Spoken script
 
+Motif: the phone rings. Sentence to leave behind: "Mom is already grandma's assistant. Sonny takes the job."
+
 **Hook (0:00)**
-Sonny is the grandkid who's always home: a voice agent for parents who live alone. Grandma just talks. Mom stops worrying.
+Sonny is the grandkid who's always home. Grandma just talks. Mom stops worrying.
 
-**The insight (0:08)**
-My grandmother lives alone. This morning at 8:04, my mom booked her a taxi to the doctor, from her own phone. Mom is already grandma's agent: she books her rides and calls all day to check. She is one of 63 million family caregivers in America, up 45 percent since 2015. Americans over 75 watch four and a half hours of TV a day and spend about half an hour with people. Sonny takes that job.
+**The insight (0:06)**
+My grandmother lives alone. This morning at 8:04, my mom booked her a taxi from her own phone. Mom is already grandma's assistant. Sonny takes the job. She is one of 63 million family caregivers in America, one in four adults.
 
-**One icon (0:32)**
-Most seniors own a phone; apps and setup are the barrier. Sonny is one icon, like the call button she already knows. No buttons, no menus. Sonny speaks first: pills, weather, the day ahead.
+**Sonny calls first (0:22)**
+Most seniors own a phone; apps and setup are the barrier. So Sonny is one icon, and Sonny calls first: "Morning, June. Sarah's staying tonight. Groceries for two?" Paid from an allowance mom tops up.
 
-**Say it, it's handled (0:42)**
-She says "call me a taxi", and it's done. Mom tops up an allowance; grandma spends it by voice; anything big waits for mom's OK. Two thousand hamburgers? Sonny double-checks, then calls mom first. Americans over 60 lost almost five billion dollars to fraud in 2024; grandma keeps her independence, mom keeps the veto.
+**When she gets stuck (0:38)**
+When grandma gets stuck, Sonny doesn't make her feel slow. It quietly calls mom. Mom taps "Book it for her", and the taxi is on its way. Two thousand burgers? Sonny asks again, and anything strange waits for mom.
 
-**Mom stops calling (1:02)**
-Mom sets it up once: scans one QR on grandma's phone, done. She sees what got done, not what was said. "Don't tell my daughter" stays between them.
+**What mom sees (0:56)**
+Mom sees what got done, not what was said; "don't tell my daughter" stays between them. Grandma is the teacher: what she teaches becomes Sonny's memory. And Sonny doesn't replace family; it nudges mom to call, with something to talk about.
 
-**Why grandma keeps it on (1:14)**
-I ran an art gallery for years. My retired regulars loved teaching me. Care devices get unplugged; Sonny asks to be taught. What she teaches becomes its memory, and the next morning it uses it.
+**Why now, and why us (1:16)**
+Agents can finally get things done by voice, on open source you can self-host: Kokoro voice, Silero VAD, GBrain memory. Companions talk. Sonny gets things done, and calls mom. Paid by the family, monthly.
 
-**How, and what's next (1:28)**
-One Claude agent with real tools. Everything else is open source you can self-host: Kokoro voice, Silero VAD, GBrain memory. Next, a TV dongle for the screen she watches all day, then Sonny calling mom on a real phone line.
-
-**Invite (1:45)**
-Pickle covers your workday through Zoom. Sonny covers grandma's whole day. Scan the first code and be grandma. Scan the second and be her daughter.
+**Close (1:38)**
+Today a phone, next her TV. Scan the first code and be June. Scan the second and be Sarah.
 
 ## How this maps to the three judging criteria
 
@@ -45,7 +44,8 @@ Pickle covers your workday through Zoom. Sonny covers grandma's whole day. Scan 
 - **Why one icon?** She already knows exactly one gesture on her phone: tap a picture to call someone. Our whole interface is that gesture, then her voice; mom installs it and signs it in once.
 - **Why TV next?** It is the one screen she watches all day, so Sonny can speak first even when the phone is in a drawer, and it is big enough for a plate number she can actually read.
 - **Why now?** For the first time, what seniors know is worth teaching to AI, so being taught by grandma is a contribution she can be proud of, not a service she has to accept; and agents can finally act (book, pay, call) instead of just chat.
-- **How are we different from Ato?** Ato is a screen-free speaker that talks and relays messages; Sonny acts for her (rides, groceries, payments) with mom holding the veto, and grandma is the teacher, not the patient.
+- **How are we different from Ato?** "Companions talk. Sonny gets things done, and calls mom." Ato is a screen-free speaker that talks and relays messages; Sonny acts for her (rides, groceries, payments), calls mom when grandma is stuck or something is strange, and grandma is the teacher, not the patient.
+- **Business, one line:** "Paid by the family, monthly." (Add mom's number when we have it.)
 
 ## The hard questions (office hours) and who pays
 
