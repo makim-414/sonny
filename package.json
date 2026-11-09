@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.99",
+    "@huggingface/transformers": "3.8.1",
     "ai": "^7.0.165",
+    "kokoro-js": "1.2.1",
     "next": "16.4.5",
     "react": "19.3.0",
     "react-dom": "19.3.0",
