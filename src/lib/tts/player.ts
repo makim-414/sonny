@@ -48,14 +48,16 @@ export function voiceLevel(): number | null {
   return Math.min(1, Math.sqrt(sum / data.length) * 4);
 }
 
-async function fetchClip(text: string): Promise<AudioBuffer | null> {
+const SENTENCE_GAP_MS = 250; // a short breath between sentences makes them clearer
+
+async function fetchClip(text: string, speed: number): Promise<AudioBuffer | null> {
   const a = ensureAudio();
   if (!a) return null;
   try {
     const res = await fetch("/api/tts", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, speed }),
     });
     if (!res.ok) return null;
     return await a.ctx.decodeAudioData(await res.arrayBuffer());
@@ -100,16 +102,18 @@ export function stopVoice() {
 // `onSentence` fires as each sentence starts; `isCancelled` lets a tap cut it short.
 export async function speakSentences(
   sentences: string[],
-  opts: { lang: string; onSentence: (i: number) => void; isCancelled: () => boolean },
+  opts: { lang: string; rate: number; onSentence: (i: number) => void; isCancelled: () => boolean },
 ): Promise<void> {
   // Kokoro here is English only; Korean lines go to the browser's Korean voice.
   const hangul = (s: string) => /[가-힣]/.test(s);
-  const clips = sentences.map((s) => (hangul(s) ? Promise.resolve(null) : fetchClip(s)));
+  const clips = sentences.map((s) => (hangul(s) ? Promise.resolve(null) : fetchClip(s, opts.rate)));
   for (let i = 0; i < sentences.length; i++) {
     const clip = await clips[i];
     if (opts.isCancelled()) return;
+    if (i > 0) await new Promise((r) => setTimeout(r, SENTENCE_GAP_MS));
+    if (opts.isCancelled()) return;
     opts.onSentence(i);
     if (clip) await playClip(clip);
-    else await speakBrowser(sentences[i], hangul(sentences[i]) ? "ko-KR" : opts.lang);
+    else await speakBrowser(sentences[i], hangul(sentences[i]) ? "ko-KR" : opts.lang, opts.rate);
   }
 }

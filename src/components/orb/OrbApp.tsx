@@ -22,6 +22,30 @@ const TUNE_CARD_MS = 3000;
 const TOAST_MS = 3500;
 const RELISTEN_MS = 250;
 const RETRY_MS = 1200;
+
+// Older speakers pause mid-sentence: wait this long in silence before taking the turn (?wait=2.5 s).
+const DEFAULT_WAIT_MS = 2000;
+// Kokoro and browser voice speed, a little slow and clear (?rate=0.9).
+const DEFAULT_RATE = 0.85;
+// If the VAD misses the end of speech, Web Speech is closed this long after the last word.
+const SAFETY_EXTRA_MS = 2500;
+
+function numberParam(name: string, min: number, max: number): number | null {
+  if (typeof window === "undefined") return null;
+  const v = Number(new URLSearchParams(window.location.search).get(name));
+  return Number.isFinite(v) && v >= min && v <= max ? v : null;
+}
+
+// ?wait= takes seconds (2.5) or milliseconds (2500).
+function waitMs(): number {
+  const v = numberParam("wait", 0.2, 20_000);
+  if (v === null) return DEFAULT_WAIT_MS;
+  return v <= 20 ? v * 1000 : v;
+}
+
+function speechRate(): number {
+  return numberParam("rate", 0.5, 1.5) ?? DEFAULT_RATE;
+}
 const INBOX_POLL_MS = 1500;
 const INBOX_MISSING_POLL_MS = 15_000;
 
@@ -32,7 +56,7 @@ const LANG = APP_LANG === "en" ? "en-US" : "ko-KR";
 // Screen words in the conversation language (brand.ts APP_LANG).
 const COPY = {
   en: {
-    start: "Tap to start",
+    start: "Start",
     micBlocked: "Please allow the microphone",
     type: "Type instead",
     family: "Family notified",
@@ -44,7 +68,7 @@ const COPY = {
     nextDay: "Next morning",
   },
   ko: {
-    start: "눌러서 시작",
+    start: "시작",
     micBlocked: "마이크를 허용해 주세요",
     type: "말 대신 글로 적기",
     family: "가족에게 알렸어요",
@@ -128,6 +152,7 @@ export function OrbApp() {
       setMode("speaking");
       await speakSentences(parts, {
         lang: LANG,
+        rate: speechRate(),
         onSentence: (i) => setLine({ who: "assistant", text: parts[i], en: eng[i] }),
         isCancelled: () => sayGenRef.current !== gen,
       });
@@ -241,8 +266,15 @@ export function OrbApp() {
     }
     setMode("listening");
     let heard = false;
+    // With the VAD on, recognition stays open through pauses and the VAD ends the turn.
+    const vadDecides = vadRef.current !== null;
+    let safety: ReturnType<typeof setTimeout> | null = null;
     const self = listenOnce({
       onInterim: (t) => {
+        if (vadDecides) {
+          if (safety) clearTimeout(safety);
+          safety = setTimeout(() => self?.stop(), waitMs() + SAFETY_EXTRA_MS);
+        }
         signal.current.pulse = 1;
         if (t) setLine({ who: "user", text: t });
       },
@@ -262,12 +294,13 @@ export function OrbApp() {
         }
       },
       onEnd: () => {
+        if (safety) clearTimeout(safety);
         if (listenerRef.current === self) listenerRef.current = null;
         if (heard || pendingRef.current > 0 || !startedRef.current) return;
         // Silence or a hiccup: keep listening, like an open phone line.
         setTimeout(() => listenRef.current(), listenOkRef.current ? RELISTEN_MS : RETRY_MS);
       },
-    }, LANG);
+    }, LANG, { continuous: vadDecides });
     listenerRef.current = self;
     if (!self) setMode("idle");
     else vadRef.current?.start();
@@ -299,7 +332,7 @@ export function OrbApp() {
         onLevel: (lv) => {
           if (signal.current.mode === "listening") signal.current.pulse = Math.max(signal.current.pulse, lv);
         },
-      }).then((v) => {
+      }, { redemptionMs: waitMs() }).then((v) => {
         vadRef.current = v;
         if (!v || pendingRef.current > 0) return;
         if (listenerRef.current) v.start();
@@ -475,7 +508,17 @@ export function OrbApp() {
     <main className={`orb-root is-${mode}`} onPointerDown={onTap}>
       <ParticleOrb signal={signal} />
 
-      {!started && <p className="orb-start">{COPY.start}</p>}
+      {!started && (
+        <button
+          type="button"
+          className="orb-start"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={start}
+          aria-label={COPY.start}
+        >
+          {COPY.start}
+        </button>
+      )}
       {notice && <p className="orb-notice">{notice}</p>}
 
       {card && (
