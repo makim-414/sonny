@@ -5,9 +5,12 @@ import { isLesson, type MemoryFact, type MemoryStore } from "@/lib/memory";
 import { addSchedule, kstClock, kstParts } from "@/lib/scheduler";
 import { logEvent, store } from "@/lib/store";
 import type { ActivityEvent, TvAction } from "@/lib/types";
+import { CORRECTED_BY, TAUGHT_BY } from "@/lib/memory/seed";
 import { orderErrand, type ErrandOrder } from "./services/errand";
 import { newsToday, weatherToday } from "./services/info";
 import { requestRide, type RideBooking } from "./services/ride";
+import { T } from "./strings";
+import { spend, walletSnapshot } from "./wallet";
 
 // One request's context. Tools push TV actions here; the route returns them.
 export type AgentContext = {
@@ -17,12 +20,12 @@ export type AgentContext = {
   private: boolean; // this turn was kept from the family
 };
 
-export const DEMO = "demo data";
+export const DEMO = T.demo;
 
 // Requests waiting for mom's approval in the family app.
 export type PendingRequest =
-  | { kind: "taxi"; at: string; ride: RideBooking }
-  | { kind: "order"; at: string; order: ErrandOrder };
+  | { kind: "taxi"; at: string; ride: RideBooking; walletEntryId: string }
+  | { kind: "order"; at: string; order: ErrandOrder; walletEntryId: string };
 
 type HealthRecord = { at: string; medicineTaken?: boolean; feeling: string; severity: string; symptoms: string[] };
 type LaterShow = { channel: number; channelName: string; title: string; startISO: string; startsAt: string; startsInMin: number };
@@ -30,7 +33,6 @@ type Shared = { health: HealthRecord[]; requests: PendingRequest[]; lastLater?: 
 const g = globalThis as unknown as { __hyodoAgent?: Shared };
 export const shared: Shared = g.__hyodoAgent ?? (g.__hyodoAgent = { health: [], requests: [] });
 
-const won = (n: number) => `${n.toLocaleString("ko-KR")}원`;
 
 function log(ctx: AgentContext, kind: ActivityEvent["kind"], text: string, opts: Pick<ActivityEvent, "visibility" | "familyText"> = {}) {
   return logEvent(kind, text, ctx.now.toISOString(), opts);
@@ -72,16 +74,25 @@ export function createTools(ctx: AgentContext) {
       }),
       execute: async ({ fact, kind, card, topic }) => {
         const category = kind === "lesson" ? "lesson" : (topic ?? "taught");
-        const provenance = `김순자 할머니가 TV 대화에서 가르침, ${ctx.now.toISOString()}`;
+        const provenance = `${TAUGHT_BY}, ${ctx.now.toISOString()}`;
         const saved = await ctx.memory.remember({ text: fact, category, source: "grandma", provenance, at: ctx.now.toISOString() });
         if (kind === "lesson") {
           const n = (await lessonsThisMonth(ctx.memory, ctx.now)).length;
-          ctx.actions.push({ type: "showCard", title: `배웠어요: ${card}`, body: `이번 달 할머니께 배운 것 ${n}개\n다른 분들께도 도움이 될 거예요` });
-          log(ctx, "memory", `새로 배운 것(lesson): ${fact} · 이번 달 ${n}개`, { visibility: "family", familyText: `할머니께 새로 배운 것: ${card} (이번 달 ${n}개)` });
+          // TV shows titles with the learned count as a big number card; body is the lesson.
+          ctx.actions.push({ type: "showCard", title: T.learnedTitle(n), body: fact });
+          log(ctx, "memory", T.logLesson(fact, n), { visibility: "family", familyText: T.famLesson(card, n) });
           return { saved: true, id: saved.id, kind, lessonsThisMonth: n, backend: ctx.memory.backend };
         }
-        ctx.actions.push({ type: "showCard", title: `기억할게요: ${card}`, body: "할머니께 배운 소중한 기억이에요" });
-        log(ctx, "memory", `새로 배운 것(personal): ${fact}`, { visibility: "private" });
+        ctx.actions.push({ type: "showCard", title: T.personalTitle(card), body: T.personalBody });
+        log(ctx, "memory", T.logPersonal(fact), { visibility: "private" });
+        // Mom sees only how many personal things were taught today, never what.
+        const today = kstParts(ctx.now);
+        const taughtToday = (await ctx.memory.all()).filter((f) => {
+          if (isLesson(f) || f.source === "seed") return false;
+          const p = kstParts(new Date(f.at));
+          return p.year === today.year && p.month === today.month && p.day === today.day;
+        }).length;
+        log(ctx, "memory", T.logPersonal(fact), { visibility: "summary", familyText: T.famTaughtCount(Math.max(1, taughtToday)) });
         ctx.private = true;
         return { saved: true, id: saved.id, kind, backend: ctx.memory.backend };
       },
@@ -93,11 +104,11 @@ export function createTools(ctx: AgentContext) {
       inputSchema: z.object({ id: z.string(), fact: z.string().describe("고친 사실 한 문장"), card: z.string().describe("짧은 요약") }),
       execute: async ({ id, fact, card }) => {
         const before = (await ctx.memory.all()).find((f) => f.id === id);
-        const saved = await ctx.memory.correct(id, fact, `김순자 할머니가 정정함, ${ctx.now.toISOString()}`);
-        if (!saved) return { ok: false, error: "그 id 의 기억이 없어요" };
-        ctx.actions.push({ type: "showCard", title: `고쳤어요: ${card}`, body: before ? `전에는: ${before.text}` : undefined });
+        const saved = await ctx.memory.correct(id, fact, `${CORRECTED_BY}, ${ctx.now.toISOString()}`);
+        if (!saved) return { ok: false, error: "no memory with that id" };
+        ctx.actions.push({ type: "showCard", title: T.correctedTitle(card), body: before ? T.correctedBefore(before.text) : undefined });
         const shared = before && isLesson(before);
-        log(ctx, "memory", `기억 정정: "${before?.text ?? id}" → "${fact}"`, shared ? { visibility: "family" } : { visibility: "private" });
+        log(ctx, "memory", T.logCorrect(before?.text ?? id, fact), shared ? { visibility: "family" } : { visibility: "private" });
         if (!shared) ctx.private = true;
         return { ok: true, id: saved.id, replaced: id };
       },
@@ -117,8 +128,7 @@ export function createTools(ctx: AgentContext) {
       inputSchema: z.object({}),
       execute: async () => {
         const list = await lessonsThisMonth(ctx.memory, ctx.now);
-        const recent = list.slice(-3).map((f) => `· ${f.text}`).join("\n");
-        ctx.actions.push({ type: "showCard", title: `이번 달 할머니께 배운 것 ${list.length}개`, body: `${recent}\n다른 분들께도 도움이 돼요` });
+        ctx.actions.push({ type: "showCard", title: T.learnedTitle(list.length), body: list[list.length - 1]?.text ?? T.learnedBodyFooter });
         return { count: list.length };
       },
     }),
@@ -128,7 +138,8 @@ export function createTools(ctx: AgentContext) {
       inputSchema: z.object({ what: z.string().describe("무엇을 비밀로 하는지 짧게") }),
       execute: async ({ what }) => {
         ctx.private = true;
-        log(ctx, "memory", `비밀로 하기: ${what}`, { visibility: "private" });
+        log(ctx, "memory", T.logSecret(what), { visibility: "private" });
+        ctx.actions.push({ type: "showCard", title: T.secretTitle, body: T.secretBody });
         return { ok: true };
       },
     }),
@@ -177,30 +188,67 @@ export function createTools(ctx: AgentContext) {
       }),
       execute: async ({ to, from, when }) => {
         const ride = requestRide({ to, from, when, now: ctx.now });
-        shared.requests.push({ kind: "taxi", at: ctx.now.toISOString(), ride });
+        const cost = T.usd(ride.fareCents);
+        const pay = spend(ride.fareCents, `Taxi to ${ride.destination.name} (${DEMO})`, ctx.now.toISOString());
         const pickup = kstClock(new Date(ride.pickupAt));
-        ctx.actions.push({
-          type: "showCard",
-          title: "택시 요청했어요",
-          body: `${ride.pickup.name} → ${ride.destination.name}\n${ride.status === "reserved" ? `${pickup} 출발` : "지금 출발"}\n따님 확인 중이에요\n${DEMO}`,
-        });
-        ctx.actions.push({ type: "notifyFamily", message: `택시 요청: ${ride.pickup.name} → ${ride.destination.name}`, level: "info" });
-        log(ctx, "task", `택시 요청: ${ride.pickup.name} → ${ride.destination.name}, ${pickup} 출발, 예상 요금 ${won(ride.fareWon)} (${DEMO})`, { visibility: "family" });
-        return { ok: true, status: "awaiting_family_approval", destination: ride.destination.name, pickupAt: pickup };
+        if (pay.status === "done") {
+          ctx.actions.push({
+            type: "showCard",
+            title: T.rideCardTitle,
+            body: `${T.rideBody(ride.pickup.name, ride.destination.name, ride.carModel, ride.plate, ride.etaMin)}\n${DEMO}`,
+          });
+          ctx.actions.push({ type: "notifyFamily", message: T.notifyRide(ride.pickup.name, ride.destination.name), level: "info" });
+          // Paid rides are a plain family line (kind family), not an approval card.
+          log(ctx, "family", T.logRidePaid(cost, ride.destination.name, ride.carModel, ride.plate, pickup) + ` (${DEMO})`, { visibility: "family" });
+          return { ok: true, status: "done", paid: cost, balanceLeft: T.usd(pay.balance), car: ride.carModel, plate: ride.plate, etaMin: ride.etaMin, destination: ride.destination.name };
+        }
+        shared.requests.push({ kind: "taxi", at: ctx.now.toISOString(), ride, walletEntryId: pay.entry.id });
+        ctx.actions.push({ type: "showCard", title: T.rideCardPending, body: `${T.ridePendingBody(ride.pickup.name, ride.destination.name)}\n${DEMO}` });
+        ctx.actions.push({ type: "notifyFamily", message: T.notifyRide(ride.pickup.name, ride.destination.name), level: "warn" });
+        log(ctx, "task", T.logRidePending(cost, ride.pickup.name, ride.destination.name) + ` (${DEMO})`, { visibility: "family" });
+        return { ok: true, status: "pending_approval", cost, reason: pay.reason === "over_limit" ? `over the ${T.usd(store.wallet.perSpendLimit)} per-purchase limit` : `only ${T.usd(pay.balance)} left in the allowance`, destination: ride.destination.name, say: "Tell her you asked her daughter to OK this." };
       },
     }),
 
     errand_order: tool({
-      description: "장보기·생필품을 주문한다(가짜 서비스). 따님이 승인하면 배송된다. 승인 요청은 자동.",
-      inputSchema: z.object({ items: z.array(z.object({ name: z.string(), qty: z.number().int().min(1).optional() })).min(1) }),
+      description: "Order groceries or household items (demo service). Paid from grandma's allowance; over the limit it waits for her daughter's OK automatically.",
+      inputSchema: z.object({
+        items: z
+          .array(
+            z.object({
+              name: z.string().describe("item in plain words, e.g. 'milk', 'eggs', 'rice'"),
+              qty: z.number().int().min(1).max(20).optional().describe("number of packs as sold: a dozen eggs = 1, two gallons of milk = 2"),
+            }),
+          )
+          .min(1),
+      }),
       execute: async ({ items }) => {
         const order = orderErrand({ items, now: ctx.now });
-        shared.requests.push({ kind: "order", at: ctx.now.toISOString(), order });
-        const list = order.items.map((i) => `${i.name} ${i.qty}개`).join(", ");
-        ctx.actions.push({ type: "showCard", title: "장보기 주문 넣었어요", body: `${list}\n합계 ${won(order.totalWon)}\n따님 확인 후 ${order.arrives} 도착\n${DEMO}` });
-        ctx.actions.push({ type: "notifyFamily", message: `주문 요청: ${list}`, level: "info" });
-        log(ctx, "task", `주문 요청: ${list}, 합계 ${won(order.totalWon)}, ${order.arrives} 도착 (${DEMO})`, { visibility: "family" });
-        return { ok: true, status: order.status, total: won(order.totalWon), arrives: order.arrives };
+        const list = order.items.map((i) => T.qty(i.name, i.qty)).join(", ");
+        const cost = T.usd(order.totalCents);
+        const pay = spend(order.totalCents, `Groceries: ${list} (${DEMO})`, ctx.now.toISOString());
+        if (pay.status === "done") {
+          order.status = "paid";
+          ctx.actions.push({ type: "showCard", title: T.orderCardTitle, body: `${T.orderBody(list, cost, order.arrives)}\n${DEMO}` });
+          ctx.actions.push({ type: "notifyFamily", message: T.notifyOrder(list), level: "info" });
+          log(ctx, "family", T.logOrderPaid(cost, list, order.arrives) + ` (${DEMO})`, { visibility: "family" });
+          return { ok: true, status: "done", paid: cost, balanceLeft: T.usd(pay.balance), arrives: order.arrives };
+        }
+        shared.requests.push({ kind: "order", at: ctx.now.toISOString(), order, walletEntryId: pay.entry.id });
+        ctx.actions.push({ type: "showCard", title: T.orderCardPending, body: `${T.orderPendingBody(list, cost)}\n${DEMO}` });
+        ctx.actions.push({ type: "notifyFamily", message: T.notifyOrder(list), level: "warn" });
+        log(ctx, "task", T.logOrderPending(list, cost) + ` (${DEMO})`, { visibility: "family" });
+        return { ok: true, status: "pending_approval", cost, reason: pay.reason === "over_limit" ? `over the ${T.usd(store.wallet.perSpendLimit)} per-purchase limit` : `only ${T.usd(pay.balance)} left in the allowance`, say: "Tell her you asked her daughter to OK this." };
+      },
+    }),
+
+    wallet_balance: tool({
+      description: "How much allowance grandma has left (the family tops it up). Shows a card.",
+      inputSchema: z.object({}),
+      execute: async () => {
+        const w = walletSnapshot();
+        ctx.actions.push({ type: "showCard", title: T.walletTitle(T.usd(w.balanceCents)), body: `${T.walletBody(T.usd(w.limitCents))}\n${DEMO}` });
+        return { balance: T.usd(w.balanceCents), perSpendLimit: T.usd(w.limitCents), waitingForOk: w.pending, recent: w.recent };
       },
     }),
 
@@ -215,13 +263,13 @@ export function createTools(ctx: AgentContext) {
       }),
       execute: async ({ medicineTaken, feeling, symptoms = [], severity }) => {
         shared.health.push({ at: ctx.now.toISOString(), medicineTaken, feeling, symptoms, severity });
-        const med = medicineTaken === undefined ? "" : medicineTaken ? `${clock()} 아침 약 드심. ` : "약 아직 안 드심. ";
+        const med = medicineTaken === undefined ? "" : medicineTaken ? T.medTaken(clock()) : T.medNotTaken;
         // "딸한테 말하지 마" keeps it private, unless it is an emergency.
         const hush = ctx.private && severity !== "urgent";
-        log(ctx, "memory", `건강 기록: ${med}${feeling}`, { visibility: hush ? "private" : "family" });
+        log(ctx, "memory", T.health(med, feeling), { visibility: hush ? "private" : "family" });
         if (hush) return { recorded: true, familyAlerted: false, keptPrivate: true };
         if (severity === "warn" || severity === "urgent") {
-          alertFamily(ctx, `할머니 건강 확인 필요: ${feeling}${symptoms.length ? ` (${symptoms.join(", ")})` : ""}`, severity);
+          alertFamily(ctx, T.healthAlert(feeling, symptoms.join(", ")), severity);
         }
         return { recorded: true, familyAlerted: severity === "warn" || severity === "urgent" };
       },
@@ -236,8 +284,8 @@ export function createTools(ctx: AgentContext) {
       }),
       execute: async ({ message, reply, level = "info" }) => {
         ctx.actions.push({ type: "notifyFamily", message, level });
-        if (reply) log(ctx, "family", `할머니 답 요약: ${message}`, { visibility: "family" });
-        else if (level === "info") log(ctx, "family", `할머니 전하는 말: ${message}`, { visibility: "family" });
+        if (reply) log(ctx, "family", T.reply(message), { visibility: "family" });
+        else if (level === "info") log(ctx, "family", T.says(message), { visibility: "family" });
         else log(ctx, "alert", `[${level}] ${message}`, { visibility: "family" });
         return { sent: true };
       },
@@ -257,7 +305,7 @@ export function createTools(ctx: AgentContext) {
       inputSchema: z.object({ card: z.boolean().optional().describe("카드를 띄울지, 기본 true") }),
       execute: async ({ card = true }) => {
         const w = weatherToday();
-        if (card) ctx.actions.push({ type: "showCard", title: `오늘 날씨 ${w.sky}`, body: `아침 ${w.morningC}도, 낮 최고 ${w.highC}도\n${w.advice}\n${DEMO}` });
+        if (card) ctx.actions.push({ type: "showCard", title: T.weatherTitle(w.sky), body: `${T.weatherBody(w)}\n${DEMO}` });
         return w;
       },
     }),
@@ -269,7 +317,7 @@ export function createTools(ctx: AgentContext) {
         const all = newsToday();
         const items = topic ? all.filter((n) => n.topic === topic) : all;
         const pick = (items.length ? items : all).slice(0, 2);
-        ctx.actions.push({ type: "showCard", title: "오늘 소식", body: `${pick.map((n) => `· ${n.plain}`).join("\n")}\n${DEMO}` });
+        ctx.actions.push({ type: "showCard", title: T.newsTitle, body: `${pick.map((n) => `· ${n.plain}`).join("\n")}\n${DEMO}` });
         return { items: pick };
       },
     }),
@@ -298,7 +346,7 @@ export function createTools(ctx: AgentContext) {
         return {
           tuned: live ? { channel: live.channel, channelName: live.channelName, title: live.title } : null,
           later,
-          note: "편성은 demo schedule data",
+          note: T.tvData,
         };
       },
     }),
@@ -308,6 +356,10 @@ export function createTools(ctx: AgentContext) {
       inputSchema: z.object({ query: z.string().describe("예: '임영웅', '가요무대', '뉴스'") }),
       execute: async ({ query }) => {
         const hits = searchEpg(query, ctx.now);
+        shared.lastLater = hits
+          .filter((h) => h.status === "later")
+          .slice(0, 2)
+          .map((h) => ({ channel: h.channel, channelName: h.channelName, title: h.title, startISO: h.start, startsAt: kstClock(new Date(h.start)), startsInMin: h.startsInMin }));
         return {
           results: hits.map((h) => ({
             channel: h.channel,
