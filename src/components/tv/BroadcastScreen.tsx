@@ -1,13 +1,23 @@
+import { APP_LANG } from "@/lib/brand";
 import type { Scene } from "./channels";
 
 // Fake broadcast pictures, one per genre. Pure SVG and CSS, no real video.
 
-const HEADLINES = [
-  "오늘 전국 대체로 맑음, 낮 기온 18도",
-  "어르신 무료 독감 예방접종 이달 말까지",
-  "주말 단풍 절정, 국립공원 나들이객 늘어",
-  "버스 요금 동결, 내년까지 유지",
-];
+// Made-up ticker lines (demo data), in the conversation language.
+const HEADLINES =
+  APP_LANG === "en"
+    ? [
+        "Mostly sunny today, high near 64",
+        "Free flu shots for seniors through the end of the month",
+        "Fall colors peak this weekend in state parks",
+        "Bus fares stay the same through next year",
+      ]
+    : [
+        "오늘 전국 대체로 맑음, 낮 기온 18도",
+        "어르신 무료 독감 예방접종 이달 말까지",
+        "주말 단풍 절정, 국립공원 나들이객 늘어",
+        "버스 요금 동결, 내년까지 유지",
+      ];
 
 function NewsScene() {
   return (

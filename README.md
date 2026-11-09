@@ -20,9 +20,17 @@ Mom sees what got done, never what was said: grandma's private conversations are
 
 ## Screens
 
-| Grandma's phone (`/`) | Sonny calls mom | Family admin (`/admin`) |
+<img src="docs/screens/00-sonny.png" alt="Sonny, a little yellow cockatiel, on grandma's phone" width="240">
+
+Sonny is a little yellow cockatiel. Parrots learn by repeating what you teach them, and so does Sonny.
+
+| Grandma's phone (`/`) | Mom's phone (`/family`) | Allowance (`/admin/allowance`) |
 |---|---|---|
-| ![Grandma's phone](docs/screens/grandma.png) | ![Sonny is calling](docs/screens/call.png) | ![Family admin](docs/screens/admin.png) |
+| ![Sonny calling grandma](docs/screens/01-grandma-call.png) | ![Mom's feed](docs/screens/02-family.png) | ![Allowance](docs/screens/07-admin-allowance.png) |
+
+| Hidden setup (`/setup`) | TV mode (`/tv`) |
+|---|---|
+| ![Setup](docs/screens/10-setup.png) | ![TV mode](docs/screens/13-tv.png) |
 
 Screenshots live in `docs/screens/`.
 
@@ -110,6 +118,13 @@ More: architecture [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), family app cont
 - TV integration: the TV app runs in the browser today (`/tv`); Android TV and Samsung TV apps are next.
 
 **Demo video:** the live-action B-roll is AI-generated footage. Every app screen in it is the real product.
+
+## How Sonny gets into her home
+
+1. **Today, the family installs it:** mom sends one link, grandma taps once, and the icon sits on her home screen. No sign-up, no password, no app store for grandma. Sonny calls her first.
+2. **The TV she already watches:** the same Sonny as an Android TV and Samsung TV app the family installs remotely. Americans 75+ watch 4.4 hours of TV a day (BLS ATUS 2025), and 61% of U.S. internet homes stream mainly on the smart TV (Parks Associates 2026).
+3. **Who pays:** the family pays monthly. Next come the channels that already sit in her home: home-care agencies, senior living communities, and senior health plans that want the daily blood-pressure check-ins.
+4. **Then our own device:** a small box or speaker that ships pre-paired to the family.
 
 ## Roadmap
 
