@@ -6,7 +6,7 @@ import { T } from "./strings";
 
 // Full-screen "Sonny is calling". Every family phone polls /api/family/ring about once a
 // second, so a call rings on all of them at once. The first person to answer handles it
-// (the server keeps a lock); everyone else sees "Daniel booked it. June's ride is on the way."
+// (the server keeps a lock); everyone else sees "Daniel booked it. Grandma's ride is on the way."
 
 const POLL_MS = 800; // visible tab
 const HIDDEN_POLL_MS = 3000; // background tab: keep the server load low
@@ -136,6 +136,7 @@ export default function IncomingCall() {
   const [heard, setHeard] = useState("");
   const busy = useRef(false);
   const callRef = useRef<RingCall | null>(null);
+  const phaseRef = useRef<Phase>("ringing");
   const dismissed = useRef(new Set<string>());
   const stopRing = useRef<(() => void) | null>(null);
   const recog = useRef<Recognition | null>(null);
@@ -143,6 +144,9 @@ export default function IncomingCall() {
   useEffect(() => {
     callRef.current = call;
   }, [call]);
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
 
   const close = useCallback((text: string) => {
     recog.current?.abort();
@@ -176,6 +180,10 @@ export default function IncomingCall() {
             if (h) {
               busy.current = true;
               close(T.handledText(h.by, h.status, cur.reason));
+            } else if (phaseRef.current === "ringing" && ringing?.id !== cur.id) {
+              // Still ringing here but no longer the live call (replaced or withdrawn).
+              stopRing.current?.();
+              setCall(ringing && !dismissed.current.has(ringing.id) ? ringing : null);
             }
           } else if (!cur && ringing && !dismissed.current.has(ringing.id)) {
             setPhase("ringing");
