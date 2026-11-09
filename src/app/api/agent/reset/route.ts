@@ -3,6 +3,7 @@ import { resetSession } from "@/lib/agent/session";
 import { shared } from "@/lib/agent/tools";
 import { resetWatch } from "@/lib/agent/watch";
 import { resetConnections } from "@/lib/agent/connections";
+import { resetWellness } from "@/lib/agent/wellness";
 import { getMemory, resetMemory } from "@/lib/memory";
 import { store } from "@/lib/store";
 
@@ -24,6 +25,7 @@ export async function POST() {
   familyState.approvedIds.length = 0;
   resetWatch();
   resetConnections();
+  resetWellness();
   store.calls.length = 0;
   store.pending.length = 0;
   store.currentChannel = null;
