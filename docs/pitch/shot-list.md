@@ -32,7 +32,7 @@ Start all recordings together and clap once in front of every device for sync.
 ## Before the first take
 
 1. Integration session restarts the server so the feed, wallet ($80, $30 limit) and calls start clean.
-2. Pair Phone G: on a laptop sign in to `<SITE>/admin` (demo account `mom@sonju.demo` / `grandma-demo`), Device tab, "Connect grandma's phone", scan the QR with Phone G, then Chrome menu, Add to Home screen. Hide every other app from that home screen.
+2. Pair Phone G: on a laptop sign in to `<SITE>/admin` (demo account `mom@sonny.demo` / `grandma-demo`), Device tab, "Connect grandma's phone", scan the QR with Phone G, then Chrome menu, Add to Home screen. Hide every other app from that home screen.
 3. Open mom's side at `<SITE>/admin?demo=1`. Check the three big buttons and the Allowance tab load.
 4. Test grandma's mic once with a throwaway line; then restart the server again.
 
