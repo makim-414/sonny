@@ -16,7 +16,9 @@ const VERT = `
 attribute vec3 a_pos;
 attribute float a_seed;
 uniform float u_time, u_angle, u_tilt, u_scale, u_wobble, u_wave, u_tremble, u_dot, u_aspect, u_lift;
-varying float v_depth;
+// Turn cue (?turns=1): her turn moves and lights the rim, Sonny's turn moves the body.
+uniform float u_turns, u_listen;
+varying float v_depth, v_rim;
 void main() {
   vec3 p = a_pos;
   float ca = cos(u_angle), sa = sin(u_angle);
@@ -24,10 +26,14 @@ void main() {
   float ct = cos(u_tilt), st = sin(u_tilt);
   p = vec3(p.x, p.y * ct - p.z * st, p.y * st + p.z * ct);
   // Cheap noise: a couple of sines keyed by each point's seed and position.
+  float rim = 1.0 - abs(p.z); // 1 on the silhouette, 0 facing her
+  v_rim = rim;
+  float waveW = mix(1.0, (1.0 - rim) * 1.7, u_turns);
+  float trembleW = mix(1.0, rim * rim * 2.5, u_turns);
   float r = 1.0
     + u_wobble * sin(u_time * 1.3 + a_seed)
-    + u_wave * sin(a_seed * 3.0 + u_time * 6.0 + p.y * 4.0)
-    + u_tremble * sin(u_time * 40.0 + a_seed * 7.0);
+    + u_wave * waveW * sin(a_seed * 3.0 + u_time * 6.0 + p.y * 4.0)
+    + (u_tremble + u_turns * u_listen * 0.03) * trembleW * sin(u_time * (u_tremble > 0.0 ? 40.0 : 3.0) + a_seed * 7.0);
   p *= r;
   float persp = 1.0 / (1.9 - p.z * 0.6);
   v_depth = (p.z + 1.0) * 0.5;
@@ -38,11 +44,12 @@ void main() {
 const FRAG = `
 precision mediump float;
 uniform vec3 u_core, u_edge;
-uniform float u_glow;
-varying float v_depth;
+uniform float u_glow, u_turns, u_listen;
+varying float v_depth, v_rim;
 void main() {
   float d = length(gl_PointCoord - 0.5);
-  float a = min(1.0, smoothstep(0.5, 0.1, d) * (0.18 + v_depth * 0.8) * u_glow);
+  float turn = 1.0 + u_turns * u_listen * (v_rim * v_rim * 1.6 - 0.45); // listening: bright rim, quiet core
+  float a = min(1.0, smoothstep(0.5, 0.1, d) * (0.18 + v_depth * 0.8) * u_glow * turn);
   gl_FragColor = vec4(mix(u_edge, u_core, smoothstep(0.3, 0.6, v_depth)) * a, a);
 }`;
 
@@ -127,7 +134,7 @@ export function WebGLOrb({ signal, onFail }: { signal: React.RefObject<OrbSignal
     const U = {
       time: u("u_time"), angle: u("u_angle"), tilt: u("u_tilt"), scale: u("u_scale"), wobble: u("u_wobble"),
       wave: u("u_wave"), tremble: u("u_tremble"), dot: u("u_dot"), aspect: u("u_aspect"), core: u("u_core"), edge: u("u_edge"),
-      lift: u("u_lift"), glow: u("u_glow"),
+      lift: u("u_lift"), glow: u("u_glow"), turns: u("u_turns"), listen: u("u_listen"),
     };
     // Core is the brand gold lifted toward white; the far side takes the cool chart-2.
     const brand = cssColor(canvas, "--brand");
@@ -159,6 +166,8 @@ export function WebGLOrb({ signal, onFail }: { signal: React.RefObject<OrbSignal
     let last = performance.now();
     let raf = 0;
     let visible = true;
+    let listen = 0;
+    gl.uniform1f(U.turns, new URLSearchParams(window.location.search).get("turns") === "1" ? 1 : 0);
 
     const frame = (now: number) => {
       raf = 0;
@@ -198,6 +207,8 @@ export function WebGLOrb({ signal, onFail }: { signal: React.RefObject<OrbSignal
       gl.uniform1f(U.tilt, 0.35 + cur.lean); // listening leans in toward her
       gl.uniform1f(U.lift, hop * 0.24);
       gl.uniform1f(U.glow, 1 + joy * 0.6);
+      listen += ((s.mode === "listening" ? 1 : 0) - listen) * ease;
+      gl.uniform1f(U.listen, listen);
       gl.drawArrays(gl.POINTS, 0, n);
       raf = requestAnimationFrame(frame);
     };
