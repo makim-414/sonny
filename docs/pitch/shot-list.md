@@ -1,6 +1,6 @@
-# Sonny: shot list for the 90 second video (v3)
+# Sonny: shot list for the 90 second video (v4)
 
-Follow this in the recording slot. Scenes and lines: `docs/pitch/demo-script.md` (v3) and the source of truth `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V3.md`. This file is only the how.
+Follow this in the recording slot. Scenes and lines: `docs/pitch/demo-script.md` (v4) and the source of truth `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V4.md`. This file is only the how.
 
 - `<SITE>` is the on-site tunnel address from the integration session; it changes on every tunnel restart.
 - Grandma's screen is `/`. Mom's screen is `/admin/today` (or `/family`). `/tv` appears only in scene 10.
@@ -28,66 +28,60 @@ Tap, `Enter` or `Space`: start, then interrupt and listen. `P`: Sonny speaks fir
 2. Pair Phone G: sign in on Phone M or a laptop at `<SITE>/admin` (`mom@sonny.demo` / `grandma-demo`), Device page, "Connect grandma's phone", scan with Phone G, then Add to Home screen.
 3. Open Phone M at `<SITE>/admin/today` at least 30 seconds before scene 4, so Sonny's voice is warm. (If the voice takes longer than 5 seconds, mom's phone reads the call in the browser voice instead.)
 
-## Scenes
+## Scenes (v4)
 
-### 1. The founder (0:00 to 0:04)
-Camera B. The founder faces camera; grandma's back and the TV behind. Line: "This is my grandma. She lives alone, and this morning my mom booked her taxi." Fallback: a title card.
+### 1. The founder (0:00 to 0:07)
+Seedance live action 1 (made by the owner in Higgsfield). Fallback: a title card with the line "This morning, I saw my mom calling a taxi for my grandmother, to the hospital."
 
-### 2. The receipt and the number (0:04 to 0:10)
-Edit only. `docs/pitch/assets/taxi-receipt-blurred.jpg` (never the original), zoom to 8:04. Then the gold U.S. card "63 million · 1 in 4 U.S. adults", source small (NAC and AARP, 2025).
+### 2. The receipt (0:07 to 0:10)
+Edit only: `docs/pitch/assets/taxi-receipt-blurred.jpg` (never the original), zoom to 8:04.
 
-### 3. One icon (0:10 to 0:13)
-Phone G home screen, tap the Sonny icon, the particle blooms.
+### 3. The numbers (0:10 to 0:16)
+Edit only: "63 million Americans care for family. 1 in 4 adults." then "27 hours a week." One per screen, source small (NAC and AARP, 2025).
 
-### 4. Sonny calls first (0:13 to 0:24)
-1. Phone G: Sonny opens with the morning call (press `P` on the fallback window if it does not).
-2. June: "Yes, please." to groceries for two.
-3. Phone M: the feed shows the grocery order and the allowance going down.
+### 4. One icon (0:16 to 0:19)
+Phone G home screen with the single Sonny icon; Sonny calls ("Sonny is calling").
 
-### 5. Stuck (0:24 to 0:40), the emotional peak
+### 5. Sunday groceries (0:19 to 0:32)
+1. Before recording, teach the routine once on Phone G: "Let me teach you how I do my Sunday groceries. Milk, eggs, the small tofu, and bananas that aren't too ripe. From Kim's market, under twenty dollars."
+2. Move the demo clock to a Sunday morning (`N` repeatedly, or start the page with `?t=08:00` on a Sunday).
+3. Record: Sonny calls, June: "Do my Sunday groceries." Sonny reads back her list and pays from the allowance. Phone M shows the order.
+- Fallback if Sonny does not reuse the routine: type it with `T` ("Do my Sunday groceries: milk, eggs, small tofu, bananas not too ripe, Kim's market").
+
+### 6. Hesitating hand (0:32 to 0:37)
+Seedance live action 2 (B-roll A). Cut if it does not arrive.
+
+### 7. Stuck (0:37 to 0:50)
 1. June: "Call me a taxi to the... the doctor, the one near the bank."
-2. Sonny: "No rush, June. I'll ask Sarah to help." Phone M rings: "Sonny is calling", "Grandma needs a hand".
-3. Answer, let the voice read it, tap "Book it for her". Phone G shows the taxi card.
-- If the agent does not place the call within 10 seconds, ring it:
+2. Phone M rings: "Grandma needs a hand". Answer, let the voice read it, tap "Book it for her". Phone G shows the taxi card.
+- Fallback within 10 seconds:
 
 ```bash
 curl -s -X POST '<SITE>/api/family/calls/demo?demo=1' -H 'content-type: application/json' -d '{"reason":"struggle"}'
 ```
 
-### 6. 2,000 burgers (0:40 to 0:48)
-1. June: "Order two thousand burgers." Sonny asks "2, or 2,000?". June: "Two thousand."
-2. Phone M rings; cut quickly. Fallback:
+### 8. Sarah leaves the meeting (0:50 to 0:54)
+Seedance live action 3 (B-roll B). Cut if it does not arrive.
 
-```bash
-curl -s -X POST '<SITE>/api/family/calls/demo?demo=1' -H 'content-type: application/json' -d '{"amount":250000,"label":"2,000 burgers","script":"Hi Sarah, it is Sonny. June just asked me to order two thousand burgers. That seems unusual. Should I go ahead?"}'
-```
+### 9. The goal (0:54 to 1:00)
+Edit only: "Sonny handles the errands, so family can just be family."
 
-### 7. Teach it once, and privacy (0:48 to 0:58)
-1. June teaches the Sunday groceries procedure (line in the script). Hold on Sonny's "Got it, June. Sunday groceries, your way." and the real lesson counter (if `/` does not show it: `<SITE>/tv?demo=1&noqr`, press `L` right after recording starts).
-2. Jump to Sunday morning: press `N` (next morning 8:00) on grandma's screen, repeating until the demo clock reads Sunday, or cut on a "Next Sunday" title card and press `P`. Sonny calls first and reads back her list. June: "Yes." Phone M shows the order paid from the allowance.
-3. June: "Don't tell my daughter. I'm knitting her a scarf." Phone G shows the lock. Phone M, bottom of Today: only "1 private conversation not shown".
-- If the agent does not reuse the procedure on its own, type the Sunday request with `T` ("It's Sunday, do my usual groceries") and keep rolling; the order must still match what she taught.
+### 10. Going to market (1:00 to 1:12)
+1. Phone G real screen for "Today".
+2. 2 seconds of `<SITE>/tv?boot&noqr&demo=1` for "Next: a Sonny app on her TV", with "Seniors 75+ watch 4.4 hours of TV a day" (BLS 2025) and "61% of U.S. internet households stream mainly on a smart TV" (Parks Associates 2026), one per screen. Optional: "Samsung's Tizen is 23% of U.S. connected-TV use" (Parks, reported April 2026). No combined percentages.
+3. "Then: our own Sonny device, plugged in by the family" card.
 
-### 8. Nudge (0:58 to 1:06)
-Phone M rings with a nudge; answer; tap "Call grandma now". Camera B: a daughter smiling (B-roll).
+### 11. The vision (1:12 to 1:22)
+Edit only: "The easiest first step into AI for the oldest generation. Then health check-ins, then the rest of their daily life."
 
-```bash
-curl -s -X POST '<SITE>/api/family/calls/demo?demo=1' -H 'content-type: application/json' -d '{"reason":"nudge","script":"Hi Sarah, it is Sonny. June mentioned you twice today. She would love a call tonight. You could ask her about the temple."}'
-```
-
-### 9. Structure and lines (1:06 to 1:18)
-Edit only: "Claude agent · GBrain memory · Kokoro voice · open source", "real product, not mocked", "Companions talk. Sonny gets things done.", "Paid by the family, monthly." One number per screen.
-
-### 10. Roadmap and both phones ringing (1:18 to 1:30)
-1. Roadmap strip "Today: one icon on her phone → Next: a Sonny app on her TV (Android TV / Google TV, Samsung Tizen) → Then: our own Sonny device, plugged in by the family" with 2 seconds of `<SITE>/tv?boot&noqr&demo=1` for "Next".
-2. Camera B: Phone G and Phone M side by side, both ringing. Ring Phone M with any demo call above while Sonny calls Phone G (`P`).
-3. End card: "Sonny. The grandkid who's always home." github.com/makim-414/sonny.
+### 12. Both phones ring (1:22 to 1:30)
+Camera B: Phone G and Phone M side by side. Press `P` on Phone G and ring Phone M with any demo call at the same moment. End card "Sonny. The grandkid who's always home." github.com/makim-414/sonny.
 
 ## Edit checklist
 
 - [ ] 1:30 or less in the exported file; music lands on the last beat.
 - [ ] Captions on every line; center emphasis 2 to 4 words.
-- [ ] "ride service mocked" (scene 5), "demo data" on staged data (scenes 1, 2 card, 8 B-roll if staged).
+- [ ] "ride service mocked" (scene 7), "demo data" on staged data. No gambling or betting anywhere.
 - [ ] Only the blurred receipt; no real names, faces of the family, addresses, plates or card numbers. On screen she is June, mom is Sarah.
 - [ ] At least 60% real product on screen.
 - [ ] Export 1080p H.264, YouTube Unlisted, open logged out to check.

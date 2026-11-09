@@ -1,40 +1,35 @@
 # Sonny: pitch (under 2 minutes, English)
 
-Spoken script first (v3, matches `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V3.md`), about 250 words (about 1:35 at 160 words per minute, leaving room for pauses; rehearse with a timer; the gallery story is in the Q&A now). Then the judging map, answers to the hard questions, sources, and the evidence for the gstack and GBrain prize. Ten judge questions with two-sentence answers: `docs/pitch/qa.md`.
+Spoken script first (v4, matches `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V4.md`), about 294 words (about 1:50 at 160 words per minute; rehearse with a timer; if it runs over, cut the second number sentence in going to market). Then the judging map, answers to the hard questions, sources, and the evidence for the gstack and GBrain prize. Ten judge questions with two-sentence answers: `docs/pitch/qa.md`.
 
 - **Customer:** the daughter (45 to 60) of a parent who lives alone pays. Grandma uses it. Speak to mom, and to every judge who has an aging parent.
 - **Insight:** "Mom is already grandma's assistant. Sonny takes the job."
 - **Language:** English. The founder's Korean grandmother is the origin story; we launch with English-speaking seniors.
 
-## Spoken script
+## Spoken script (v4 order)
 
-Four selling points, in this order: (1) she says it, the allowance pays; (2) Sonny calls first; (3) teach it once, Sonny does it that way; (4) Sonny calls mom only when it really matters.
+Order: my scene, the numbers, the product, the goal, going to market, the vision. Motif: the phone rings. Killer line: "Grandma isn't the patient. She's the boss."
 
-Motif: the phone rings. Axis: "Teach him how to do it." Killer line: "Grandma isn't the patient. She's the boss." Sentence to leave behind: "Mom is already grandma's assistant. Sonny takes the job."
+**My scene (0:00)**
+This morning, I saw my mom calling a taxi for my grandmother, to the hospital. Mom is already grandma's assistant.
 
-**Hook (0:00)**
-Sonny is the grandkid who's always home. Grandma just talks. Mom stops worrying.
+**The numbers (0:08)**
+She is one of 63 million Americans who care for family, one in four adults, giving 27 hours a week. Families don't want to be caretakers. They want to be family. Grandma wants mom to call and say hi, not to manage her errands. Sonny takes the errands, so mom can live her day with peace of mind, and the call home is just a call home.
 
-**The insight (0:06)**
-My grandmother lives alone. This morning at 8:04, my mom booked her a taxi from her own phone. Mom is already grandma's assistant. Sonny takes the job. She is one of 63 million family caregivers in America, one in four adults.
+**The product (0:30)**
+So we built Sonny, the grandkid who's always home. Grandma isn't the patient. She's the boss. One icon on her phone, and Sonny calls first. Mom loads the allowance; grandma just says it: "Do my Sunday groceries." She teaches Sonny how she likes things done, once, and Sonny does it that way from then on. When she gets stuck, Sonny doesn't make her feel slow. It quietly calls mom. Anything big or strange waits for mom's OK, and mom sees what got done, not what was said.
 
-**She's the boss (0:20)**
-Grandma isn't the patient. She's the boss. She teaches Sonny how she likes things done, once, and Sonny does it that way from then on. Mom funds it and holds the veto.
+**The goal (1:12)**
+Sonny handles the errands, so family can just be family.
 
-**Sonny calls first (0:30)**
-Most seniors own a phone; apps and setup are the barrier. So Sonny is one icon, and Sonny calls first: "Morning, June. Sarah's staying tonight. Groceries for two?" Paid from an allowance mom tops up.
+**Going to market (1:16)**
+Today, a web app on her phone, set up by mom with one QR. Next, a Sonny app on the TV she already watches: people over 75 watch four and a half hours of TV a day, and 61 percent of U.S. internet households already stream mainly on a smart TV. Then our own Sonny device, plugged in by the family. Paid by the family, monthly.
 
-**When she gets stuck (0:38)**
-When grandma gets stuck, Sonny doesn't make her feel slow. It quietly calls mom. Mom taps "Book it for her", and the taxi is on its way. Two thousand burgers? Sonny asks again, and anything strange waits for mom.
+**The vision (1:38)**
+Sonny is the easiest first step into AI for the oldest generation. Then health check-ins, then the rest of their daily life.
 
-**What mom sees (0:56)**
-Mom sees what got done, not what was said; "don't tell my daughter" stays between them. And Sonny doesn't replace family; it nudges mom to call, with something to talk about.
-
-**Why now, and why us (1:16)**
-Agents can finally get things done by voice, on open source you can self-host: Kokoro voice, Silero VAD, GBrain memory. Companions talk. Sonny gets things done, and calls mom. Paid by the family, monthly.
-
-**Close (1:38)**
-Today, one icon on her phone. Next, a Sonny app on the TV she already watches. Then our own Sonny device, plugged in by the family. Scan the first code and be June. Scan the second and be Sarah.
+**Close (1:46)**
+Companions talk. Sonny gets things done, and calls mom. Scan the first code and be June. Scan the second and be Sarah.
 
 ## The four selling points
 
@@ -52,6 +47,19 @@ Today, one icon on her phone. Next, a Sonny app on the TV she already watches. T
 3. **Then: our own Sonny device, plugged in by the family, nothing to install.** (This absorbs the earlier HDMI stick and pass-through box ideas: a box between the set-top box and the TV, drawing Sonny over live TV and driving the set-top box over HDMI-CEC or IR, is one form the device can take.)
 
 Why this order: "The phone ships today and proves the agent; the TV apps reuse the same web app; the device comes when we know exactly what grandma uses."
+
+Why the TV is worth it (confirmed numbers, one at a time, never added together):
+- Americans 75 and older watch 4.4 hours of TV a day (BLS ATUS 2025).
+- 61% of U.S. internet households already stream mainly on a smart TV (Parks Associates, CES 2026, n=8,000).
+- Samsung's Tizen alone is 23% of U.S. connected-TV platform use (Parks Associates Streaming Video Tracker, reported April 2026). Do not mix with the 34% figure (Tizen among smart TV owners); the bases differ.
+- We did not find a TV platform split for households 65+, or a confirmed U.S. share for Google TV / Android TV. Say "Android TV / Google TV and Samsung Tizen" without a combined number.
+
+## Goal and vision
+
+- Goal: "Sonny handles the errands, so family can just be family." (earlier wording, still true: "Protect the family's time. Let grandma run her own day.")
+- Core message (owner): "Families don't want to be caretakers. They want to be family. Grandma wants mom to call and say hi, not to manage her errands. Sonny takes the errands, so mom can live her day with peace of mind, and the call home is just a call home."
+- Vision: "The easiest first step into AI for the oldest generation. Then health check-ins, then the rest of their daily life."
+- Out of scope, never in the pitch, video or repo: gambling or betting extensions. They would read as targeting seniors' money, and online gambling is illegal in Korea.
 
 ## How this maps to the three judging criteria
 
@@ -126,6 +134,8 @@ No camera. Mom sees tasks and safety, not conversations; private talk is counted
 | 63 million family caregivers, up 45% since 2015 | 63 million Americans, 1 in 4 adults (24%), are family caregivers; up 45% since 2015 | National Alliance for Caregiving and AARP, Caregiving in the U.S. 2025 ([caregivingintheus.org](https://www.caregivingintheus.org/), [caregiving.org](https://www.caregiving.org/research/caregiving-in-the-us/)) |
 | Four and a half hours of TV, about half an hour with people | Americans 75+: 4.43 hours a day watching TV, 0.56 hours (about 34 minutes) socializing and communicating; 65 to 74: 4.20 and 0.55 | U.S. Bureau of Labor Statistics, American Time Use Survey, 2025 annual averages, [Table 11A](https://www.bls.gov/news.release/atus.t11a.htm) (opened 2026-11-09) |
 | Almost five billion dollars lost to fraud | Americans 60+ reported $4.885 billion in losses in 2024, 147,127 complaints | FBI Internet Crime Complaint Center, [2024 IC3 Report](https://ic3.gov/AnnualReport/Reports/2024_IC3Report.pdf) |
+| 61% stream mainly on a smart TV | 61% of U.S. internet households use a smart TV as their primary streaming device | [Parks Associates, 2026-01-06](https://www.parksassociates.com/blogs/ce-pr/sixty-one-percent-of-us-internet-households-use-their-smart-tv-as-the-primary-streaming-device), n=8,000 (opened 2026-11-09) |
+| Samsung Tizen 23% | Roku OS 28%, Samsung Tizen 23% of U.S. connected-TV platform use | Parks Associates Streaming Video Tracker, reported 2026-04-23 by [Advanced Television](https://www.advanced-television.com/2026/04/23/research-roku-samsung-dominate-ctv-platforms-in-us/) and [MacTech](https://www.mactech.com/2026/04/23/roku-os-28-and-samsungs-tizen-os-23-account-for-the-largest-share-of-tv-operating-system-usage-in-the-us/) |
 | Most seniors own a phone | 79% of Americans 65+ own a smartphone | [Pew Research Center Mobile Fact Sheet](https://www.pewresearch.org/internet/fact-sheet/mobile/), survey 2026 |
 | Caregivers' hours (Q&A only) | 27 hours a week on average; 84% handle three or more everyday tasks | NAC and AARP, 2025 (same as above) |
 | One in four Americans over 65 lives alone (Q&A only) | 26 percent of US adults 65+ lived alone in 2023 | [Pew Research Center, 2025-12-04](https://www.pewresearch.org/short-reads/2025/12/04/a-smaller-share-of-older-us-adults-live-alone-today-than-in-1990/), from Census decennial and ACS data |
@@ -150,5 +160,5 @@ Do not use:
 
 - **"Will she really talk to it?"** Our riskiest assumption, not tested with her yet. Our bet: she answers when it speaks first, and keeps it on because it asks to be taught.
 - **"What about the real phone call?"** Today mom's app rings full screen. Next: Sonny places a real call through a telephony voice agent (pipecat or livekit, both in `docs/OPEN_SOURCE.md` as roadmap).
-- **"Doesn't this replace family?"** No. "Sonny doesn't replace family; it nudges mom to call, with something to talk about." It even rings mom when grandma has been quiet, with a topic for the call.
-- **"What is the long-term vision?"** Multiplayer: seniors meeting each other by voice through their TVs, with Sonny as host. No betting or gambling.
+- **"Doesn't this replace family?"** The opposite: Sonny nudges mom to call, with something to talk about. It even rings mom when grandma has been quiet, with a topic for the call.
+- **"What is the long-term vision?"** "The easiest first step into AI for the oldest generation. Then health check-ins, then the rest of their daily life." No betting or gambling.
