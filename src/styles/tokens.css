@@ -1,0 +1,216 @@
+/* ============================================================
+   Design tokens as CSS variables. Neutral achromatic dark core.
+   Import this file once at your app root, before any component renders.
+
+   Names follow the shadcn/ui convention (--background, --foreground, --card, ...)
+   plus a short alias layer (--bg, --text, --border, --sp-*, --r-*, --sh-*) that the
+   components use through the Tailwind preset in tailwind-preset.cjs.
+
+   Brand slot: --brand defaults to near white. To theme, override --brand (and the
+   --chart-* ramp if you want color data) in your own stylesheet. Nothing else needs
+   to change, because the components only read the alias layer.
+   ============================================================ */
+:root {
+  /* shadcn/ui style base tokens */
+  --background: oklch(0.12 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(1 0 0 / 3%);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.18 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  /* Raw shadcn accent (hover and selected surface). The alias layer below sets
+     --accent: var(--brand), which wins. If you use stock shadcn components, delete
+     that alias line to restore this raw value. */
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+
+  /* Brand slot, achromatic by default */
+  --brand: oklch(0.985 0 0);            /* main emphasis, white by default */
+  --highlight: oklch(0.70 0 0);         /* secondary emphasis, mid gray */
+  --success: oklch(0.65 0.15 160);      /* semantic colors are the one exception */
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.72 0.14 38);
+  --warning-foreground: oklch(0.205 0 0);
+  --info: oklch(0.985 0 0);
+  --info-foreground: oklch(0.205 0 0);
+
+  /* Chart palette: a lightness ramp from white to near black.
+     Rank and series are told apart by lightness step, not by hue. */
+  --chart-1: oklch(0.98 0 0);
+  --chart-2: oklch(0.82 0 0);
+  --chart-3: oklch(0.66 0 0);
+  --chart-4: oklch(0.50 0 0);
+  --chart-5: oklch(0.38 0 0);
+  --chart-6: oklch(0.28 0 0);
+
+  --sidebar: oklch(0.10 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.985 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+  --radius: 0.625rem;
+
+  /* Alias layer used by the components */
+  --bg: var(--background);
+  --bg-elev: var(--card);
+  --bg-sunken: var(--muted);
+  --border: oklch(1 0 0 / 8%);
+  /* soft border for cards and bento cells */
+  --border-soft: rgba(255, 255, 255, 0.06);
+  --text: var(--foreground);
+  --text-muted: var(--muted-foreground);
+  /* Smallest text in the set (labels, captions). 0.65 keeps 4.5:1 on every dark surface, --muted included. */
+  --text-subtle: oklch(0.65 0 0);
+  --accent: var(--brand);              /* white unless a theme sets --brand */
+  --accent-fg: oklch(0.205 0 0);       /* text on top of an accent surface */
+  --accent-soft: oklch(1 0 0 / 12%);
+  --success-soft: oklch(0.65 0.15 160 / 12%);
+  --warning-soft: oklch(0.72 0.14 38 / 12%);
+  --danger: var(--destructive);
+  --danger-soft: oklch(0.704 0.191 22.216 / 12%);
+  /* Delta colors by direction. A theme can swap them (Korean market convention: up red, down blue).
+     Metrics where up is not simply good (share, rank, cost) use the neutral tone, see blocks/kpi. */
+  --delta-up: var(--success);
+  --delta-down: var(--destructive);
+  --delta-flat: var(--text-muted);
+
+  /* Type. IBM Plex: one open licensed family drawn for Latin and Hangul (IBM Plex Sans KR), with clear figures for
+     data. It is not one of the faces generated pages default to, so the repo's own TYP-02 rule stays quiet.
+     Not bundled: load it once, for example
+     https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono&display=swap
+     Swap in the brand's face by overriding --font; keep a Hangul family in the stack. */
+  --font: 'IBM Plex Sans', 'IBM Plex Sans KR', -apple-system, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', monospace;
+  /* Scale: KPI value 24, title 16, body 14, label 12, caption 11, micro 10 (13 on Korean pages, see :lang(ko) below) */
+  --t-display: 36px;
+  --t-h1: 30px;
+  --t-h2: 24px;
+  --t-title: 16px;
+  --t-body: 14px;
+  --t-sm: 12px;
+  --t-xs: 11px;
+  --t-micro: 10px;
+  --w-reg: 400;
+  --w-med: 500;
+  --w-semi: 600;
+  --lh-tight: 1.1;
+  --lh-snug: 1.3;
+  --lh-normal: 1.5;
+
+  /* Space on a 4px grid */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* Icons: three sizes and one stroke for the whole set. Which slots get an icon: patterns/icon-placement.md */
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
+  --icon-stroke: 2;
+
+  /* Control heights. Touch screens get --control-touch (44px); only a wide screen without a coarse pointer
+     drops to the compact sizes (the desk: screen in tailwind-preset.cjs). Never test pointer: fine, a
+     headless browser reports no pointer and would get the compact size on a phone width. */
+  --control-sm: 32px;
+  --control-md: 36px;
+  --control-touch: 44px;
+
+  /* Radius as a ratio scale of --radius */
+  --r-sm: calc(var(--radius) * 0.6);   /* 0.375rem */
+  --r-md: calc(var(--radius) * 0.8);   /* 0.5rem */
+  --r-card: var(--radius);             /* 0.625rem */
+  --r-xl: calc(var(--radius) * 1.4);   /* 0.875rem */
+  --r-2xl: calc(var(--radius) * 1.8);  /* 1.125rem */
+  --r-3xl: calc(var(--radius) * 2.2);  /* 1.375rem */
+  --r-4xl: calc(var(--radius) * 2.6);  /* 1.625rem */
+  --r-pill: 999px;
+
+  /* Shadow */
+  --sh-card: 0 1px 2px rgba(0,0,0,.3), 0 1px 1px rgba(0,0,0,.2);
+  --sh-pop: 0 8px 24px rgba(0,0,0,.35);
+
+  /* Scrim behind modals and drawers */
+  --scrim: oklch(0 0 0 / 55%);
+
+  /* Motion. Enter and exit use ease-out, moves inside the screen use ease-in-out,
+     UI stays under 300ms. ease-in is not used for UI because the first frame,
+     the one people watch, would feel sluggish. Reference the tokens, do not inline values. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);      /* enter and exit default */
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);  /* move from A to B on screen */
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);   /* drawers and sheets */
+
+  /* Durations: the more frequent the action, the shorter */
+  --dur-press: 160ms;     /* press feedback */
+  --dur-tooltip: 125ms;   /* tooltips and small popovers */
+  --dur-dropdown: 200ms;  /* dropdowns and selects */
+  --dur-modal: 400ms;     /* modals and drawers */
+  --stagger-step: 50ms;   /* list stagger step, 30 to 80ms */
+
+  /* Physics: never start from scale(0), real objects do not appear from nothing */
+  --press-scale: 0.97;
+  --enter-scale: 0.95;
+  --enter-offset: 8px;
+  --blur-mask: 2px;       /* crossfade masking, 20px at most */
+}
+
+/* Accessibility: soften motion instead of removing it.
+   Position changes are turned off, opacity and color transitions stay. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-press: 1ms;
+    --dur-tooltip: 1ms;
+    --dur-dropdown: 1ms;
+    --dur-modal: 1ms;
+    --stagger-step: 0ms;
+    --press-scale: 1;
+    --enter-scale: 1;
+    --enter-offset: 0px;
+    --blur-mask: 0px;
+  }
+}
+
+/* When the user asks for reduced transparency, make glass surfaces opaque. */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --bg-elev: var(--bg-sunken);
+    --scrim: oklch(0 0 0 / 80%);
+  }
+}
+
+/* Korean pages: Hangul fills in below 13px (rule KO-11), so the three small steps meet at 13px,
+   and words break between words, not between syllables (rule KO-01). Set lang="ko" on <html>. */
+:lang(ko) {
+  --t-sm: 13px;
+  --t-xs: 13px;
+  --t-micro: 13px;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* Base styles for a consuming app */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font);
+  font-size: var(--t-body);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+}

@@ -1,13 +1,14 @@
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { SEED_FACTS, SEED_LESSONS } from "./seed";
+import { APP_LANG } from "@/lib/brand";
+import { SEED_FACTS, SEED_LESSONS, SEED_PROVENANCE } from "./seed";
 import { rankFacts } from "./search";
 import type { MemoryFact, MemoryStore } from "./types";
 
 // File-backed memory, the safety net under GBrain. Lives outside the repo.
 const DATA_DIR = process.env.HYODO_DATA_DIR ?? path.join(os.homedir(), ".hyodo-tv");
-const FILE = path.join(DATA_DIR, "memory.json");
+const FILE = path.join(DATA_DIR, APP_LANG === "en" ? "memory-en.json" : "memory.json");
 
 let cache: MemoryFact[] | null = null;
 let writing: Promise<void> = Promise.resolve();
@@ -22,7 +23,7 @@ export function seedFacts(): MemoryFact[] {
       category: "lesson" as const,
       source: "seed" as const,
       at: new Date(l.at).toISOString(),
-      provenance: `seed: 김순자 할머니가 TV 대화에서 가르침 (demo data)`,
+      provenance: SEED_PROVENANCE,
     })),
   ];
 }

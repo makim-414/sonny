@@ -1,10 +1,11 @@
 import { execFile } from "node:child_process";
+import { APP_LANG } from "@/lib/brand";
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { jsonMemory } from "./json-store";
-import { SEED_FACTS, SEED_LESSONS } from "./seed";
+import { SEED_FACTS, SEED_LESSONS, SEED_PROVENANCE } from "./seed";
 import { rankFacts } from "./search";
 import type { MemoryCategory, MemoryFact, MemoryStore } from "./types";
 
@@ -21,8 +22,9 @@ const GBRAIN_HOME = process.env.GBRAIN_HOME ?? path.join(HOME, ".hyodo-tv/gbrain
 // Each demo run gets its own entity (grandma-run-N). A reset starts a new run
 // instead of forgetting facts: GBrain refuses to re-remember a withdrawn claim,
 // and keeping old runs leaves an honest record.
-const RUN_FILE = path.join(GBRAIN_HOME, "hyodo-run.json");
-let ENTITY = "grandma-run-1";
+// One run file per conversation language so English and Korean demos never mix.
+const RUN_FILE = path.join(GBRAIN_HOME, APP_LANG === "en" ? "hyodo-run-en.json" : "hyodo-run.json");
+let ENTITY = APP_LANG === "en" ? "grandma-en-run-1" : "grandma-run-1";
 async function loadRun() {
   try {
     ENTITY = (JSON.parse(await fs.readFile(RUN_FILE, "utf8")) as { entity: string }).entity;
@@ -89,7 +91,7 @@ async function seed() {
     ...SEED_LESSONS.map((l) => ({
       fact: encode(l.text, "lesson"),
       entity: ENTITY,
-      provenance: "seed: 김순자 할머니가 TV 대화에서 가르침 (demo data)",
+      provenance: SEED_PROVENANCE,
       valid_from: new Date(l.at).toISOString(),
     })),
   ];
@@ -132,7 +134,7 @@ export async function createGbrainMemory(): Promise<MemoryStore> {
     async correct(id, text, provenance) {
       const old = (await load()).find((f) => f.id === id);
       if (!old) return null;
-      const prov = provenance ?? `grandma correction: ${new Date().toISOString()}`;
+      const prov = provenance ?? `correction: ${new Date().toISOString()}`;
       await gb(["remember", encode(text, old.category), "--entity", ENTITY, "--provenance", prov, "--replaces", rawId(id), "--content-origin", "user_said", "--json"]);
       return newest(text);
     },
@@ -155,7 +157,7 @@ export async function createGbrainMemory(): Promise<MemoryStore> {
 export async function resetGbrainMemory() {
   await loadRun();
   const n = Number(ENTITY.match(/(\d+)$/)?.[1] ?? 1) + 1;
-  ENTITY = `grandma-run-${n}`;
+  ENTITY = APP_LANG === "en" ? `grandma-en-run-${n}` : `grandma-run-${n}`;
   await fs.writeFile(RUN_FILE, JSON.stringify({ entity: ENTITY }));
   await seed();
 }
