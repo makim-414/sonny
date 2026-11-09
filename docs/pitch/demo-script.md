@@ -1,127 +1,122 @@
-# Demo video script (90 seconds)
+# Sonny: demo video script (90 seconds)
 
-One day in grandma's life, told through one icon on her phone and mom's phone next to it.
+Sonny is the grandkid who's always home: a voice agent for parents who live alone. Grandma just talks. Mom stops worrying.
 
-- Product name: `[NAME]` everywhere in this file. It lives in one place, `PRODUCT_NAME_EN` in `src/lib/brand.ts`.
-- Language: **English is the original** for every line (`APP_LANG = "en"`, global market first). Korean appears only as optional subtitles, for the founder's own story.
-- The founder's Korean grandmother is why we built this. The product launches with English-speaking seniors first.
+- **Who pays:** the daughter (45 to 60) of a parent who lives alone. **Who uses it:** grandma. The video speaks to mom, and to judges who are the sons and daughters of aging parents.
+- **The insight:** mom is already grandma's remote agent. This morning she booked grandma's taxi from her own phone, and she calls to check every day. Sonny takes that job.
+- **Language:** English is the original for every line (`APP_LANG = "en"`). The founder's Korean grandmother is the origin story; the product launches with English-speaking seniors.
+- **Honesty:** anything not live gets a corner label ("demo data", "ride service mocked", "demo count"). Numbers on screen are real or labelled.
 
-The message: **a screen with nothing to learn.** No buttons, no menus. One icon, like the call button she already knows. She taps it, a single particle blooms, and the agent is already talking. Listening, it gathers in. Speaking, it ripples.
+## The four things the video proves (live, in this order)
 
-Rules that shape this cut:
-- **Narrow beats wide** (gstack office hours): one loop is shown for real and in depth. She taps, she talks, the agent acts, she teaches it, mom's phone gets the result.
-- **Her whole day** (owner): everything else is a fast, clearly labelled card montage that follows the clock.
-- **Same agent, next on her TV:** the TV appears only in the roadmap at the end.
-- **No made-up numbers on screen:** the lesson counter shows the real count from memory, tagged "demo count".
+1. **One icon. Sonny speaks first.** Pills, weather. A screen with nothing to learn.
+2. **Say it, it's handled.** Taxi and groceries paid from the allowance mom topped up (Stripe). A strange order gets a double-check; anything over the limit, Sonny calls mom first.
+3. **Grandma teaches, Sonny learns.** The next morning Sonny uses it, unprompted. Real lesson counter.
+4. **Mom sees what got done, not what was said.** "Don't tell my daughter."
 
-Two pillars to land:
-1. Grandma hands things off to the agent: pills, taxi, groceries, her show.
-2. Mom sees what got done, not what was said. She stops calling to check.
+Everything else (temple day, evening pills, her favorite show, mom's message and grandma's reply) is a 10 second montage. Finding a TV channel is one card in it, nothing more.
 
 ## Recording setup
 
-- Left half: grandma's phone (`/`, the particle screen). Right half: mom's phone (`/family`, English UI). Both at phone size, side by side.
-- Captions: burn in the spoken English lines as captions (seniors and judges both read along). Korean subtitles only on the founder's story in scene 1, if at all.
-- The time of day is an edit overlay in the top corner (7:50 AM, 9:40 AM, ...).
-- Grandma's voice: recorded by an older English speaker if possible, or read by the presenter. No real face, name or address on screen.
-- Anything not live gets a small corner label: "demo data", "ride service mocked", "demo count".
-- Narration only in scenes 1, 2 and 9.
+- Left half: grandma's phone (`/`). A plain Android home screen with no apps except one Sonny icon. Tapping it opens Sonny already signed in: one particle and one big Start button.
+- Right half: mom's phone (`/family` or `/admin`, English UI).
+- Time of day is an edit overlay (7:50 AM, 9:40 AM, ...).
+- Burned-in captions for every spoken line.
+- Narration only in scenes 1 and 9.
 
 ## Timeline
 
-| # | Time | Clock overlay | What | Live loop or card |
+| # | Time | Clock | Scene | Feature |
 |---|---|---|---|---|
-| 1 | 0:00 to 0:08 | none | Why we built it: the founder's grandmother, alone with the TV | Title cards |
-| 2 | 0:08 to 0:17 | 7:50 AM | One tap on the icon, the particle blooms: "Good morning, grandma. Did you sleep well?" | Live |
-| 3 | 0:17 to 0:27 | 7:51 AM | Pills and weather. Mom's phone: "No need to call today." | Live loop |
-| 4 | 0:27 to 0:39 | 9:40 AM | Clinic taxi, plate number in huge letters, card on mom's phone | Live loop |
-| 5 | 0:39 to 0:50 | 1:10 PM | Grandma teaches, the agent remembers, real lesson counter | Live loop |
-| 6 | 0:50 to 0:56 | 1:12 PM | "Don't tell my daughter": nothing shows on mom's phone | Live loop |
-| 7 | 0:56 to 1:08 | 5:30 PM | Mom's message reaches grandma, her answer comes back as a summary | Live loop |
-| 8 | 1:08 to 1:18 | 3:20 PM to 9:00 PM | The rest of her day in 10 seconds | Card montage |
-| 9 | 1:18 to 1:30 | none | Roadmap: phone today, her TV next. Pickle line. Two QR codes | Close |
+| 1 | 0:00 to 0:08 | none | Mom is already grandma's agent | Problem |
+| 2 | 0:08 to 0:19 | 7:50 AM | One icon, Start, Sonny speaks first | 1 |
+| 3 | 0:19 to 0:21 | none | The real taxi receipt from this morning | Proof |
+| 4 | 0:21 to 0:31 | 9:40 AM | "Call me a taxi", paid from the allowance | 2 |
+| 5 | 0:31 to 0:47 | 11:30 AM | 2,000 hamburgers: Sonny double-checks, then calls mom | 2 |
+| 6 | 0:47 to 1:00 | 1:10 PM, next day 8:00 AM | Grandma teaches; next morning Sonny uses it; counter | 3 |
+| 7 | 1:00 to 1:07 | 1:12 PM | "Don't tell my daughter" | 4 |
+| 8 | 1:07 to 1:17 | 3:20 PM to 9:00 PM | The rest of her day | Montage |
+| 9 | 1:17 to 1:30 | none | Set up once, roadmap, QR codes | Close |
 
 ## Scenes
 
-### 1. Why we built it (0:00 to 0:08)
+### 1. Mom is already grandma's agent (0:00 to 0:08)
 
-- Screen: dim living room, the TV glowing, an empty chair. Title cards:
-  "My grandmother lives alone." / "My mom stays over every third night." / "Her only outing: the temple, once or twice a week." / "The rest of the day, the TV is on."
-- Narration: "This is my grandmother's day. Millions of seniors live it. None of them will learn a new app."
+- Screen: a living room, the TV on, an empty chair. Then mom's phone with a call log full of calls to grandma, morning, noon, night (staged, labelled "demo data").
+- Narration: "My grandmother lives alone. My mom is already her agent: she books her rides from her own phone and calls all day to check. Sonny takes that job."
 
-### 2. One icon (0:08 to 0:17)
+### 2. One icon. Sonny speaks first. (0:08 to 0:19)
 
-- Screen: grandma's phone home screen, big icons. A thumb taps the `[NAME]` icon next to her phone app.
-- The screen goes dark, one particle blooms in the middle and ripples as it speaks:
-  - Agent: "Good morning, grandma. Did you sleep well?"
-- Narration: "So she doesn't have to. No buttons. No menus. One icon, like the call button she already knows."
-- Lower third: "Mom set it up once from her admin: scanned one QR on grandma's phone, done."
+- Grandma's phone: a plain Android home screen, no apps, one Sonny icon. A thumb taps it.
+- Sonny opens already signed in: one particle and a big Start button. She taps Start.
+- Sonny: "Good morning, grandma. Did you sleep well? Did you take your morning pills? It'll rain this afternoon, so take an umbrella to the temple."
+- Grandma: "Yes, I just took them."
+- Mom's phone: the top turns green, "No need to call today.", "Pills: Taken".
+- Caption: "No buttons. No menus. One icon, like the call button she already knows."
 
-### 3. Morning: pills and weather (0:17 to 0:27)
+### 3. The real receipt (0:19 to 0:21)
 
-- Agent: "Did you take your morning pills? It'll rain this afternoon, so take an umbrella to the temple."
-- The particle gathers in while she answers.
-  - Grandma: "Yes, I just took them."
-- Mom's phone: the top turns green, "No need to call today.", and "Pills: Taken".
+- Full screen for 2 seconds: `docs/pitch/assets/taxi-receipt-blurred.jpg` (date, 8:04 to 8:12 AM and 5,900 won visible; addresses, plate, driver and card blurred).
+- Caption: "This morning, 8:04 AM. My mom booked this ride for my grandmother, from her own phone."
 
-### 4. Clinic taxi (0:27 to 0:39)
+### 4. "Call me a taxi" (0:21 to 0:31)
 
-- Grandma: "I have a doctor's appointment today. Can you call me a taxi?"
-- Agent: "Done. A taxi from your door to the clinic, here in ten minutes. I let your daughter know."
-- Grandma's screen: the plate number and arrival time in very large text.
-- Mom's phone: a "Taxi" card in the feed.
-- Lower third: "This morning my mom booked this exact ride for my grandmother, on her own phone. Now grandma just asks." Corner label: "ride service mocked".
+- Grandma: "I have a doctor's appointment. Can you call me a taxi?"
+- Sonny: "Done. Your taxi is on its way, paid from your allowance. I let your daughter know."
+- Grandma's phone: plate number and arrival time in very large text.
+- Mom's phone: a "Taxi" line and the allowance going down.
+- Corner label: "ride service mocked".
 
-### 5. Grandma teaches (0:39 to 0:50)
+### 5. 2,000 hamburgers (0:31 to 0:47)
 
-- Grandma: "Let me teach you something. My daughter comes every third day and stays the night. On those days, dinner is for two."
-- Agent: "Thank you for teaching me, grandma. I'll remember that."
-- The lesson counter appears under the particle with the **real** number of lessons in her memory (GBrain, `category: "lesson"`), tagged "demo count". Do not script a fixed number; read whatever the counter shows.
-- Point made: she is the teacher, not the patient. What she teaches becomes the agent's long-term memory, with source and corrections.
+- Grandma: "Order two thousand hamburgers for the temple party."
+- Sonny: "Two thousand? Not two?"
+- Grandma: "Two thousand."
+- Sonny: "That's far more than your allowance lets me spend. I'll check with your daughter."
+- Mom's phone: full screen "Sonny is calling" with Answer and Decline. Mom taps Answer. Sonny's voice (Kokoro): "Hi, it's Sonny. Grandma just asked me to order two thousand hamburgers. That seems unusual. Should I go ahead?"
+- Mom: "No." (or taps Decline)
+- Sonny to grandma: "Your daughter says not this time. Shall I order a few for you instead?"
+- Caption: "Anything big or strange, Sonny calls mom first. Grandma keeps her independence; mom keeps the veto."
 
-### 6. "Don't tell my daughter" (0:50 to 0:56)
+### 6. Grandma teaches, Sonny remembers (0:47 to 1:00)
+
+- 1:10 PM. Grandma: "Let me teach you something. My daughter comes every third day and stays the night. On those days, dinner is for two."
+- Sonny: "Thank you for teaching me, grandma. I'll remember that."
+- The lesson counter shows the real number of lessons in her memory (GBrain), tagged "demo count". Read whatever it shows; never script a number.
+- Cut to "Next morning, 8:00 AM". Sonny, unprompted: "Good morning, grandma. Your daughter comes tonight. Shall I order groceries for two? Tofu, zucchini and eggs."
+- Grandma: "Yes, please." Mom's phone: groceries for two, paid from the allowance.
+
+### 7. "Don't tell my daughter" (1:00 to 1:07)
 
 - Grandma: "Don't tell my daughter. I'm knitting her a scarf for her birthday."
-- Agent: "Okay. Just between us."
-- Mom's phone: nothing new in the feed. At the bottom only: "1 private conversation not shown. They're grandma's."
-- Caption on mom's side: "Mom sees what got done, not what was said."
+- Sonny: "Okay. Just between us."
+- Mom's phone: nothing new in the feed. At the bottom only "1 private conversation not shown. They're grandma's."
+- Caption: "Mom sees what got done, not what was said."
 
-### 7. Mom's message, grandma's answer (0:56 to 1:08)
+### 8. The rest of her day (1:07 to 1:17)
 
-- Mom's phone: she taps the big button "I'll be there at 7 tonight".
-- Grandma's phone: the particle ripples and reads it out.
-  - Agent: "A message from your daughter: I'll be there at 7 tonight."
-- Grandma: "Good. Tell her to drive safe, and to take some kimchi home. It's ready."
-- Mom's phone: the reply card fills in, "Grandma's reply: 7 is fine. Take the kimchi home."
+Fast cards, about 2 seconds each, corner label "demo data".
+1. 3:20 PM: "Tomorrow is a temple day. The bus is at 9:40."
+2. 5:30 PM: mom taps "I'll be there at 7 tonight"; grandma's reply comes back as a summary on mom's phone.
+3. 7:55 PM: "Your favorite singer is on in five minutes. I'll put it on." (one card: channels are just one tool)
+4. 9:00 PM: "Time for your evening pills."
+5. Next day: "Grandma hasn't talked at her usual time" lands on mom's phone.
 
-### 8. The rest of her day, in 10 seconds (1:08 to 1:18)
+### 9. Set up once, and what's next (1:17 to 1:30)
 
-Fast cards, about 2 seconds each, clock overlay jumping forward. Corner label on all: "demo data".
+- Mom's admin: she taps "Connect grandma's phone"; a QR appears; grandma's phone scans it. Caption: "Mom sets it up once from the admin: scans one QR on grandma's phone, done."
+- Roadmap strip: "Today: one icon on her phone" / "Next: a TV dongle on the TV she watches all day" / "Then: Sonny calls mom on a real phone line".
+- Two QR codes: "Be grandma" (`/?demo=1`) and "Be her daughter" (`/family?demo=1`).
+- Narration: "Sonny is the grandkid who's always home. Grandma just talks. Mom stops worrying. Scan the first code and be grandma. Scan the second and be her daughter."
+- End card: "Sonny", https://github.com/makim-414/sonny, "Built in 5 hours at c0mpiled-17 Seoul with Claude, on open source: Kokoro, Silero VAD, three.js, GBrain, gstack".
 
-1. 3:20 PM, groceries from her allowance: "Your daughter is coming tonight. Groceries for two: tofu, zucchini, eggs?" It is over the $30 per-purchase limit, so an approval card appears in mom's admin (Allowance tab); mom taps Approve. (It used what she taught in scene 5.) Caption: "Mom tops up an allowance; grandma spends it by voice; anything big waits for Mom's OK."
-2. 6:00 PM, temple: "Tomorrow is a temple day. The bus is at 9:40."
-3. 7:55 PM, her show: "Your favorite singer is on in five minutes."
-4. 9:00 PM, evening pills: "Time for your evening pills."
-5. Next morning, safety: "Grandma hasn't talked at her usual time" lands on mom's phone as an alert.
-
-- Music only. Captions name each card: "Groceries, approved by mom", "Temple day", "Her favorite show", "Evening pills", "Safety check".
-
-### 9. Close: phone today, her TV next (1:18 to 1:30)
-
-- Screen: a five-step strip that lights up left to right: "0. Phone icon (today)" / "1. HDMI stick" / "2. Android and Google TV app" / "3. Pass-through box over the set-top box" / "4. The TV itself".
-- During steps 1 to 4: a hand plugs an HDMI stick into a TV; the TV plays its "connected" boot screen (`/tv?boot`) and the same agent appears on the big screen.
-- Then two QR codes side by side: "Be grandma" (`/?demo=1`) and "Be her daughter" (`/family?demo=1`). `?demo=1` signs the scanner in as the demo device or demo family account, so nobody types a password.
-- Narration: "Pickle covers your whole workday through Zoom. We cover grandma's whole day. Today one icon on her phone, next the TV she watches all day. Scan the first code and be grandma. Scan the second and be her daughter."
-- End card: `[NAME]`, GitHub URL, "Built in 5 hours at c0mpiled-17 Seoul on open source: Kokoro, Silero VAD, three.js, GBrain, gstack".
-
-## Live demo at the judging table (not the video)
+## Live demo at the judging table
 
 Office hours rule: watch, don't demo. Put the phone in the judge's hand.
 
-1. On the table: a printed card or a screen with two QR codes. "Be grandma" opens `/?demo=1`. "Be her daughter" opens `/family?demo=1` (or `/admin?demo=1` to show the full admin).
-2. Judge one scans "Be grandma". The particle blooms and greets them. They just talk, in English.
-3. Judge two (or the presenter) scans "Be her daughter" and taps "I'll be there at 7 tonight". Grandma's phone reads it out.
-4. Judge one answers. Within seconds, judge two's phone shows "Grandma's reply" with the summary.
-5. Optional: judge one says "call me a taxi". A taxi card with Approve appears on judge two's phone.
+1. A card with two QR codes: "Be grandma" (`/?demo=1`) and "Be her daughter" (`/admin?demo=1`).
+2. Judge one opens Sonny and talks in English.
+3. Judge one: "Order two thousand hamburgers." Judge two's phone rings: "Sonny is calling". Judge two answers and says no.
+4. Judge two taps "I'll be there at 7 tonight"; grandma's phone reads it out; judge one answers; judge two sees the summary.
 
-Fallbacks: if a phone's mic is blocked, use the presenter's phone that already has the icon on its home screen. If Wi-Fi fails, phone hotspot. If both fail, play the 90 second video.
+Fallbacks: the presenter's phone with Sonny paired as grandma; a phone hotspot; the 90 second video.
