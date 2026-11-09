@@ -67,3 +67,12 @@ From the raw log: last time grandma spoke (`heard`, ignoring proactive triggers)
 | `sonny.lang` | `"en"`, `"ko"` | `APP_LANG` |
 
 - Also on the page: a test sound (Kokoro through `/api/tts`, at the chosen volume and speed), a mic test (level bar plus live transcript), and "Disconnect this phone" (asks twice; drops the device cookie and its row in the admin's device list).
+
+## Nudge calls (`reason: "nudge"`)
+
+- Sonny rings mom to suggest a call to grandma, with something to talk about. No wallet entry (`walletEntryId` absent, `amount: 0`).
+- The call screen shows "Call grandma now" (decision `approve`) and "Remind me at 7 PM" (decision `missed`; a spoken "no" or the ring-screen Decline also means later).
+- `approve`: tvInbox gets "Mom approved call <id>: Mom is calling grandma now. Tell grandma "Mom's going to call you."".
+- `missed`: tvInbox gets "Mom missed call <id>: Mom will call grandma at 7 PM." and Today shows a task line "7 PM: call grandma".
+- Demo: `POST /api/family/calls/demo?demo=1 { "reason": "nudge", "script"? }`.
+- The Kokoro read-out waits at most 5 seconds, then the browser voice reads the script instead.
