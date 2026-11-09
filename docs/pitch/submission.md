@@ -2,7 +2,7 @@
 
 Deliverables: a 90 second demo video (Loom or YouTube) and a public GitHub repo URL. Judging starts at 15:00. Presentation in English.
 
-State when this list was written (about 12:30): repo `makim-414/hyodo-tv` is **private**, default branch `build`, rename pending. First commit 10:03:48 KST (after the 10:00 start, so the repo is eligible).
+State when this list was written (10:30): repo `makim-414/hyodo-tv` is **private**, default branch `build`, rename pending. First commit 10:03:48 KST (after the 10:00 start, so the repo is eligible).
 
 ## 1. Repo, before making it public
 
@@ -23,7 +23,7 @@ Prints nothing when clean (checked 12:30 across all branches: clean).
 
 ## 2. Make the repo public
 
-Owner or integration session runs this after section 1 is green (treat it as irreversible: once public, assume it has been cloned):
+Integration session runs this only after section 1 is green **and the owner says yes** (treat it as irreversible: once public, assume it has been cloned):
 
 ```bash
 gh repo edit makim-414/hyodo-tv --visibility public --accept-visibility-change-consequences
@@ -37,12 +37,16 @@ The current README has the one-liner and run steps. Before submitting, make sure
 
 - [ ] One-line pitch: "Pickle covers your whole workday through Zoom. We cover grandma's whole day through her TV."
 - [ ] The demo video link at the top (YouTube or Loom).
-- [ ] What it does in 5 bullets: speaks first (medicine, weather), taxi to the hospital, learns from grandma (memory), groceries with family approval, family messages both ways, favorite show (one tool among many).
+- [ ] Two pillars first: grandma hands things off to the agent; mom sees what got done, not what was said.
+- [ ] What it does in 5 bullets: speaks first (medicine, weather), taxi to the hospital, learns from grandma (memory, lesson counter), groceries with family approval, family messages both ways, favorite show (one tool among many).
+- [ ] Distribution in four steps: HDMI stick or USB app, Android and Google TV app, HDMI pass-through box over the set-top box (CEC or IR), the TV itself.
 - [ ] Screenshot or GIF: TV screen next to mom's phone.
 - [ ] How it works: one Claude agent with tools (memory, schedule, ride, order, EPG search, tune, family notify), TV web app, family web app, shared activity log. Link `docs/ARCHITECTURE.md`.
 - [ ] Run: `pnpm install`, then `pnpm dev`, open `/tv` and `/family`. Explain the key comes from the keychain item `anthropic-hackathon-key`, or set `ANTHROPIC_API_KEY` yourself.
 - [ ] Honest notes: ride and grocery services are mocked; TV guide is seed data cut from a real Korean listing; voice uses the browser's Web Speech API (Chrome).
-- [ ] Built at c0mpiled-17 Seoul, 2026-11-09, YC RFS "AI for the Aging Population". Mention GBrain if the agent brain uses it (there is a side prize for gstack and GBrain use).
+- [ ] Built at c0mpiled-17 Seoul, 2026-11-09, YC Fall 2026 RFS "AI for the Aging Population" (not in the Winter 2027 list; do not claim it is).
+- [ ] A clear line for the gstack and GBrain side prize: "Built with GBrain (grandma's long-term memory, with provenance and corrections) and gstack (office hours, review)." Link `docs/gstack/` as evidence.
+- [ ] Privacy line: no camera; mom sees tasks and safety, not conversations; private talk never leaves the server (`docs/family-app-contract.md`).
 - [ ] Links to `docs/pitch/pitch.md` and `docs/pitch/demo-script.md`.
 
 ## 4. Demo video
@@ -61,20 +65,23 @@ The current README has the one-liner and run steps. Before submitting, make sure
 - [ ] Fields: team name, product name, one-liner, GitHub URL (public), video URL, track "AI for the Aging Population".
 - [ ] Submit before 15:00. Screenshot the confirmation.
 
-## 6. Live presentation
+## 6. Live presentation and the QR demo
 
-- [ ] Rehearse `docs/pitch/pitch.md` twice with a timer (target 1:50).
-- [ ] Laptop on the venue Wi-Fi and a phone hotspot ready (venue Wi-Fi is slow).
-- [ ] Fallback: the recorded video on the laptop desktop in case the live demo fails.
-- [ ] `/family` open on a real phone for the approval tap, if showing it live.
+- [ ] Rehearse `docs/pitch/pitch.md` with a timer (target 1:55, hard stop 2:00).
+- [ ] The TV runs full screen on a real monitor or TV over HDMI, not on the laptop screen.
+- [ ] QR on the TV points to `/family` on a URL the judges' phones can reach (the integration session's tunnel, or the venue Wi-Fi IP). Scan it with a phone on mobile data to confirm before judging.
+- [ ] Reset the store just before judging so the judge sees a clean feed.
+- [ ] Rehearse the judge loop three times: scan, tap "오늘 저녁 7시에 갈게요", TV reads it, presenter answers as grandma, the reply card fills on the judge's phone.
+- [ ] Fallbacks ready: TV text input if the mic fails, phone hotspot if Wi-Fi fails, the 90 second video on the desktop if both fail.
+- [ ] Second phone with `/family` open as "mom" for the approval tap.
 
-## Timeline
+## Timeline (from STATUS.md and office hours)
 
 | Time | What |
 |---|---|
-| 13:30 | Pitch and demo script frozen |
-| 13:45 | Code freeze on `build`, integration test of the full day |
-| 14:00 | Record the video (two takes) |
-| 14:30 | Video uploaded, README updated, repo public |
-| 14:45 | Form submitted |
+| 11:30 | First merge into `build`, one full loop on port 3000 |
+| 12:30 | Feature freeze, second merge. Only bug fixes and polish after this |
+| 13:30 | Record the fallback video of the full live loop |
+| 14:00 to 14:40 | Rehearsals and the 90 second video (record, edit, upload) |
+| 14:45 | Submit the form (repo public only after the owner says yes) |
 | 15:00 | Judging |
