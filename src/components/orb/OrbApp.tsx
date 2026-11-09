@@ -8,6 +8,7 @@ import { splitSentences, unlockSpeech } from "@/lib/voice/speak";
 import { setVoiceVolume, speakSentences, stopVoice, unlockAudio, voiceLevel, warmTts } from "@/lib/tts/player";
 import { createVad, type Vad } from "@/lib/voice/vad";
 import { getSettings } from "./settings";
+import { loadRoutines, useWakeLock, type Routine } from "./always-on";
 import { isTurnComplete, transcribe } from "@/lib/voice/stt";
 import { callAgent } from "@/components/tv/agent-client";
 import { formatTime, useDemoClock } from "@/components/tv/use-demo-clock";
@@ -27,6 +28,19 @@ const RETRY_MS = 1200;
 
 // Hidden family setup: hold the top-left corner (or the remote's Menu / S key) this long.
 const SETUP_HOLD_MS = 2000;
+
+// Always-on: no conversation for this long (demo clock) and Sonny asks how she is.
+// ?idle= sets it in seconds for the demo; the second try comes after min(idle, 10 min).
+const IDLE_DEFAULT_MS = 3 * 60 * 60_000;
+const IDLE_RETRY_MAX_MS = 10 * 60_000;
+// The orb dims and drifts (screen burn-in) after this long without talking (?rest= seconds).
+const REST_DEFAULT_MS = 45_000;
+
+function secondsParam(name: string, fallbackMs: number): number {
+  if (typeof window === "undefined") return fallbackMs;
+  const v = Number(new URLSearchParams(window.location.search).get(name));
+  return Number.isFinite(v) && v > 0 ? v * 1000 : fallbackMs;
+}
 // Smart turn: after this much silence ask /api/turn whether she finished; if not, wait up to
 // SMART_MAX_EXTRA_MS more. Falls back to the fixed wait when /api/turn is down. ?wait= or ?noturn = fixed.
 const SMART_PROBE_MS = 700;
@@ -142,11 +156,20 @@ export function OrbApp() {
   const turnAudioRef = useRef<Float32Array[]>([]);
   const turnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const listenGenRef = useRef(0);
+  // Always-on bookkeeping. Times for routines and idle are on the demo clock.
+  const routinesRef = useRef<Routine[]>([]);
+  const prevTickRef = useRef<number | null>(null);
+  const lastHeardRef = useRef<number | null>(null); // demo ms of grandma's last words (or start)
+  const idleTriesRef = useRef(0);
+  const idleTriedAtRef = useRef(0);
+  const lastActivityRef = useRef(0); // real ms, for dimming the resting orb
+  const [resting, setResting] = useState(false);
   const cardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const setMode = useCallback((m: OrbMode) => {
     signal.current.mode = m;
+    if (m === "thinking" || m === "speaking") setResting(false);
     setModeState(m);
   }, []);
 
@@ -224,6 +247,7 @@ export function OrbApp() {
         .catch((err) => console.warn("[orb] turn failed", err))
         .finally(() => {
           pendingRef.current--;
+          lastActivityRef.current = Date.now();
           if (pendingRef.current === 0) listenRef.current();
         });
     },
@@ -233,6 +257,12 @@ export function OrbApp() {
   const runTurn = useCallback(
     async (req: Omit<AgentRequest, "now">) => {
       setMode("thinking");
+      lastActivityRef.current = Date.now();
+      if (req.source === "voice") {
+        // She talked: the idle clock and the check-in tries start over.
+        lastHeardRef.current = getNow().getTime();
+        idleTriesRef.current = 0;
+      }
       const { reply } = await callAgent({ ...req, now: getNow().toISOString() });
       if (req.source === "voice" && reply.heardEn) setLine({ who: "user", text: req.text, en: reply.heardEn });
       runActions(reply.actions);
@@ -381,10 +411,15 @@ export function OrbApp() {
   const start = useCallback(() => {
     if (startedRef.current) return;
     startedRef.current = true;
+    lastActivityRef.current = Date.now();
     unlockAudio();
     unlockSpeech();
     setStarted(true);
     turn({ text: "morning-checkin", source: "proactive" });
+    lastHeardRef.current = getNow().getTime();
+    void loadRoutines().then((r) => {
+      routinesRef.current = r;
+    });
     // Silero VAD decides when a turn ends (0.7 s of silence), then Web Speech hands over the words.
     if (!hasFlag("novad")) {
       void createVad({
@@ -405,7 +440,7 @@ export function OrbApp() {
         else listenRef.current(); // was waiting for the VAD to use the server STT
       });
     }
-  }, [turn, onSpeechPause]);
+  }, [turn, onSpeechPause, getNow]);
 
   // A tap after start interrupts the voice, closes a card and goes back to listening.
   const onTap = () => {
@@ -451,6 +486,55 @@ export function OrbApp() {
       });
     }
   }, [now, enqueue, runActions, say]);
+
+  // ---------- always on: routines and idle check-ins ----------
+
+  const idleCheckin = useCallback(
+    (attempt: 1 | 2) => {
+      idleTriesRef.current = attempt;
+      idleTriedAtRef.current = getNow().getTime();
+      // The agent decides what to say and, after the second try, whether to alert the family.
+      turn({ text: attempt === 1 ? "idle-checkin" : "idle-checkin:2", source: "proactive" });
+    },
+    [getNow, turn],
+  );
+
+  useEffect(() => {
+    if (!now || !startedRef.current) return;
+    const t = now.getTime();
+    // Never talk over a running turn. Keep the last tick so a routine passed meanwhile still fires after.
+    if (pendingRef.current > 0) return;
+    const prev = prevTickRef.current ?? t;
+    prevTickRef.current = t;
+
+    // Routines fire once when the clock passes their time (also after F jumps).
+    for (const r of routinesRef.current) {
+      const at = new Date(now);
+      at.setHours(r.hour, r.minute, 0, 0);
+      if (prev < at.getTime() && at.getTime() <= t) {
+        turn({ text: `routine:${r.name}`, source: "proactive" });
+        return;
+      }
+    }
+
+    const idleMs = secondsParam("idle", IDLE_DEFAULT_MS);
+    const heard = lastHeardRef.current ?? t;
+    if (idleTriesRef.current === 0 && t - heard >= idleMs) idleCheckin(1);
+    else if (idleTriesRef.current === 1 && t - idleTriedAtRef.current >= Math.min(idleMs, IDLE_RETRY_MAX_MS)) idleCheckin(2);
+  }, [now, turn, idleCheckin]);
+
+  useWakeLock(started);
+
+  // Nobody has talked for a while: dim the orb and let it drift (screen burn-in).
+  useEffect(() => {
+    if (!started) return;
+    const restMs = secondsParam("rest", REST_DEFAULT_MS);
+    const id = setInterval(() => {
+      const quiet = signal.current.mode === "listening" || signal.current.mode === "idle";
+      setResting(quiet && Date.now() - lastActivityRef.current > restMs);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [started]);
 
   // ---------- family messages and the phone remote ----------
 
@@ -523,12 +607,18 @@ export function OrbApp() {
       case "KeyF":
         forward(30);
         break;
+      case "KeyI":
+        if (startedRef.current) idleCheckin(1);
+        break;
       case "KeyN": {
         const target = getNow();
         target.setDate(target.getDate() + 1);
         target.setHours(8, 0, 0, 0);
         timersRef.current = timersRef.current.filter((x) => x.at >= target.getTime());
         jumpTo(target);
+        prevTickRef.current = target.getTime(); // the jump itself is not a routine crossing
+        lastHeardRef.current = target.getTime();
+        idleTriesRef.current = 0;
         sayGenRef.current++;
         stopVoice();
         showCard({ title: copy().nextDay, body: formatTime(target) }, 2500);
@@ -610,7 +700,7 @@ export function OrbApp() {
 
   return (
     <main
-      className={`orb-root is-${mode}`}
+      className={`orb-root is-${mode} ${resting ? "is-resting" : ""}`}
       onPointerDown={onTap}
       style={{ "--text-scale": getSettings().textScale } as React.CSSProperties}
     >

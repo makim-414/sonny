@@ -7,6 +7,10 @@
 - Captions: only the last sentence, small and faint at the bottom. E or `?en` adds the English line.
 - `showCard` floats over the orb (6 s, learned-count cards 4.5 s with the big number). `tune` becomes a 3 s '채널을 바꿨어요' card. `notifyFamily` and `private` show a small top toast.
 - If the mic is blocked or speech recognition is missing (possible in an iOS home-screen app), a small '말 대신 글로 적기' line appears.
+- Always-on (phone on its charger): after Start the screen stays on with the Screen Wake Lock API (asked again whenever the page becomes visible). With no talk for 45 s (`?rest=` seconds) the orb dims to 30 % and drifts slowly against burn-in.
+- Sonny speaks first on a schedule: `routine:<name>` (`source: "proactive"`) when the demo clock passes 8:00 (`routine:morning`), 19:00 (`routine:evening`), or a time found in a `routine` or `health` memory fact ("8 am", "7:30 pm", "19:00", "저녁 7시"). F jumps count. A routine that comes due during a turn waits until the turn ends.
+- Idle check-in: 3 h without her words (`?idle=` seconds) sends `idle-checkin`; still no answer after min(idle, 10 min) sends `idle-checkin:2`. Nothing more from the screen; the agent decides on the family alert. I key sends `idle-checkin` now.
+- Web Push for a closed app was not built (it needs VAPID keys stored in the keychain and new API routes); roadmap line: Sonny calls her phone.
 - Hidden setup: hold the invisible 64x64 top-left corner, or the remote's Menu or S key, for 2 s to open `/setup`. Short taps do nothing there.
 - Family settings (localStorage, written by `/setup`): `sonny.rate`, `sonny.waitMs`, `sonny.textScale` (normal/large/xlarge or 1/1.25/1.5), `sonny.captions` (on/off), `sonny.volume` (0..1), `sonny.lang` (en/ko). URL `?rate=` and `?wait=` win. Read in `src/components/orb/settings.ts`.
 - Desktop demo keys: Enter or Space (tap), E, T (text line), P (greet again), N (next morning 08:00 + greeting), F (+30 min).
