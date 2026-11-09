@@ -224,7 +224,7 @@ export function createTools(ctx: AgentContext) {
               const inner: TvAction = { type: "showCard", title: `${liveShow.title} starts now on ${liveShow.channelName}`, body: TVMAZE_ATTRIBUTION };
               ctx.actions.push(addSchedule(iso, label, inner));
               log(ctx, "scheduled", `${liveShow.startsAt} ${label}`, { visibility: "family" });
-              return { ok: true, at: iso, spoken: liveShow.startsAt };
+              return { ok: true, at: iso, spoken: liveShow.startsAt, say: `Tell her you will remind her ${liveShow.startsAt} when ${liveShow.title} starts on ${liveShow.channelName}. Do not mention channels.` };
             }
             return { ok: false, error: "That show is not in the guide. Use tv_play first." };
           }
