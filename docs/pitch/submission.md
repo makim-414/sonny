@@ -14,9 +14,9 @@ Backup tagline: "Sonny: the grandkid who's always home."
 
 Sonny is an AI errand runner for parents who live alone: grandma says it, Sonny does it, paid from the allowance mom sets. She builds new skills just by talking, mom connects accounts and cards once, and Sonny calls mom only when it matters, then sends her a simple report.
 
-**About 150 words (147):**
+**About 150 words (150):**
 
-Sonny is an AI errand runner for parents who live alone: grandma says it, Sonny does it. This morning my mom booked my grandmother's taxi from her own phone, then called to check. Sonny takes that job. She asks for a ride or groceries, and Sonny pays from the allowance mom funds. Grandma builds new skills just by talking ("learn to get me my usual ride"). Anything that needs an account or a card, mom connects once from her phone, so grandma never types a password. Sonny calls mom only when it matters: something big or strange, or grandma stuck. Mom sees what got done, never what was said. Sonny calls for a daily blood-pressure reading and a weekly two-minute memory check, then sends mom a simple report. Built on Claude, GBrain and Kokoro. Today a phone app, next a Sonny TV app, then our own device.
+Sonny is an AI errand runner for parents who live alone: grandma says it, Sonny does it. This morning my mom booked my grandmother's taxi from her own phone. Sonny takes that job. Mom sends one link; grandma taps once. She asks for a ride or groceries, and Sonny pays from the allowance mom funds. Grandma builds new skills just by talking ("learn to get me my usual ride"). Anything that needs an account or a card, mom connects once from her phone, so grandma never types a password. Sonny calls mom only when it matters: something big or strange, or grandma stuck. Mom sees what got done, never what was said. Sonny calls for a daily blood-pressure reading and a weekly two-minute memory check, then sends mom a simple report. Built on Claude, GBrain and Kokoro. Today a phone app, next a Sonny TV app, then our own device.
 
 ## Checklist
 
