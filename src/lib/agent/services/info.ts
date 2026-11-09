@@ -17,7 +17,7 @@ export function weatherToday() {
       advice: "It's chilly this morning, so take a warm coat. The afternoon is nice for a walk.",
     };
   return {
-    place: "서울 마포구",
+    place: "햇살시 행복구",
     sky: "맑음, 오후에 구름 조금",
     lowC: 4,
     highC: 13,

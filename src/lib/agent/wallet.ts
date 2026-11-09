@@ -1,5 +1,5 @@
 import { store } from "@/lib/store";
-import type { WalletEntry } from "@/lib/types";
+import type { GuardianCall, WalletEntry } from "@/lib/types";
 
 // Grandma's allowance. Demo money only: nothing is charged anywhere.
 // At or under the per-spend limit (and with enough balance) it is paid at once;
@@ -37,6 +37,13 @@ export function settle(entryId: string): WalletEntry | null {
   entry.status = "done";
   w.balance += entry.amount; // amount is negative
   return entry;
+}
+
+/** Sonny phones the guardian about a pending spend (the family app shows it ringing). */
+export function ringGuardian(entry: WalletEntry, script: string, reason: GuardianCall["reason"], at: string): GuardianCall {
+  const call: GuardianCall = { id: crypto.randomUUID(), at, walletEntryId: entry.id, script, amount: Math.abs(entry.amount), reason, status: "ringing" };
+  store.calls.push(call);
+  return call;
 }
 
 export function walletSnapshot() {

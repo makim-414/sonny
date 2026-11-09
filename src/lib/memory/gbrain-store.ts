@@ -7,7 +7,7 @@ import { promisify } from "node:util";
 import { jsonMemory } from "./json-store";
 import { SEED_FACTS, SEED_LESSONS, SEED_PROVENANCE } from "./seed";
 import { rankFacts } from "./search";
-import type { MemoryCategory, MemoryFact, MemoryStore } from "./types";
+import { bumpMemVersion, memVersion, type MemoryCategory, type MemoryFact, type MemoryStore } from "./types";
 
 // GBrain (github.com/garrytan/gbrain) on keyless local PGLite, driven through its CLI.
 // One entity "grandma" holds every fact. Each fact carries provenance (who taught it,
@@ -103,7 +103,17 @@ async function seed() {
 export async function createGbrainMemory(): Promise<MemoryStore> {
   await loadRun();
   let cache: MemoryFact[] | null = null;
-  const load = async () => (cache ??= (await fetchAll()).map(decode).sort((a, b) => Date.parse(a.at) - Date.parse(b.at)));
+  let seen = memVersion();
+  const load = async () => {
+    if (seen !== memVersion()) cache = null; // someone else wrote (admin, another bundle)
+    seen = memVersion();
+    return (cache ??= (await fetchAll()).map(decode).sort((a, b) => Date.parse(a.at) - Date.parse(b.at)));
+  };
+  // After our own write: tell other copies, keep our (already updated) cache.
+  const wrote = () => {
+    bumpMemVersion();
+    seen = memVersion();
+  };
 
   if ((await load()).length === 0) {
     await seed();
@@ -133,6 +143,7 @@ export async function createGbrainMemory(): Promise<MemoryStore> {
       if (!out.id) return newest(text);
       const fact: MemoryFact = { id: `gbrain-${out.id}`, text, category, source, at: at ?? new Date().toISOString(), provenance: prov };
       (await load()).push(fact);
+      wrote();
       return fact;
     },
     async correct(id, text, provenance) {
@@ -140,12 +151,15 @@ export async function createGbrainMemory(): Promise<MemoryStore> {
       if (!old) return null;
       const prov = provenance ?? `correction: ${new Date().toISOString()}`;
       await gb(["remember", encode(text, old.category), "--entity", ENTITY, "--provenance", prov, "--replaces", rawId(id), "--content-origin", "user_said", "--json"]);
-      return newest(text);
+      const fact = await newest(text);
+      wrote();
+      return fact;
     },
     async forget(id) {
       if (!(await load()).some((f) => f.id === id)) return false;
       await gb(["forget", rawId(id)]);
       cache = null;
+      wrote();
       return true;
     },
     async recall(query, limit = 6) {
