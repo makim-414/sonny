@@ -404,6 +404,18 @@
 .tv-avatar-dots i:nth-child(2) { animation-delay: 0.18s; }
 .tv-avatar-dots i:nth-child(3) { animation-delay: 0.36s; }
 
+/* ---------- 3D buddy (same look as the phone) ---------- */
+
+.tv-buddy { position: relative; flex: none; width: var(--avatar-size); height: var(--avatar-size); }
+.tv-buddy.is-boot { width: clamp(220px, 22vw, 380px); height: clamp(220px, 22vw, 380px); }
+.tv-buddy canvas, .tv-buddy svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* 2D fallback face when WebGL is missing */
+.tv-buddy .face-skin { fill: var(--brand); }
+.tv-buddy .face-ink { fill: var(--dark); }
+.tv-buddy .face-white { fill: var(--light); }
+.tv-buddy .face-mouth { fill: none; stroke: var(--dark); stroke-width: 6; stroke-linecap: round; }
+.tv-buddy .face-mouth.is-open { fill: var(--dark); stroke-width: 4; }
+
 /* ---------- mic button ---------- */
 
 .tv-mic {

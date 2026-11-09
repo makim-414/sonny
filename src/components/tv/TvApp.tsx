@@ -5,7 +5,8 @@ import type { AgentRequest, TvAction } from "@/lib/types";
 import { listenOnce, type Listener } from "@/lib/voice/listen";
 import { speak, splitSentences, stopSpeaking, unlockSpeech } from "@/lib/voice/speak";
 import { callAgent } from "./agent-client";
-import { Avatar, type AvatarMood } from "./Avatar";
+import type { AvatarMood } from "./Avatar";
+import { TvBuddy } from "./TvBuddy";
 import { BroadcastScreen } from "./BroadcastScreen";
 import { APP_LANG } from "@/lib/brand";
 import { ASSISTANT_NAME, PRODUCT_NAME, PRODUCT_NAME_EN } from "./brand";
@@ -733,7 +734,7 @@ export function TvApp() {
       )}
 
       <section className={`tv-caption ${captionVisible ? "is-open" : ""} ${userTurn ? "is-user" : ""}`} aria-live="polite">
-        <Avatar mood={mood} />
+        <TvBuddy mood={mood} />
         <div className="tv-caption-bubble">
           <span className="tv-caption-who">{userTurn ? COPY.userSays : ASSISTANT_NAME}</span>
           <p className="tv-caption-text">
@@ -784,7 +785,7 @@ export function TvApp() {
 
       {booting && (
         <div className="tv-boot" aria-live="polite">
-          <Avatar mood="speaking" />
+          <TvBuddy mood="idle" className="is-boot" />
           <span className="tv-boot-title">
             {APP_LANG === "en"
               ? `${ASSISTANT_NAME} is here`
