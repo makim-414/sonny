@@ -18,9 +18,13 @@ Say the first sentence; add the second only if they lean in. Numbers are sourced
 | 10 | **How big is this?** | 63 million Americans already do this job unpaid, and about one in four Americans 65+ lives alone (Pew, 2023 data). At an assumed $20 a month, one million paying families would be $240 million a year (estimate, our arithmetic, not a market study). |
 | 11 | **Isn't this the family spying on grandma?** | No: mom sees what got done (pills, rides, orders, safety), never what was said, and grandma's private conversations are hidden on the server, not just on screen; "don't tell my daughter" stays between them. There is no camera, and anything grandma teaches leaves her own Sonny only with her consent and her family's, anonymized. |
 | 12 | **What if grandma doesn't use it?** | She doesn't have to start anything: Sonny is always on and calls her first at the times she already keeps, like a grandkid checking in. If she doesn't answer at her usual time, or seems stuck, Sonny calls mom, so silence itself becomes useful information. |
-| 13 | **Why start on the phone if the TV is the goal?** | The phone ships today and proves the agent; the TV apps reuse the same web app; the device comes when we know exactly what grandma uses. Next is a Sonny app on the TV she already watches (Android TV / Google TV, Samsung Tizen), then our own Sonny device, plugged in by the family. |
+| 13 | **Why start on the phone if the TV is the goal?** | The phone ships today and proves the agent; the TV apps reuse the same web app; the device comes when we know exactly what grandma uses. And the TV is worth it: Americans 75+ watch 4.4 hours of TV a day (BLS 2025), and 61% of U.S. internet households already stream mainly on a smart TV (Parks Associates 2026); Samsung's Tizen alone is 23% of U.S. connected-TV use. |
 
 ## If they push further
+
+- **"What's the goal?"** "Sonny handles the errands, so family can just be family." Families don't want to be caretakers; they want to be family.
+- **"Doesn't this replace family?"** The opposite: Sonny nudges mom to call, with something to talk about. It takes the errands, so the call home is just a call home.
+- **"Where does this go?"** "The easiest first step into AI for the oldest generation. Then health check-ins, then the rest of their daily life." (No gambling or betting, ever.)
 
 - **"Will she really talk to it?"** Our riskiest assumption and we say so. We bet on two things: it calls her first, so she only has to answer, and it asks to be taught, so it feels like a grandkid, not a caretaker.
 - **"What is the roadmap?"** Today: a one-icon web app on grandma's phone, set up by mom with one QR. Next: a Sonny app on the TV she already watches all day (Android TV / Google TV, Samsung Tizen); then our own Sonny device, plugged in by the family, nothing to install.
