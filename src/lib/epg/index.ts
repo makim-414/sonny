@@ -1,3 +1,4 @@
+import { APP_LANG } from "@/lib/brand";
 import type { Channel, Program } from "@/lib/types";
 import channelsJson from "./channels.json";
 import lineupJson from "./lineup.json";
@@ -5,12 +6,33 @@ import lineupJson from "./lineup.json";
 // About 220 channels and today's lineup. Times are built around the request's
 // `now` so the demo always has a 임영웅 show airing now and one in 30 minutes.
 
-export const CHANNELS: Channel[] = channelsJson as Channel[];
-const LINEUP = lineupJson as unknown as Record<string, [string, string[]][]>;
+// English demo: a few US networks (numbers are demo only) and a Dustin Hoffman fan.
+const CHANNELS_EN: Channel[] = [
+  { number: 2, name: "CBS" }, { number: 4, name: "NBC" }, { number: 5, name: "FOX" }, { number: 7, name: "ABC" },
+  { number: 13, name: "PBS" }, { number: 20, name: "CNN" }, { number: 25, name: "ESPN" }, { number: 30, name: "TCM" },
+  { number: 31, name: "Hallmark" }, { number: 32, name: "HGTV" }, { number: 33, name: "Food Network" }, { number: 40, name: "Weather" },
+];
+const LINEUP_EN: Record<string, [string, string[]][]> = {
+  "2": [["CBS Mornings", []], ["The Price Is Right", []], ["CBS Evening News", []]],
+  "4": [["Today", []], ["NBC Nightly News", []], ["Wheel of Fortune", []]],
+  "7": [["Good Morning America", []], ["General Hospital", []], ["Jeopardy!", []]],
+  "13": [["PBS NewsHour", []], ["Antiques Roadshow", []], ["Masterpiece", []]],
+  "20": [["CNN Newsroom", []]],
+  "30": [["Classic movie matinee", []]],
+  "31": [["Hallmark movie", []]],
+  "33": [["Barefoot Contessa", []], ["The Pioneer Woman", []]],
+  "40": [["Weather Center Live", []]],
+};
+
+export const CHANNELS: Channel[] = APP_LANG === "en" ? CHANNELS_EN : (channelsJson as Channel[]);
+const LINEUP = APP_LANG === "en" ? LINEUP_EN : (lineupJson as unknown as Record<string, [string, string[]][]>);
 
 const SLOT_MIN = 60;
-const HERO_NOW_CHANNEL = 18; // TV조선
-const HERO_LATER_CHANNEL = 7; // KBS1
+const HERO = APP_LANG === "en" ? "Dustin Hoffman" : "임영웅";
+const HERO_NOW_CHANNEL = APP_LANG === "en" ? 30 : 18; // TCM / TV조선
+const HERO_LATER_CHANNEL = APP_LANG === "en" ? 4 : 7; // NBC / KBS1
+const HERO_NOW_TITLE = APP_LANG === "en" ? "The Graduate (1967), starring Dustin Hoffman" : "임영웅 콘서트 [IM HERO] 특별 방송";
+const HERO_LATER_TITLE = APP_LANG === "en" ? "Today: guest Dustin Hoffman" : "가요무대 임영웅 특집";
 
 export function channelName(n: number): string | undefined {
   return CHANNELS.find((c) => c.number === n)?.name;
@@ -50,15 +72,15 @@ export function todaysPrograms(now: Date = new Date()): Program[] {
   const heroes: Program[] = [
     {
       channel: HERO_NOW_CHANNEL,
-      title: "임영웅 콘서트 [IM HERO] 특별 방송",
-      people: ["임영웅"],
+      title: HERO_NOW_TITLE,
+      people: [HERO],
       start: new Date(nowStart).toISOString(),
       end: new Date(nowStart + 80 * 60_000).toISOString(),
     },
     {
       channel: HERO_LATER_CHANNEL,
-      title: "가요무대 임영웅 특집",
-      people: ["임영웅"],
+      title: HERO_LATER_TITLE,
+      people: [HERO],
       start: new Date(laterStart).toISOString(),
       end: new Date(laterStart + 60 * 60_000).toISOString(),
     },

@@ -13,6 +13,15 @@ export async function POST() {
   shared.lastLater = undefined;
   store.pending.length = 0;
   store.currentChannel = null;
+  // Wallet back to the demo seed ($80, family OK above $30), same as store.ts.
+  store.wallet = {
+    currency: "usd",
+    balance: 8000,
+    perSpendLimit: 3000,
+    ledger: [
+      { id: "seed-topup", at: new Date().toISOString(), amount: 8000, label: "Weekly allowance from Mom (demo data)", status: "done", by: "family" },
+    ],
+  };
   const memory = await getMemory();
   return Response.json({ ok: true, memory: memory.backend, facts: (await memory.all()).length });
 }
