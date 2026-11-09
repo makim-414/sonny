@@ -1,4 +1,16 @@
-# TV screen and phone remote
+# Phone orb app, TV screen and phone remote
+
+## Phone app `/` (PWA, the main screen)
+- One particle orb on a dark screen (`src/components/orb/`). Tap once ('눌러서 시작') if the browser needs a gesture; then the agent greets first (`proactive` / `morning-checkin`) and the page keeps listening, thinking and speaking with no buttons.
+- Orb states: idle breathes, listening gathers and shrinks (trembles on interim speech), thinking spins, speaking spreads and ripples on a fake speech rhythm.
+- A tap while it talks stops the voice and goes back to listening; a tap also closes a card.
+- Captions: only the last sentence, small and faint at the bottom. E or `?en` adds the English line.
+- `showCard` floats over the orb (6 s, learned-count cards 4.5 s with the big number). `tune` becomes a 3 s '채널을 바꿨어요' card. `notifyFamily` and `private` show a small top toast.
+- If the mic is blocked or speech recognition is missing (possible in an iOS home-screen app), a small '말 대신 글로 적기' line appears.
+- Desktop demo keys: Enter or Space (tap), E, T (text line), P (greet again), N (next morning 08:00 + greeting), F (+30 min).
+- It also polls `/api/family/inbox`. Only one screen should consume the inbox: open the other with `?noinbox` (orb) when `/tv` is the one showing family messages.
+- PWA: `src/app/manifest.ts` serves `/manifest.webmanifest` (name from `src/lib/brand.ts`, standalone, dark colors). Icons in `public/icons/` (192, 512, maskable 512, apple-touch 180), generated from `public/icons/orb-icon.svg` with ImageMagick. `public/sw.js` only exists so the app can be installed. The Claude browser pane blocks service workers; real Chrome registers it.
+
 
 
 ## Keys on /tv
