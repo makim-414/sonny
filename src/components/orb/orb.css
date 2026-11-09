@@ -237,6 +237,24 @@
 @keyframes orb-sway { 0%, 100% { transform: translate(-50%, -50%) rotate(-4deg); } 50% { transform: translate(-50%, -50%) rotate(4deg); } }
 @keyframes orb-talk { from { transform: translate(-50%, -50%) scale(1); } to { transform: translate(-50%, -50%) scale(1.06, 0.96); } }
 
+/* ---------- retro faces (?look=smiley, ?look=classic) ---------- */
+
+.face-look {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--character-size);
+  height: var(--character-size);
+  transform: translate(-50%, -50%);
+  overflow: visible;
+}
+.face-skin { fill: var(--brand); }
+.face-ink { fill: var(--dark); }
+.face-white { fill: var(--light); }
+.face-shine { fill: var(--light); opacity: 0.85; }
+.face-mouth { fill: none; stroke: var(--dark); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.face-mouth.is-open { fill: var(--dark); stroke-width: 4; }
+
 /* ---------- Sonny is calling (same layout as the family call screen, larger for grandma) ---------- */
 
 .orb-call {
