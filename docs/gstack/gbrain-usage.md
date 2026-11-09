@@ -32,6 +32,10 @@ The brain is keyless: `gbrain init --pglite --no-embedding`. Search is keyword-o
 | 10:52 | `gbrain doctor --fast --json` | Memory checks (`memory_verbs_usage`, `memory_writeback`, `memorable_relay_health`, `bun_runtime`) ok. The overall status is `unhealthy` because of the skill and resolver checks, which are about a coding agent's skill folder and do not affect the brain. |
 | 10:58 | Scenario run, see [agent-scenarios.md](../agent-scenarios.md) | In run `grandma-run-9` GBrain holds facts #383 (grandson Minsu, personal), #384 (kimchi brining, lesson) and #385 (temple on Wednesday and Friday, a correction that supersedes the seed fact). Each one carries its provenance. |
 
+| 11:00 | English demo (`APP_LANG = "en"`) | One run file per language (`hyodo-run-en.json`), entity `grandma-en-run-N`, 39 English seed facts (30 lessons). English and Korean demos never share facts. |
+| 11:09 | Finding: GBrain answers an exact repeat with `status: "duplicate"` ("already knew this, kept fact #868") and the old id | The adapter now reports it as already known, the lesson counter does not move, and Sonny says she taught it before. |
+| 11:10 | Scenario run in English, see [agent-scenarios.md](../agent-scenarios.md) | In `grandma-en-run-9`: fact #898 "Grandson's name is Max" (personal, private) and #899 "bingo every Wednesday and Friday", which supersedes the seed fact "Tuesday and Friday" through `--replaces`. Both carry provenance ("Margaret taught this in a talk with Sonny, <ISO>" / "Margaret corrected this, <ISO>"). |
+
 ## Limits we know about
 
 - Keyword-only recall: no embeddings, so near-duplicate phrasings are not merged (GBrain reports `degraded_dedup`). We rank the entity's facts locally with a small Korean-aware scorer.
