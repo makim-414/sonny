@@ -3,3 +3,6 @@
 export const ASSISTANT_NAME = "손주"; // what grandma calls the agent
 export const PRODUCT_NAME = "손주 TV"; // product name on screens and titles
 export const PRODUCT_NAME_EN = "Sonju TV";
+
+// Conversation language. "en" for the global demo (owner, 11/9 10:50); "ko" still works.
+export const APP_LANG: "en" | "ko" = "en";
