@@ -5,6 +5,13 @@ What mom's phone (`/family`) reads, what it sends to the TV, and what the agent 
 
 Language: every string on the phone lives in `src/components/family/strings.ts` (ko and en). `APP_LANG` in `src/lib/brand.ts` picks one; with `"en"` the routes also log "Mom: ..." instead of "엄마: ...". The parsers below match both Korean and English wording.
 
+## Sign-in (src/proxy.ts, src/lib/auth/**)
+
+- Guardian pages and data (`/admin`, `/admin/data`, `/family`, `/api/family`, `/api/events`) need the guardian cookie. Pages redirect to `/login`, APIs answer 401.
+- Grandma's side (`/`, `/tv`, `/remote`, `/api/agent/**`, `/api/family/inbox`) needs a paired device cookie or a guardian cookie. Pages redirect to `/login/device`.
+- `?demo=1` on any of them signs in as the demo guardian or demo device. `?pair=<token>` (from the admin QR) pairs a device. `AUTH_MODE=off` disables all checks.
+- The TV and grandma's phone keep polling `/api/family/inbox`; that works as long as the device was paired or opened with `?demo=1` once.
+
 ## Routes
 
 | Route | Who calls it | What it does |

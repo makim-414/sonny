@@ -9,6 +9,7 @@ State when this list was written (10:30): repo `makim-414/hyodo-tv` is **private
 - [ ] All session branches merged into `build` by the integration session (TV screen, agent brain, family app and pitch).
 - [ ] Final product name set in `src/lib/brand.ts` (`PRODUCT_NAME`, `PRODUCT_NAME_EN`), and `[NAME]` filled in across `docs/pitch/`.
 - [ ] Final repo name decided. If renamed, update the GitHub URL in the README, the video end card and the submission form.
+- [ ] Demo passwords in `src/lib/auth/users.ts` are test values on purpose (listed in the README). No real password anywhere.
 - [ ] No secrets. The API key lives only in the macOS keychain (`anthropic-hackathon-key`) and `package.json` only reads it. Check before going public:
 
 ```bash
@@ -45,8 +46,14 @@ The current README has the one-liner and run steps. Before submitting, make sure
 - [ ] Screenshot or GIF: TV screen next to mom's phone.
 - [ ] Open source, near the top: "Everything runs on open source you can self-host: Kokoro voice, Silero VAD, GBrain memory." Link `docs/OPEN_SOURCE.md` (every project 1,000+ stars, with license and how we use it).
 - [ ] Market line: launches in English for English-speaking seniors first; the founder's Korean grandmother is the origin story. The app language is one switch, `APP_LANG` in `src/lib/brand.ts`.
+- [ ] Demo accounts section (test values only, from `src/lib/auth/users.ts`):
+  - Family admin: `/login`, email `mom@sonju.demo`, password `grandma-demo`.
+  - Grandma's phone: pair from the admin, Device tab, "Connect grandma's phone", scan the QR. Or open `/?demo=1`.
+  - Skip sign-in anywhere with `?demo=1` (`/admin?demo=1`, `/family?demo=1`, `/?demo=1`).
+  - Note: sessions are signed cookies; set `AUTH_SECRET` in any real deployment. `AUTH_MODE=off` turns sign-in off.
+- [ ] Family admin and allowance: "Mom sets it up once from the admin: scans one QR on grandma's phone, done." and "Mom tops up an allowance; grandma spends it by voice; anything big waits for Mom's OK." Top-ups are demo credits until `STRIPE_SECRET_KEY` is set, then Stripe Checkout in test mode.
 - [ ] How it works: one Claude agent with tools (memory, schedule, ride, order, EPG search, tune, family notify), TV web app, family web app, shared activity log. Link `docs/ARCHITECTURE.md`.
-- [ ] Run: `pnpm install`, then `pnpm dev`, open `/` (grandma), `/family` (mom), `/tv` (TV mode). Explain the key comes from the keychain item `anthropic-hackathon-key`, or set `ANTHROPIC_API_KEY` yourself.
+- [ ] Run: `pnpm install`, then `pnpm dev`, open `/admin` (sign in as the demo account), `/?demo=1` (grandma), `/tv?demo=1` (TV mode). Explain the key comes from the keychain item `anthropic-hackathon-key`, or set `ANTHROPIC_API_KEY` yourself.
 - [ ] Honest notes: ride and grocery services are mocked; TV guide is seed data cut from a real Korean listing; voice uses the browser's Web Speech API (Chrome).
 - [ ] Built at c0mpiled-17 Seoul, 2026-11-09, YC Fall 2026 RFS "AI for the Aging Population" (not in the Winter 2027 list; do not claim it is).
 - [ ] A clear line for the gstack and GBrain side prize: "Built with GBrain (grandma's long-term memory, with provenance and corrections) and gstack (office hours, review)." Link `docs/gstack/` as evidence.
@@ -73,7 +80,7 @@ The current README has the one-liner and run steps. Before submitting, make sure
 ## 6. Live presentation and the QR demo
 
 - [ ] Rehearse `docs/pitch/pitch.md` with a timer (target 1:55, hard stop 2:00).
-- [ ] Two QR codes the judges can scan, on a printed card or a screen: "Be grandma" opens `/`, "Be her daughter" opens `/family`. Both use the on-site tunnel address (it changes on every restart, so generate or check them right before judging). Scan both with a phone on mobile data.
+- [ ] Two QR codes the judges can scan, on a printed card or a screen: "Be grandma" opens `/?demo=1`, "Be her daughter" opens `/family?demo=1`. Without `?demo=1` they land on a sign-in page. Both use the on-site tunnel address (it changes on every restart, so generate or check them right before judging). Scan both with a phone on mobile data.
 - [ ] The presenter's phone has the `[NAME]` icon on its home screen, signed in, as the backup grandma.
 - [ ] Reset the store just before judging so the judges see a clean feed.
 - [ ] Rehearse the judge loop three times: judge one scans "Be grandma" and talks, judge two scans "Be her daughter" and taps "I'll be there at 7 tonight", grandma's phone reads it, judge one answers, the reply card fills on judge two's phone.
