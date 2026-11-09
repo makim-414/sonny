@@ -16,6 +16,7 @@ import { formatTime, useDemoClock } from "@/components/tv/use-demo-clock";
 import { Orb } from "./Orb";
 import { AltLook } from "./AltLook";
 import { FaceLook } from "./FaceLook";
+import { BuddyLook } from "./BuddyLook";
 import type { OrbMode, OrbSignal } from "./ParticleOrb";
 
 type Line = { text: string; en?: string; who: "assistant" | "user" };
@@ -828,7 +829,8 @@ export function OrbApp() {
     lookParam === "bars" ||
     lookParam === "glow" ||
     lookParam === "smiley" ||
-    lookParam === "classic"
+    lookParam === "classic" ||
+    lookParam === "buddy"
       ? lookParam
       : params.get("eyes") === "1"
         ? "eyes"
@@ -852,6 +854,7 @@ export function OrbApp() {
       {(look === "orb" || look === "eyes") && <Orb signal={signal} />}
       {(look === "wave" || look === "bars" || look === "glow") && <AltLook look={look} signal={signal} />}
       {(look === "smiley" || look === "classic") && <FaceLook look={look} signal={signal} />}
+      {look === "buddy" && <BuddyLook signal={signal} />}
       {look === "character" && <span className={`orb-character is-${mode}`} aria-hidden />}
       {(look === "eyes" || look === "character") && (
         <span className={`orb-eyes is-${mode} ${look === "character" ? "on-character" : ""}`} aria-hidden>
