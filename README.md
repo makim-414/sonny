@@ -12,6 +12,23 @@ Sonny is a voice agent for parents who live alone. Grandma just talks to it on h
   <img src="docs/screens/02-family.png" alt="Mom's phone: what got done today, and when Sonny is calling" width="260">
 </p>
 
+## Built on GBrain + gstack
+
+Sonny's long-term memory is [GBrain](https://github.com/garrytan/gbrain) on keyless local PGLite (`gbrain init --pglite --no-embedding`, home `~/.hyodo-tv/gbrain-home`): no embeddings, no model calls, nothing leaves the machine.
+
+| What grandma does | Stored in GBrain as | Code |
+|---|---|---|
+| Teaches a tip ("brine kimchi overnight") | fact `[lesson] ...` on entity `grandma-run-N`, with provenance and `valid_from` | [`gbrain-store.ts`](src/lib/memory/gbrain-store.ts) |
+| Teaches a new skill ("my usual Sunday groceries") | fact `[skill] ...`, replayed step by step later | [`skills.ts`](src/lib/agent/skills.ts), [`tools.ts`](src/lib/agent/tools.ts) |
+| Mentions health or family ("my grandson is Max") | fact `[health] ...` / `[family] ...` | [`types.ts`](src/lib/memory/types.ts) |
+| Corrects herself ("Wednesday, not Tuesday") | new fact with `--replaces`, old one kept on record | [`gbrain-store.ts`](src/lib/memory/gbrain-store.ts) |
+| Demo reset | a new run entity, nothing forgotten | [`gbrain-store.ts`](src/lib/memory/gbrain-store.ts) |
+| Anything said | privacy tier `family` / `summary` / `private`, redacted on the server before mom sees it | [`privacy.ts`](src/lib/memory/privacy.ts), [`view.ts`](src/app/api/family/view.ts) |
+
+Our contribution back: a reusable [family privacy-tiered memory recipe](docs/gbrain/family-privacy-memory.md) for GBrain apps. Usage log: [`docs/gstack/gbrain-usage.md`](docs/gstack/gbrain-usage.md).
+
+gstack: we ran `/office-hours` ([notes](docs/gstack/office-hours.md)) and `/review` at the feature freeze, and fixed 4 of the bugs it caught (agent timeout, double approve, "No, don't approve" heard as yes, English brain errors in mom's feed): [`docs/gstack/review.md`](docs/gstack/review.md).
+
 ## The problem
 
 - 63 million Americans are family caregivers, 1 in 4 adults, giving about 27 hours a week (National Alliance for Caregiving and AARP, Caregiving in the U.S. 2025).
@@ -61,7 +78,7 @@ More: [architecture](docs/ARCHITECTURE.md), [open source credits and licenses](d
 ## Built with GBrain and gstack
 
 - **GBrain is Sonny's long-term memory.** Every skill grandma teaches ("my usual ride to Dr. Lee", "a note to Martha") is stored in GBrain with its source, and can be corrected or withdrawn. Code: [`src/lib/memory/gbrain-store.ts`](src/lib/memory/gbrain-store.ts). Usage log: [`docs/gstack/gbrain-usage.md`](docs/gstack/gbrain-usage.md).
-- **gstack shaped the build.** We ran gstack `/office-hours` to pressure-test the idea ([`docs/gstack/office-hours.md`](docs/gstack/office-hours.md), [run log](docs/gstack/office-hours-run.md)) and gstack `/review` at the feature freeze, which found nine serious issues; we fixed the ones that could break the demo, including "No, don't approve" being heard as a yes ([`docs/gstack/review.md`](docs/gstack/review.md)).
+- **gstack shaped the build.** We ran gstack `/office-hours` to pressure-test the idea ([`docs/gstack/office-hours.md`](docs/gstack/office-hours.md), [run log](docs/gstack/office-hours-run.md)) and gstack `/review` at the feature freeze, which found eight critical issues; we fixed the ones that could break the demo, including "No, don't approve" being heard as a yes ([`docs/gstack/review.md`](docs/gstack/review.md)).
 
 ## What's real, what's mocked
 

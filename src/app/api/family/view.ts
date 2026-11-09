@@ -1,4 +1,5 @@
 import type { ActivityEvent } from "@/lib/types";
+import { effectiveVisibility } from "@/lib/memory/privacy";
 
 // What mom's phone is allowed to see. Redaction happens here on the server,
 // so private words never leave the machine, not even in the network panel.
@@ -8,12 +9,6 @@ import type { ActivityEvent } from "@/lib/types";
 // Events without a visibility: grandma's raw talk ("heard", "said") counts as private,
 // everything else counts as "family".
 export type FamilyView = { events: ActivityEvent[]; hiddenCount: number };
-
-function effectiveVisibility(e: ActivityEvent): NonNullable<ActivityEvent["visibility"]> {
-  if (e.visibility) return e.visibility;
-  if (e.kind === "heard" || e.kind === "said") return e.familyText ? "summary" : "private";
-  return "family";
-}
 
 // The agent echoes inbox items as "엄마 → TV: ..."; our own route already logged them.
 const INBOX_ECHO = /^\S+\s*(→|->)\s*TV:/;
