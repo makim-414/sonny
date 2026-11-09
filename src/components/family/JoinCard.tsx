@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { unlockAudio } from "./IncomingCall";
 import { T } from "./strings";
 
-// First visit on a phone (judges scan the TV's Family QR): "You're June's family now."
+// First visit on a phone (judges scan the TV's Family QR): "You're Grandma's family now."
 // The big button is the tap iOS needs before any ring can make a sound later.
 const JOINED_KEY = "sonny.joined";
 const NAME_KEY = "sonny.familyName";
