@@ -76,6 +76,10 @@ export function createTools(ctx: AgentContext) {
         const category = kind === "lesson" ? "lesson" : (topic ?? "taught");
         const provenance = `${TAUGHT_BY}, ${ctx.now.toISOString()}`;
         const saved = await ctx.memory.remember({ text: fact, category, source: "grandma", provenance, at: ctx.now.toISOString() });
+        if (saved.duplicate) {
+          ctx.actions.push({ type: "showCard", title: T.alreadyTitle(card), body: T.alreadyBody });
+          return { saved: false, alreadyKnown: true, id: saved.id, say: "Tell her warmly she taught you this before and you still remember it." };
+        }
         if (kind === "lesson") {
           const n = (await lessonsThisMonth(ctx.memory, ctx.now)).length;
           // TV shows titles with the learned count as a big number card; body is the lesson.

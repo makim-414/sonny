@@ -123,7 +123,11 @@ export async function createGbrainMemory(): Promise<MemoryStore> {
       const prov = provenance ?? `${source}: ${new Date().toISOString()}`;
       const args = ["remember", encode(text, category), "--entity", ENTITY, "--provenance", prov, "--content-origin", "user_said", "--json"];
       if (at) args.push("--valid-from", at);
-      const out = JSON.parse(await gb(args)) as { id?: string };
+      const out = JSON.parse(await gb(args)) as { id?: string; status?: string };
+      if (out.status === "duplicate" && out.id) {
+        const known = (await load()).find((f) => f.id === `gbrain-${out.id}`);
+        if (known) return { ...known, duplicate: true };
+      }
       // Write-through to JSON so the demo survives if GBrain breaks mid-run.
       void jsonMemory.remember({ text, category, source, provenance: prov, at }).catch(() => undefined);
       if (!out.id) return newest(text);
