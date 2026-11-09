@@ -10,7 +10,8 @@ import { isTurnComplete, transcribe } from "@/lib/voice/stt";
 import { APP_LANG } from "@/lib/brand";
 import { callAgent } from "@/components/tv/agent-client";
 import { formatTime, useDemoClock } from "@/components/tv/use-demo-clock";
-import { ParticleOrb, type OrbMode, type OrbSignal } from "./ParticleOrb";
+import { Orb } from "./Orb";
+import type { OrbMode, OrbSignal } from "./ParticleOrb";
 
 type Line = { text: string; en?: string; who: "assistant" | "user" };
 type Card = { title: string; body?: string; learned?: string };
@@ -578,7 +579,7 @@ export function OrbApp() {
 
   return (
     <main className={`orb-root is-${mode}`} onPointerDown={onTap}>
-      <ParticleOrb signal={signal} />
+      <Orb signal={signal} />
 
       {!started && (
         <button
