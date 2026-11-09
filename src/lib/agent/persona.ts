@@ -93,6 +93,8 @@ const PROACTIVE_EN: Record<string, string> = {
   "temple-day": "Today is bingo day at the senior center. Ask one thing: a warm coat or a taxi.",
   "hospital-day": "Today is her clinic visit. Say the time and place and ask if she wants a taxi.",
   idle: "It has been quiet for a while. Say a light, friendly hello.",
+  "idle-checkin":
+    "It has been quiet for a while. One gentle line and one easy offer, for example: \"June, it's been a quiet afternoon. Want me to put on something nice?\" Do not ask about pills.",
 };
 
 const PROACTIVE_KO: Record<string, string> = {
