@@ -1,5 +1,5 @@
 import net from "node:net";
-import { anthropic } from "@ai-sdk/anthropic";
+import { anthropic, type AnthropicLanguageModelOptions } from "@ai-sdk/anthropic";
 import { generateText, isStepCount } from "ai";
 import { getMemory } from "@/lib/memory";
 import { kstLabel, todayAgenda } from "@/lib/scheduler";
@@ -90,12 +90,16 @@ export async function runAgent(req: AgentRequest): Promise<AgentReply & { meta: 
       messages: [...session.messages, { role: "user", content: userTurn }],
       tools: createTools(ctx),
       stopWhen: isStepCount(5),
-      maxOutputTokens: 400,
+      // Sonnet 5.5 always thinks; thinking counts toward this limit. Low effort keeps replies fast.
+      maxOutputTokens: 2000,
+      providerOptions: {
+        anthropic: { effort: (process.env.HYODO_EFFORT ?? "low") as "low" | "medium" | "high" } satisfies AnthropicLanguageModelOptions,
+      },
     });
     steps = result.steps.length;
-    toolNames = result.toolCalls.map((c) => c.toolName);
+    toolNames = result.toolResults.map((r) => r.toolName); // executed only
     const text = (result.finalStep.text || result.text).trim();
-    if (process.env.HYODO_DEBUG) console.log("[agent] raw:", JSON.stringify(result.steps.map((st) => st.text)), result.finishReason);
+    if (process.env.HYODO_DEBUG || text.length < 8) console.log("[agent] raw:", JSON.stringify(result.steps.map((st) => ({ text: st.text, finish: st.finishReason, calls: st.toolCalls.map((c) => c.toolName), results: st.toolResults.length, content: st.content.map((c) => c.type) }))));
     if (text) say = text.replace(/\[[^\]]*\]/g, "").replace(/\s*\n+\s*/g, " ").trim();
     if (text.length < 8 || say.length < 8) say = defaultSay;
   } catch (err) {

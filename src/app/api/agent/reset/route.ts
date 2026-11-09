@@ -7,5 +7,6 @@ export async function POST() {
   resetSession();
   await resetMemory();
   store.pending.length = 0;
+  store.currentChannel = null;
   return Response.json({ ok: true, memory: (await getMemory()).backend });
 }
