@@ -13,10 +13,10 @@ export type OrbSignal = {
   level?: () => number | null;
 };
 
-type Target = { radius: number; spin: number; wobble: number; spread: number };
+export type Target = { radius: number; spin: number; wobble: number; spread: number };
 
 // How each state looks. The canvas eases toward these so changes are smooth.
-const TARGETS: Record<OrbMode, Target> = {
+export const TARGETS: Record<OrbMode, Target> = {
   idle: { radius: 1.0, spin: 0.1, wobble: 0.035, spread: 0 },
   listening: { radius: 0.56, spin: 0.18, wobble: 0.015, spread: 0 },
   thinking: { radius: 0.6, spin: 1.1, wobble: 0.01, spread: 0 },
@@ -33,7 +33,7 @@ function readColor(el: HTMLElement, name: string) {
 }
 
 // Browser speechSynthesis gives no volume, so this rhythm is only the fallback.
-function speechEnvelope(t: number) {
+export function speechEnvelope(t: number) {
   const syllables = Math.abs(Math.sin(t * 7.1) * Math.sin(t * 2.3 + 0.7));
   const phrase = 0.6 + 0.4 * Math.sin(t * 0.9);
   return 0.25 + 0.75 * syllables * phrase;
