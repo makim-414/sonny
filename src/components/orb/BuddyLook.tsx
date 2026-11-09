@@ -22,7 +22,7 @@ const FRAG = `
 precision mediump float;
 uniform vec2 R;
 uniform vec3 C, K, Q, A, P; // brand, light gold, ink, amber, blush
-uniform float Y, X, T, S, B, Bl, W, H, M, L, D, Z; // yaw pitch roll squash height blink wide happy mouth look-up drag grow
+uniform float Y, X, T, S, B, Bl, W, H, M, L, D, Z, G, N; // yaw pitch roll squash height blink wide happy mouth look-up drag grow glasses-lift glasses-on
 mat3 rx(float a){float c=cos(a),s=sin(a);return mat3(1.,0.,0.,0.,c,s,0.,-s,c);}
 mat3 ry(float a){float c=cos(a),s=sin(a);return mat3(c,0.,-s,0.,1.,0.,s,0.,c);}
 mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,s,0.,-s,c,0.,0.,0.,1.);}
@@ -45,6 +45,17 @@ float mouth(vec2 q){
   float dShape=soft(length(m)-.045,.005)*dTop;
   float idle=smile*(1.-step(.05,M));
   return mix(max(idle,o),dShape,H);
+}
+// Round reading glasses: two thin gold rims around the eyes and a bridge. Returns rim, shine.
+vec2 glasses(vec2 q){
+  vec2 g=q-vec2(0.,G);
+  float r=.1, w=.011;
+  float rims=max(soft(abs(length(g-vec2(-.15,.05))-r)-w,.005),soft(abs(length(g-vec2(.15,.05))-r)-w,.005));
+  float bridge=soft(abs(g.y-(.07-.25*g.x*g.x))-w*.8,.005)*step(abs(g.x),.05);
+  vec2 s1=g-vec2(-.19,.1), s2=g-vec2(.11,.1);
+  float shine=soft(abs(length(s1)-.055)-.006,.004)*step(s1.x,0.)*step(0.,s1.y)
+             +soft(abs(length(s2)-.055)-.006,.004)*step(s2.x,0.)*step(0.,s2.y);
+  return vec2(max(rims,bridge),shine)*N;
 }
 void main(){
   vec2 uv=(gl_FragCoord.xy-.5*R)/min(R.x,R.y);
@@ -78,7 +89,11 @@ void main(){
     base=mix(base,P,blush*.35*face);
     // eyes close together (spacing 15% of the diameter), a little above the middle
     float ink=max(max(eye(f,vec2(-.15,.05)),eye(f,vec2(.15,.05))),mouth(f))*face;
-    col=vec4(mix(base,Q,ink*.94),1.);
+    vec3 shade=mix(base,Q,ink*.94);
+    vec2 gl=glasses(f)*face;
+    shade=mix(shade,mix(A,Q,.45),gl.x);                    // dark gold rims
+    shade=mix(shade,K,gl.y*.45);                           // one faint lens shine
+    col=vec4(shade,1.);
   }
   gl_FragColor=vec4(col.rgb*col.a,col.a);
 }`;
@@ -131,7 +146,9 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     const U: Record<string, WebGLUniformLocation | null> = {};
-    for (const n of ["R", "C", "K", "Q", "A", "P", "Y", "X", "T", "S", "B", "Bl", "W", "H", "M", "L", "D", "Z"]) U[n] = gl.getUniformLocation(prog, n);
+    for (const n of ["R", "C", "K", "Q", "A", "P", "Y", "X", "T", "S", "B", "Bl", "W", "H", "M", "L", "D", "Z", "G", "N"]) U[n] = gl.getUniformLocation(prog, n);
+    // Reading glasses are on by default; ?acc=none takes them off.
+    gl.uniform1f(U.N, new URLSearchParams(window.location.search).get("acc") === "none" ? 0 : 1);
     gl.uniform3fv(U.C, rgb(canvas, "--brand"));
     gl.uniform3fv(U.K, rgb(canvas, "--chart-1"));
     gl.uniform3fv(U.Q, rgb(canvas, "--dark"));
@@ -141,7 +158,8 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      // Every pixel runs the shader, so cap the density: 1.5x is sharp enough for a soft ball.
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       canvas.width = Math.round(canvas.clientWidth * dpr);
       canvas.height = Math.round(canvas.clientHeight * dpr);
       gl.viewport(0, 0, canvas.width, canvas.height);
@@ -190,6 +208,7 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
     window.addEventListener("pointercancel", onUp);
 
     const st = { yaw: 0, pitch: 0, roll: 0, wide: 0, look: 0, voice: 0, bounce: 0 };
+    let learnAt = -1e9; // when Sonny last learned something (push up the glasses)
     let nextBlink = performance.now() + 3000 + Math.random() * 2000;
     let blinkUntil = 0;
     let last = performance.now();
@@ -231,6 +250,12 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
       gl.uniform1f(U.S, Math.max(-0.25, Math.min(0.35, sq * 0.06)));
       gl.uniform1f(U.B, st.bounce);
       gl.uniform1f(U.Z, st.voice * 0.06);
+      if ((s.learn ?? 0) > 0) {
+        s.learn = 0;
+        learnAt = now;
+      }
+      const lp = (now - learnAt) / 200; // 200 ms push up and back
+      gl.uniform1f(U.G, lp >= 0 && lp <= 1 ? Math.sin(lp * Math.PI) * 0.03 : 0);
       gl.uniform1f(U.Bl, now < blinkUntil ? 1 : 0);
       gl.uniform1f(U.W, Math.min(1.4, st.wide + st.voice * 0.6)); // eyes open with the voice
       gl.uniform1f(U.H, Math.min(1, happy * 1.4));

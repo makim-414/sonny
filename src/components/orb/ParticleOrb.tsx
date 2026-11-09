@@ -13,6 +13,8 @@ export type OrbSignal = {
   level?: () => number | null;
   // 0..1 impulse for a happy moment (thanks, something learned); decays by itself.
   joy?: number;
+  // Set to 1 when Sonny learns something (buddy pushes up its glasses); consumed by the look.
+  learn?: number;
 };
 
 // lean: extra forward tilt (radians) so listening reads as "leaning in".
