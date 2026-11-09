@@ -77,13 +77,13 @@ export const ROUTINES: Routine[] =
       ]
     : [
         { label: "혈압약 드시기", weekdays: [0, 1, 2, 3, 4, 5, 6], hour: 8, minute: 0, kind: "medicine" },
-        { label: "보현사 절에 가시는 날", weekdays: [2, 5], hour: 9, minute: 30, kind: "temple" },
+        { label: "햇살사 절에 가시는 날", weekdays: [2, 5], hour: 9, minute: 30, kind: "temple" },
       ];
 
 /** One-off appointments for the demo week. */
 export const APPOINTMENTS = [
   {
-    label: APP_LANG === "en" ? "Blood pressure checkup at Riverside Family Clinic" : "서울바른내과의원 혈압 정기 검진",
+    label: APP_LANG === "en" ? "Blood pressure checkup at Riverside Family Clinic" : "햇살내과의원 혈압 정기 검진",
     weekday: 1,
     hour: 11,
     minute: 0,

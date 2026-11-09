@@ -8,7 +8,7 @@ Grandma teaches the TV, and every fact she teaches becomes a GBrain fact with pr
 
 | Product moment | GBrain feature used | Command (through the CLI) |
 |---|---|---|
-| "내 손주 이름은 민수야" (my grandson's name is Minsu) | `remember` a fact on one entity, with provenance (who taught it, when) and `valid_from` | `gbrain remember "[family] 손주 이름은 민수다" --entity grandma-run-N --provenance "김순자 할머니가 TV 대화에서 가르침, <ISO>" --valid-from <ISO> --content-origin user_said` |
+| "내 손주 이름은 민수야" (my grandson's name is Minsu) | `remember` a fact on one entity, with provenance (who taught it, when) and `valid_from` | `gbrain remember "[family] 손주 이름은 민수다" --entity grandma-run-N --provenance "할머니가 TV 대화에서 가르침, <ISO>" --valid-from <ISO> --content-origin user_said` |
 | Next morning the TV opens with "민수는 학교 잘 다녀왔대요?" | `recall` of the entity's live facts, ranked locally | `gbrain recall grandma-run-N --json` |
 | Kimchi brining tip, counted as "이번 달 할머니께 배운 것 31개" | lessons are facts tagged `[lesson]`; 30 seeded lessons carry their own `valid_from` dates this month | `gbrain remember --items '[...]'` (20 per batch) |
 | "아니 화요일 말고 수요일이야" (not Tuesday, Wednesday) | correction: the new fact supersedes the old one, and both stay in the record | `gbrain remember "<new fact>" --replaces <fact_id>` |
@@ -33,7 +33,7 @@ The brain is keyless: `gbrain init --pglite --no-embedding`. Search is keyword-o
 | 10:58 | Scenario run, see [agent-scenarios.md](../agent-scenarios.md) | In run `grandma-run-9` GBrain holds facts #383 (grandson Minsu, personal), #384 (kimchi brining, lesson) and #385 (temple on Wednesday and Friday, a correction that supersedes the seed fact). Each one carries its provenance. |
 
 | 11:00 | English demo (`APP_LANG = "en"`) | One run file per language (`hyodo-run-en.json`), entity `grandma-en-run-N`, 39 English seed facts (30 lessons). English and Korean demos never share facts. |
-| 11:04 | Scenario run in English, see [agent-scenarios.md](../agent-scenarios.md) | In `grandma-en-run-9`: fact #898 "Grandson's name is Max" (personal, private) and #899 "bingo every Wednesday and Friday", which supersedes the seed fact "Tuesday and Friday" through `--replaces`. Both carry provenance ("Margaret taught this in a talk with Sonny, <ISO>" / "Margaret corrected this, <ISO>"). |
+| 11:04 | Scenario run in English, see [agent-scenarios.md](../agent-scenarios.md) | In `grandma-en-run-9`: fact #898 "Grandson's name is Max" (personal, private) and #899 "bingo every Wednesday and Friday", which supersedes the seed fact "Tuesday and Friday" through `--replaces`. Both carry provenance ("June taught this in a talk with Sonny, <ISO>" / "June corrected this, <ISO>"). |
 | 11:07 | Finding: GBrain answers an exact repeat with `status: "duplicate"` ("already knew this, kept fact #868") and the old id | The adapter now reports it as already known, the lesson counter does not move, and Sonny says she taught it before. |
 
 ## Limits we know about

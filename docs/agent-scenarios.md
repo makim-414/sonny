@@ -107,7 +107,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Hello, Margaret! It's nice to hear from you. How can I help you this afternoon?",
+  "say": "Hello, June! It's nice to hear from you. How can I help you this afternoon?",
   "heardEn": "Hi Sonny",
   "actions": []
 }
@@ -119,7 +119,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Yes, Margaret! The Graduate is on right now on channel 30. Also, Dustin Hoffman is a guest on the Today show at 2:30 PM, on channel 4. Would you like me to remind you then?",
+  "say": "Yes, June! The Graduate is on right now on channel 30. Also, Dustin Hoffman is a guest on the Today show at 2:30 PM, on channel 4. Would you like me to remind you then?",
   "heardEn": "Is Dustin Hoffman on TV today?",
   "actions": [
     {
@@ -160,7 +160,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Thank you, Margaret. Your grandson Max is one I'll remember.",
+  "say": "Thank you, June. Your grandson Max is one I'll remember.",
   "heardEn": "My grandson's name is Max",
   "private": true,
   "actions": [
@@ -179,7 +179,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Good morning, Margaret! Did Max have a good day at school yesterday? Don't forget your blood pressure pill at 8 AM. It's chilly out, so bundle up.",
+  "say": "Good morning, June! Did Max have a good day at school yesterday? Don't forget your blood pressure pill at 8 AM. It's chilly out, so bundle up.",
   "actions": []
 }
 ```
@@ -190,7 +190,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Wonderful, Margaret! I've written down that you took your pill. Have a lovely morning.",
+  "say": "Wonderful, June! I've written down that you took your pill. Have a lovely morning.",
   "heardEn": "He's fine. And yes, I took my pill",
   "actions": []
 }
@@ -202,7 +202,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "You have 80 dollars left in your allowance, Margaret.",
+  "say": "You have 80 dollars left in your allowance, June.",
   "heardEn": "How much allowance do I have left?",
   "actions": [
     {
@@ -232,7 +232,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Your taxi is on the way, Margaret. A black Ford Fusion will be at your door in about 6 minutes.",
+  "say": "Your taxi is on the way, June. A black Ford Fusion will be at your door in about 6 minutes.",
   "heardEn": "Yes, now please",
   "actions": [
     {
@@ -300,7 +300,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Thank you, Margaret, that's a wonderful tip. I've saved it. This will help other people too.",
+  "say": "Thank you, June, that's a wonderful tip. I've saved it. This will help other people too.",
   "heardEn": "When you make pie crust, the butter and the water have to be ice cold",
   "actions": [
     {
@@ -318,7 +318,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Thank you, Margaret. I've fixed it, so bingo is on Wednesday and Friday now.",
+  "say": "Thank you, June. I've fixed it, so bingo is on Wednesday and Friday now.",
   "heardEn": "No, not Tuesday. Bingo is on Wednesday and Friday",
   "private": true,
   "actions": [
@@ -337,7 +337,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Okay, I won't tell your daughter. I'm sorry about your knee, Margaret. Please rest it today.",
+  "say": "Okay, I won't tell your daughter. I'm sorry about your knee, June. Please rest it today.",
   "heardEn": "My knee has been aching. But don't tell my daughter",
   "private": true,
   "actions": [
@@ -356,7 +356,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Sarah says she'll come over at 7 tonight for dinner together. Would you like to reply to her, Margaret?",
+  "say": "Sarah says she'll come over at 7 tonight for dinner together. Would you like to reply to her, June?",
   "heardEn": "I'll come over at 7 tonight. Let's have dinner together",
   "actions": [
     {
@@ -374,7 +374,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "I passed that on to Sarah, Margaret. She will be so happy about the pot roast!",
+  "say": "I passed that on to Sarah, June. She will be so happy about the pot roast!",
   "heardEn": "Wonderful, I'll make a pot roast",
   "actions": [
     {
@@ -392,7 +392,7 @@ curl -s -X POST localhost:3102/api/agent -H 'content-type: application/json' -d 
 
 ```json
 {
-  "say": "Please sit down now and rest, Margaret. I've let Sarah know, and she will help you.",
+  "say": "Please sit down now and rest, June. I've let Sarah know, and she will help you.",
   "heardEn": "Oh, I've been dizzy since this morning and my head hurts",
   "actions": [
     {
