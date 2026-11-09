@@ -1,14 +1,33 @@
-# Submission checklist (c0mpiled-17 Seoul, 2026-11-09)
+# Sonny: submission (c0mpiled-17 Seoul, 2026-11-09)
+
+The form asks for three things: the 90 second demo video, the GitHub repo (https://github.com/makim-414/sonny) and a short description. The description is right below; the checklist follows.
+
+## Short description (paste into the form)
+
+**Tagline (6 words):** Sonny: the grandkid who's always home.
+
+Backup taglines: "Grandma just talks. Mom stops worrying." / "A voice agent for parents who live alone."
+
+**About 50 words (52):**
+
+Sonny is the grandkid who's always home: a voice agent for parents who live alone. Grandma taps one icon and talks. Sonny handles pills, rides and groceries from an allowance mom tops up, calls mom before anything big, and learns what grandma teaches. Mom sees what got done, never what was said.
+
+**About 150 words (147):**
+
+Sonny is the grandkid who's always home: a voice agent for parents who live alone, paid for by their worried adult children. Today those children are already their parent's remote agent: this morning my mom booked my grandmother's taxi from her own phone, then called to check. Sonny takes that job. Grandma taps one icon, nothing to learn, and Sonny speaks first: pills, weather, the day ahead. She asks for a ride or groceries and it's paid from an allowance mom tops up; anything big or strange, Sonny calls mom first. Grandma teaches Sonny her recipes and routines, and it remembers. Mom sees what got done, never what was said. Built with a Claude agent calling real tools, GBrain for long-term memory, Kokoro for the voice and Silero VAD for hands-free listening, all self-hostable open source. Next: a TV dongle for the screen she watches all day.
+
+## Checklist
 
 Deliverables: a 90 second demo video (Loom or YouTube) and a public GitHub repo URL. Judging starts at 15:00. Presentation in English.
 
-State when this list was written (10:30): repo `makim-414/hyodo-tv` is **private**, default branch `build`, rename pending (repo name and product name `[NAME]` both come from the owner; the product name lives in `src/lib/brand.ts`). First commit 10:03:48 KST (after the 10:00 start, so the repo is eligible).
+State at 11:10: repo https://github.com/makim-414/sonny is **private**, default branch `build`. Product name: **Sonny** (`src/lib/brand.ts`). First commit 10:03:48 KST (after the 10:00 start, so the repo is eligible). Submission form: Google Form, link expected around 13:30.
 
 ## 1. Repo, before making it public
 
 - [ ] All session branches merged into `build` by the integration session (TV screen, agent brain, family app and pitch).
-- [ ] Final product name set in `src/lib/brand.ts` (`PRODUCT_NAME`, `PRODUCT_NAME_EN`), and `[NAME]` filled in across `docs/pitch/`.
-- [ ] Final repo name decided. If renamed, update the GitHub URL in the README, the video end card and the submission form.
+- [x] Product name Sonny set in `src/lib/brand.ts` and used across `docs/pitch/`.
+- [ ] Leftover old names on screens and in copy: search for 손주 TV, Sonju, 효도, Hyodo (internal `HYODO_` env vars and `~/.hyodo-tv` stay until after the demo).
+- [x] Repo renamed to https://github.com/makim-414/sonny. Use this URL in the README, the video end card and the form.
 - [ ] Demo passwords in `src/lib/auth/users.ts` are test values on purpose (listed in the README). No real password anywhere.
 - [ ] No secrets. The API key lives only in the macOS keychain (`anthropic-hackathon-key`) and `package.json` only reads it. Check before going public:
 
@@ -28,7 +47,7 @@ Prints nothing when clean (checked 12:30 across all branches: clean).
 Integration session runs this only after section 1 is green **and the owner says yes** (treat it as irreversible: once public, assume it has been cloned):
 
 ```bash
-gh repo edit makim-414/hyodo-tv --visibility public --accept-visibility-change-consequences
+gh repo edit makim-414/sonny --visibility public --accept-visibility-change-consequences
 ```
 
 - [ ] Open the URL in a private browser window while logged out and confirm it loads.
@@ -47,7 +66,7 @@ The current README has the one-liner and run steps. Before submitting, make sure
 - [ ] Open source, near the top: "Everything runs on open source you can self-host: Kokoro voice, Silero VAD, GBrain memory." Link `docs/OPEN_SOURCE.md` (every project 1,000+ stars, with license and how we use it).
 - [ ] Market line: launches in English for English-speaking seniors first; the founder's Korean grandmother is the origin story. The app language is one switch, `APP_LANG` in `src/lib/brand.ts`.
 - [ ] Demo accounts section (test values only, from `src/lib/auth/users.ts`):
-  - Family admin: `/login`, email `mom@sonju.demo`, password `grandma-demo`.
+  - Family admin: `/login`, email `mom@sonny.demo`, password `grandma-demo`.
   - Grandma's phone: pair from the admin, Device tab, "Connect grandma's phone", scan the QR. Or open `/?demo=1`.
   - Skip sign-in anywhere with `?demo=1` (`/admin?demo=1`, `/family?demo=1`, `/?demo=1`).
   - Note: sessions are signed cookies; set `AUTH_SECRET` in any real deployment. `AUTH_MODE=off` turns sign-in off.
@@ -73,28 +92,28 @@ The current README has the one-liner and run steps. Before submitting, make sure
 
 ## 5. Submission form
 
-- [ ] Event page: https://luma.com/compiled-8lsr (use the submission link the organizers share).
-- [ ] Fields: team name, product name, one-liner, GitHub URL (public), video URL, track "AI for the Aging Population".
-- [ ] Submit before 15:00. Screenshot the confirmation.
+- [ ] Google Form link from the organizers (expected around 13:30; event page https://luma.com/compiled-8lsr).
+- [ ] Video URL (YouTube Unlisted or Loom), GitHub URL https://github.com/makim-414/sonny (public), short description (pick the 50 or 150 word version to fit the field).
+- [ ] Submit by 14:30. Screenshot the confirmation.
 
 ## 6. Live presentation and the QR demo
 
 - [ ] Rehearse `docs/pitch/pitch.md` with a timer (target 1:55, hard stop 2:00).
 - [ ] Two QR codes the judges can scan, on a printed card or a screen: "Be grandma" opens `/?demo=1`, "Be her daughter" opens `/family?demo=1`. Without `?demo=1` they land on a sign-in page. Both use the on-site tunnel address (it changes on every restart, so generate or check them right before judging). Scan both with a phone on mobile data.
-- [ ] The presenter's phone has the `[NAME]` icon on its home screen, signed in, as the backup grandma.
+- [ ] The presenter's phone has the Sonny icon on its home screen, signed in, as the backup grandma.
 - [ ] Reset the store just before judging so the judges see a clean feed.
 - [ ] Rehearse the judge loop three times: judge one scans "Be grandma" and talks, judge two scans "Be her daughter" and taps "I'll be there at 7 tonight", grandma's phone reads it, judge one answers, the reply card fills on judge two's phone.
 - [ ] Mic permission: iOS Safari asks on first use; have the judge tap Allow. If a phone blocks the mic, hand over the presenter's phone.
 - [ ] Optional: `/tv` on a monitor over HDMI to show "next, her TV" (boot screen with `?boot`).
 - [ ] Fallbacks: typed input on `/` if the mic fails, phone hotspot if Wi-Fi fails, the 90 second video on the desktop if both fail.
 
-## Timeline (from STATUS.md and office hours)
+## Timeline (STATUS.md)
 
 | Time | What |
 |---|---|
-| 11:30 | First merge into `build`, one full loop on port 3000 |
-| 12:30 | Feature freeze, second merge. Only bug fixes and polish after this |
-| 13:30 | Record the fallback video of the full live loop |
-| 14:00 to 14:40 | Rehearsals and the 90 second video (record, edit, upload) |
-| 14:45 | Submit the form (repo public only after the owner says yes) |
-| 15:00 | Judging |
+| 12:15 | Sign-in, admin, allowance and the "Sonny is calling" screen done |
+| 12:30 | Feature freeze, merge into `build` |
+| 13:00 to 13:30 | Record the 90 second video (`docs/pitch/shot-list.md`) |
+| 13:30 | Form link published; edit and upload the video |
+| 14:30 | Submit the form (repo public only after the owner says yes) |
+| 15:00 | Build closes, judging |
