@@ -2,7 +2,30 @@
 // The key comes from OPENAI_API_KEY only; without it, /api/tts uses Kokoro as before.
 
 const MODEL = "gpt-4o-mini-tts";
-const VOICES = ["alloy", "ash", "ballad", "coral", "echo", "fable", "nova", "onyx", "sage", "shimmer", "verse"];
+const VOICES = ["alloy", "ash", "ballad", "cedar", "coral", "echo", "fable", "marin", "nova", "onyx", "sage", "shimmer", "verse"];
+/** The two the family can pick in /setup (owner, 11/9): cedar (male, default) and marin (female). */
+export const SONNY_VOICES = ["cedar", "marin"] as const;
+export type SonnyVoice = (typeof SONNY_VOICES)[number];
+
+// The family's pick lives in the shared agent slot (__hyodoAgent), which syncs across instances.
+type Slot = { health: unknown[]; requests: unknown[]; voice?: string };
+const g = globalThis as unknown as { __hyodoAgent?: Slot };
+const slot = () => (g.__hyodoAgent ??= { health: [], requests: [] });
+
+/** SONNY_VOICE is only the default when the family has not picked one. */
+export function defaultVoice(): string {
+  const env = process.env.SONNY_VOICE?.trim().toLowerCase();
+  return env && VOICES.includes(env) ? env : "cedar";
+}
+export function chosenVoice(): string {
+  const v = slot().voice;
+  return v && VOICES.includes(v) ? v : defaultVoice();
+}
+export function setChosenVoice(v: string): boolean {
+  if (!(SONNY_VOICES as readonly string[]).includes(v)) return false;
+  slot().voice = v;
+  return true;
+}
 const INSTRUCTIONS =
   "Warm, cheerful young grandchild talking to his grandmother on the phone. Natural, relaxed, smiling. Clear and a little slow, never robotic.";
 const SAMPLE_RATE = 24_000; // "pcm" output: 16-bit little-endian mono at 24 kHz
@@ -10,11 +33,10 @@ const TIMEOUT_MS = 8_000;
 
 export const openaiEnabled = () => Boolean(process.env.OPENAI_API_KEY);
 
-/** SONNY_VOICE, or a voice the client asked for when it is an OpenAI voice name. */
+/** A voice the client asked for when it is an OpenAI voice name, else the family's pick. */
 export function openaiVoice(asked?: string): string {
   if (asked && VOICES.includes(asked)) return asked;
-  const env = process.env.SONNY_VOICE?.trim().toLowerCase();
-  return env && VOICES.includes(env) ? env : "ash";
+  return chosenVoice();
 }
 
 // Raw PCM with our own WAV header: a fixed, correct length that iOS Safari's decodeAudioData accepts.

@@ -1,4 +1,5 @@
 import { loadKokoro, synthesize } from "@/lib/tts/kokoro";
+import { syncShared } from "@/lib/shared-state";
 import { openaiEnabled, openaiVoice, synthesizeOpenAI } from "@/lib/tts/openai";
 
 // Node.js runtime is the default (cacheComponents forbids a runtime export).
@@ -46,6 +47,7 @@ export async function POST(request: Request) {
     });
 
   if (openaiEnabled()) {
+    await syncShared(); // the voice the family picked in /setup
     const voice = openaiVoice(asked);
     const key = `openai:${voice}:${text}`;
     const hit = cache.get(key);
