@@ -32,6 +32,10 @@
 .ad-tab {
   min-width: 0;
   min-height: var(--hit);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
   padding: 0 var(--sp-3);
   border: 0;
   border-bottom: 2px solid transparent;
@@ -188,4 +192,74 @@
 .ad-url {
   overflow-wrap: anywhere;
   text-align: center;
+}
+
+/* page frame */
+.ad-brand {
+  font-size: var(--t-h2);
+  font-weight: var(--w-semi);
+  line-height: var(--lh-snug);
+  color: var(--text);
+  text-decoration: none;
+}
+.ad-main {
+  display: grid;
+  align-content: start;
+}
+.ad-page-title {
+  font-size: var(--t-h2);
+  font-weight: var(--w-semi);
+  line-height: var(--lh-snug);
+  padding: var(--sp-5) var(--sp-4) 0;
+}
+
+/* overview: today's line and one card per page */
+.ad-overview-summary {
+  margin-top: var(--sp-4);
+}
+.ad-cards {
+  list-style: none;
+  margin: 0;
+  padding: var(--sp-4);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+.ad-cards > li {
+  display: grid;
+}
+.ad-card-link {
+  display: grid;
+  gap: var(--sp-1);
+  align-content: start;
+  min-height: calc(var(--sp-16) + var(--sp-12));
+  padding: var(--sp-4);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  color: var(--text);
+  text-decoration: none;
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.ad-card-link:active {
+  transform: scale(var(--press-scale));
+}
+.ad-card-link:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+.ad-card-title {
+  font-size: var(--t-title);
+  font-weight: var(--w-semi);
+}
+.ad-card-desc {
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+}
+.ad-card-status {
+  margin-top: auto;
+  padding-top: var(--sp-2);
+  font-size: var(--t-sm);
+  font-weight: var(--w-med);
+  font-variant-numeric: tabular-nums;
 }
