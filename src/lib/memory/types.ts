@@ -20,6 +20,13 @@ export type MemoryFact = {
   provenance?: string; // who taught it, when, where
 };
 
+// Shared write counter. The admin's server actions and the agent's route can load
+// separate module copies, so every store re-reads when another copy wrote.
+// One counter per backend, so the JSON write-through does not make GBrain re-read.
+const G = globalThis as unknown as Record<string, number | undefined>;
+export const memVersion = (key = "gbrain") => (G[`__hyodoMemVersion_${key}`] ??= 0);
+export const bumpMemVersion = (key = "gbrain") => (G[`__hyodoMemVersion_${key}`] = memVersion(key) + 1);
+
 export const isLesson = (f: Pick<MemoryFact, "category">) => f.category === "lesson";
 
 export interface MemoryStore {
