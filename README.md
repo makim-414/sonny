@@ -98,6 +98,18 @@ Built with [gstack](https://github.com/garrytan/gstack): office hours and review
 
 More: architecture [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), family app contract [docs/family-app-contract.md](docs/family-app-contract.md), pitch and demo script [docs/pitch/](docs/pitch/).
 
+## What's real, what's mocked
+
+**Real:** the Claude agent and its tool calls, GBrain memory, the Kokoro voice, the allowance wallet and mom's approvals, Sonny's calls to mom (struggle, nudge and over-limit), and the skills grandma teaches by talking.
+
+**Mocked:**
+- Ride and grocery services: there is no real taxi or store API behind them.
+- Account connection: no real credentials are stored.
+- Payments: allowance top-ups are demo credits, or Stripe Checkout in test mode when `STRIPE_SECRET_KEY` is set.
+- TV integration: the TV app runs in the browser today (`/tv`); Android TV and Samsung TV apps are next.
+
+**Demo video:** the live-action B-roll is AI-generated footage. Every app screen in it is the real product.
+
 ## Roadmap
 
 1. **Today:** a one-icon web app on grandma's phone, set up by mom with one QR.
