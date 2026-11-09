@@ -36,7 +36,7 @@ export function orderErrand(input: { items: { name: string; qty?: number }[]; no
     totalWon: items.reduce((s, i) => s + i.priceWon, 0),
     totalCents: items.reduce((s, i) => s + i.priceCents, 0),
     store: APP_LANG === "en" ? "Corner Grocery delivery (fake)" : "동네 마트 새벽배송 (가짜)",
-    arrives: APP_LANG === "en" ? "tomorrow before 9 AM" : "내일 아침 7시 전",
+    arrives: APP_LANG === "en" ? "today by 4 PM" : "오늘 오후 4시 전",
     status: "awaiting_family_approval",
   };
 }

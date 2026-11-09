@@ -12,6 +12,7 @@ export async function POST() {
   shared.requests.length = 0;
   shared.lastLater = undefined;
   shared.confirmOrder = undefined;
+  shared.offer = undefined;
   store.calls.length = 0;
   store.pending.length = 0;
   store.currentChannel = null;
