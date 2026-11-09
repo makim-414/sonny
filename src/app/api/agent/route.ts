@@ -13,6 +13,9 @@ export async function POST(request: Request) {
     return Response.json({ error: "text is required" }, { status: 400 });
   }
   const source = body.source === "proactive" || body.source === "family" ? body.source : "voice";
-  const reply = await runAgent({ text: body.text, source, now: body.now });
+  // x-hyodo-model: debug override for latency comparisons (claude-* ids only).
+  const override = request.headers.get("x-hyodo-model");
+  const model = override && /^claude-[a-z0-9-]+$/.test(override) ? override : undefined;
+  const reply = await runAgent({ text: body.text, source, now: body.now }, { model });
   return Response.json(reply);
 }
