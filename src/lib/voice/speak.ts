@@ -1,12 +1,15 @@
-// Text to speech with the browser speechSynthesis (ko-KR).
+// Text to speech with the browser speechSynthesis (ko-KR by default, en-US for the global demo).
 
-const PREFERRED_VOICES = ["Yuna", "Google 한국의", "Sora", "Jian", "Heami"];
+const PREFERRED_VOICES: Record<string, string[]> = {
+  ko: ["Yuna", "Google 한국의", "Sora", "Jian", "Heami"],
+  en: ["Samantha", "Google US English", "Ava", "Allison", "Karen"],
+};
 
 // Slightly slow for older ears, a little bright for a grandchild voice.
 const RATE = 0.92;
 const PITCH = 1.1;
 
-let cachedVoice: SpeechSynthesisVoice | null = null;
+const cachedVoice = new Map<string, SpeechSynthesisVoice>();
 // Chrome can garbage collect an utterance mid-sentence and never fire onend.
 let current: SpeechSynthesisUtterance | null = null;
 let cancelCurrent: (() => void) | null = null;
@@ -16,15 +19,18 @@ function synth(): SpeechSynthesis | null {
   return window.speechSynthesis;
 }
 
-function pickVoice(s: SpeechSynthesis): SpeechSynthesisVoice | null {
-  if (cachedVoice) return cachedVoice;
-  const ko = s.getVoices().filter((v) => v.lang.replace("_", "-").toLowerCase().startsWith("ko"));
-  if (ko.length === 0) return null;
-  for (const name of PREFERRED_VOICES) {
-    const hit = ko.find((v) => v.name.includes(name));
-    if (hit) return (cachedVoice = hit);
-  }
-  return (cachedVoice = ko[0]);
+function pickVoice(s: SpeechSynthesis, lang: string): SpeechSynthesisVoice | null {
+  const base = lang.slice(0, 2).toLowerCase();
+  const hit = cachedVoice.get(base);
+  if (hit) return hit;
+  const matching = s.getVoices().filter((v) => v.lang.replace("_", "-").toLowerCase().startsWith(base));
+  if (matching.length === 0) return null;
+  const preferred = (PREFERRED_VOICES[base] ?? [])
+    .map((name) => matching.find((v) => v.name.includes(name)))
+    .find(Boolean);
+  const voice = preferred ?? matching[0];
+  cachedVoice.set(base, voice);
+  return voice;
 }
 
 function waitForVoices(s: SpeechSynthesis, timeoutMs = 1200): Promise<void> {
@@ -63,7 +69,7 @@ export function stopSpeaking() {
 }
 
 // Speaks one chunk of text. Resolves when done, cancelled, or after a safety timeout.
-export async function speak(text: string): Promise<void> {
+export async function speak(text: string, lang = "ko-KR"): Promise<void> {
   const clean = text.trim();
   if (!clean) return;
   const s = synth();
@@ -83,10 +89,10 @@ export async function speak(text: string): Promise<void> {
       resolve();
     };
     const u = new SpeechSynthesisUtterance(clean);
-    u.lang = "ko-KR";
+    u.lang = lang;
     u.rate = RATE;
     u.pitch = PITCH;
-    const voice = pickVoice(s);
+    const voice = pickVoice(s, lang);
     if (voice) u.voice = voice;
     u.onend = finish;
     u.onerror = finish;

@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from "react";
 import type { AgentRequest, TvAction } from "@/lib/types";
 import { isListenSupported, listenOnce, type Listener } from "@/lib/voice/listen";
-import { speak, splitSentences, stopSpeaking, unlockSpeech } from "@/lib/voice/speak";
+import { splitSentences, unlockSpeech } from "@/lib/voice/speak";
+import { speakSentences, stopVoice, unlockAudio, voiceLevel, warmTts } from "@/lib/tts/player";
+import { APP_LANG } from "@/lib/brand";
 import { callAgent } from "@/components/tv/agent-client";
 import { formatTime, useDemoClock } from "@/components/tv/use-demo-clock";
 import { ParticleOrb, type OrbMode, type OrbSignal } from "./ParticleOrb";
@@ -23,12 +25,42 @@ const INBOX_MISSING_POLL_MS = 15_000;
 
 const noopSubscribe = () => () => {};
 
+const LANG = APP_LANG === "en" ? "en-US" : "ko-KR";
+
+// Screen words in the conversation language (brand.ts APP_LANG).
+const COPY = {
+  en: {
+    start: "Tap to start",
+    micBlocked: "Please allow the microphone",
+    type: "Type instead",
+    family: "Family notified",
+    private: "Kept private from family",
+    reminder: "Reminder set",
+    channel: "Changed the channel",
+    channelBody: (n: number) => `Channel ${n}`,
+    taught: "What grandma taught me",
+    nextDay: "Next morning",
+  },
+  ko: {
+    start: "눌러서 시작",
+    micBlocked: "마이크를 허용해 주세요",
+    type: "말 대신 글로 적기",
+    family: "가족에게 알렸어요",
+    private: "딸에게는 안 알려요",
+    reminder: "알림 맞춤",
+    channel: "채널을 바꿨어요",
+    channelBody: (n: number) => `${n}번`,
+    taught: "할머니가 가르쳐 주신 것",
+    nextDay: "다음 날 아침",
+  },
+}[APP_LANG];
+
 function hasFlag(name: string) {
   return typeof window !== "undefined" && new URLSearchParams(window.location.search).has(name);
 }
 
 function learnedCount(title: string, body?: string): string | undefined {
-  if (!/배운|가르쳐/.test(title)) return undefined;
+  if (!/배운|가르쳐|taught|learned/i.test(title)) return undefined;
   return `${title} ${body ?? ""}`.match(/(\d+)/)?.[1];
 }
 
@@ -41,7 +73,7 @@ function pairEnglish(ko: string[], en?: string): (string | undefined)[] {
 export function OrbApp() {
   const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const { now, getNow, forward, jumpTo } = useDemoClock();
-  const signal = useRef<OrbSignal>({ mode: "idle", pulse: 0 });
+  const signal = useRef<OrbSignal>({ mode: "idle", pulse: 0, level: voiceLevel });
   const [mode, setModeState] = useState<OrbMode>("idle");
   const [started, setStarted] = useState(false);
   const [line, setLine] = useState<Line | null>(null);
@@ -84,14 +116,14 @@ export function OrbApp() {
   const say = useCallback(
     async (text: string, en?: string) => {
       const gen = sayGenRef.current;
-      const ko = splitSentences(text);
-      const eng = pairEnglish(ko, en);
-      for (let i = 0; i < ko.length; i++) {
-        if (sayGenRef.current !== gen) return;
-        setLine({ who: "assistant", text: ko[i], en: eng[i] });
-        setMode("speaking");
-        await speak(ko[i]);
-      }
+      const parts = splitSentences(text);
+      const eng = APP_LANG === "en" ? parts.map(() => undefined) : pairEnglish(parts, en);
+      setMode("speaking");
+      await speakSentences(parts, {
+        lang: LANG,
+        onSentence: (i) => setLine({ who: "assistant", text: parts[i], en: eng[i] }),
+        isCancelled: () => sayGenRef.current !== gen,
+      });
     },
     [setMode],
   );
@@ -103,15 +135,15 @@ export function OrbApp() {
           const learned = learnedCount(a.title, a.body);
           showCard({ title: a.title, body: a.body, learned }, learned ? LEARNED_MS : CARD_MS);
         } else if (a.type === "tune") {
-          showCard({ title: "채널을 바꿨어요", body: `${a.channel}번${a.reason ? ` · ${a.reason}` : ""}` }, TUNE_CARD_MS);
+          showCard({ title: COPY.channel, body: `${COPY.channelBody(a.channel)}${a.reason ? ` · ${a.reason}` : ""}` }, TUNE_CARD_MS);
         } else if (a.type === "schedule") {
           const at = Date.parse(a.at);
           if (!Number.isNaN(at)) {
             timersRef.current = [...timersRef.current, { at, label: a.label, action: a.action }];
-            showToast(`알림 맞춤 · ${formatTime(new Date(at))} ${a.label}`);
+            showToast(`${COPY.reminder} · ${formatTime(new Date(at))} ${a.label}`);
           }
         } else if (a.type === "notifyFamily") {
-          showToast("가족에게 알렸어요");
+          showToast(COPY.family);
         }
       }
     },
@@ -149,7 +181,7 @@ export function OrbApp() {
         const { reply } = await callAgent({ ...req, now: getNow().toISOString() });
         if (req.source === "voice" && reply.heardEn) setLine({ who: "user", text: req.text, en: reply.heardEn });
         runActions(reply.actions);
-        if (reply.private) showToast("딸에게는 안 알려요");
+        if (reply.private) showToast(COPY.private);
         await say(reply.say, reply.sayEn);
       });
     },
@@ -178,7 +210,7 @@ export function OrbApp() {
       onError: (code) => {
         if (code === "not-allowed" || code === "service-not-allowed" || code === "audio-capture") {
           listenOkRef.current = false;
-          setNotice("마이크를 허용해 주세요");
+          setNotice(COPY.micBlocked);
           setTyping(true);
         }
       },
@@ -188,7 +220,7 @@ export function OrbApp() {
         // Silence or a hiccup: keep listening, like an open phone line.
         setTimeout(() => listenRef.current(), listenOkRef.current ? RELISTEN_MS : RETRY_MS);
       },
-    });
+    }, LANG);
     listenerRef.current = self;
     if (!self) setMode("idle");
   }, [setMode, turn]);
@@ -202,6 +234,7 @@ export function OrbApp() {
   const start = useCallback(() => {
     if (startedRef.current) return;
     startedRef.current = true;
+    unlockAudio();
     unlockSpeech();
     setStarted(true);
     turn({ text: "morning-checkin", source: "proactive" });
@@ -216,7 +249,7 @@ export function OrbApp() {
     if (card) showCard(null);
     if (signal.current.mode === "speaking") {
       sayGenRef.current++;
-      stopSpeaking();
+      stopVoice();
     }
   };
 
@@ -227,6 +260,9 @@ export function OrbApp() {
   }, [start]);
 
   useEffect(() => {
+    // Dev-only probe so headless checks can read the live voice level.
+    if (process.env.NODE_ENV !== "production") (window as unknown as { __orbVoiceLevel?: () => number | null }).__orbVoiceLevel = voiceLevel;
+    warmTts();
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
   }, []);
 
@@ -316,8 +352,8 @@ export function OrbApp() {
         timersRef.current = timersRef.current.filter((x) => x.at >= target.getTime());
         jumpTo(target);
         sayGenRef.current++;
-        stopSpeaking();
-        showCard({ title: "다음 날 아침", body: english ? "Next morning, 8:00" : "오전 8:00" }, 2500);
+        stopVoice();
+        showCard({ title: COPY.nextDay, body: formatTime(target) }, 2500);
         startedRef.current = true;
         setStarted(true);
         turn({ text: "morning-checkin", source: "proactive" });
@@ -335,7 +371,7 @@ export function OrbApp() {
     () => () => {
       startedRef.current = false;
       stopListening();
-      stopSpeaking();
+      stopVoice();
     },
     [stopListening],
   );
@@ -347,6 +383,7 @@ export function OrbApp() {
     if (!startedRef.current) {
       startedRef.current = true;
       setStarted(true);
+      unlockAudio();
       unlockSpeech();
     }
     setLine({ who: "user", text: t });
@@ -359,14 +396,14 @@ export function OrbApp() {
     <main className={`orb-root is-${mode}`} onPointerDown={onTap}>
       <ParticleOrb signal={signal} />
 
-      {!started && <p className="orb-start">눌러서 시작</p>}
+      {!started && <p className="orb-start">{COPY.start}</p>}
       {notice && <p className="orb-notice">{notice}</p>}
 
       {card && (
         <section className={`orb-card ${card.learned ? "is-learned" : ""}`} role="dialog" aria-label={card.title}>
           {card.learned && <span className="orb-card-num">{card.learned}</span>}
           <span className="orb-card-text">
-            {card.learned && <span className="orb-card-label">할머니가 가르쳐 주신 것</span>}
+            {card.learned && <span className="orb-card-label">{COPY.taught}</span>}
             <h2 className="orb-card-title">{card.title}</h2>
             {card.body && <p className="orb-card-body">{card.body}</p>}
           </span>
@@ -393,8 +430,8 @@ export function OrbApp() {
             className="orb-type-input"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder="말 대신 글로 적기"
-            aria-label="말 대신 글로 적기"
+            placeholder={COPY.type}
+            aria-label={COPY.type}
           />
         </form>
       )}
