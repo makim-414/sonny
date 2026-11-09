@@ -50,6 +50,7 @@
   --sp-5: 20px;
   --sp-6: 24px;
   --sp-8: 32px;
+  --sp-12: 48px;
   /* shape */
   --r-md: 8px;
   --r-card: 12px;
@@ -62,6 +63,14 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --press-scale: 0.97;
   --max-w: 480px;
+  /* incoming call */
+  --call-bg: oklch(0.2 0.02 255);
+  --call-fg: oklch(0.98 0 0);
+  --call-muted: oklch(0.78 0.01 255);
+  --call-yes: oklch(0.6 0.15 155);
+  --call-no: oklch(0.58 0.19 25);
+  --call-orb: oklch(0.72 0.12 255);
+  --call-btn: 76px;
 
   min-height: 100dvh;
   width: 100%;
@@ -408,4 +417,89 @@
   font-size: var(--t-sm);
   color: var(--text-subtle);
   text-align: center;
+}
+
+/* incoming call from Sonny: full screen, two big buttons */
+.fa-call {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--call-bg);
+  color: var(--call-fg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: calc(var(--sp-12) + env(safe-area-inset-top)) var(--sp-6) calc(var(--sp-8) + env(safe-area-inset-bottom));
+  text-align: center;
+  font-family: var(--font);
+}
+.fa-call-top {
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-3);
+}
+.fa-call-orb {
+  width: var(--call-btn);
+  height: var(--call-btn);
+  border-radius: var(--r-pill);
+  background: radial-gradient(circle, var(--call-orb), transparent 70%);
+}
+.fa-call-orb.is-ringing {
+  animation: fa-call-pulse 1.6s var(--ease-out) infinite;
+}
+@keyframes fa-call-pulse {
+  0% { transform: scale(var(--press-scale)); opacity: 0.7; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(var(--press-scale)); opacity: 0.7; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fa-call-orb.is-ringing { animation: none; }
+}
+.fa-call-title {
+  font-size: var(--t-display);
+  font-weight: var(--w-semi);
+  line-height: var(--lh-snug);
+}
+.fa-call-sub,
+.fa-call-hint {
+  color: var(--call-muted);
+  font-size: var(--t-body);
+}
+.fa-call-script {
+  margin-top: var(--sp-6);
+  font-size: var(--t-title);
+  line-height: var(--lh-normal);
+}
+.fa-call-result {
+  margin-top: var(--sp-6);
+  font-size: var(--t-h2);
+  font-weight: var(--w-semi);
+}
+.fa-call-actions {
+  margin-top: auto;
+  display: grid;
+  align-items: end;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-6);
+  justify-items: center;
+}
+.fa-call-btn {
+  width: 100%;
+  min-height: var(--call-btn);
+  border: 0;
+  border-radius: var(--r-pill);
+  color: var(--call-fg);
+  font-size: var(--t-title);
+  font-weight: var(--w-semi);
+  cursor: pointer;
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.fa-call-btn:active {
+  transform: scale(var(--press-scale));
+}
+.fa-call-btn.is-yes {
+  background: var(--call-yes);
+}
+.fa-call-btn.is-no {
+  background: var(--call-no);
 }

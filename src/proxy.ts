@@ -59,13 +59,20 @@ export function proxy(request: NextRequest) {
   if (url.searchParams.get("demo") === "1") {
     const clean = new URL(url);
     clean.searchParams.delete("demo");
-    const res = isApi ? NextResponse.next() : NextResponse.redirect(clean);
-    if (required === "guardian" && !guardian) {
-      res.cookies.set(GUARDIAN_COOKIE, guardianToken(DEMO_GUARDIAN.email, DEMO_GUARDIAN.name), cookieOptions(GUARDIAN_TTL, secure));
+    const add: [string, string][] = [];
+    if (required === "guardian" && !guardian) add.push([GUARDIAN_COOKIE, guardianToken(DEMO_GUARDIAN.email, DEMO_GUARDIAN.name)]);
+    if (required === "device" && !device && !guardian) add.push([DEVICE_COOKIE, deviceToken(DEMO_DEVICE_ID)]);
+    let res: NextResponse;
+    if (isApi) {
+      // Route handlers read the session from the request, so hand it the demo cookie now.
+      const headers = new Headers(request.headers);
+      const extra = add.map(([k, v]) => `${k}=${v}`).join("; ");
+      if (extra) headers.set("cookie", [headers.get("cookie"), extra].filter(Boolean).join("; "));
+      res = NextResponse.next({ request: { headers } });
+    } else {
+      res = NextResponse.redirect(clean);
     }
-    if (required === "device" && !device && !guardian) {
-      res.cookies.set(DEVICE_COOKIE, deviceToken(DEMO_DEVICE_ID), cookieOptions(DEVICE_TTL, secure));
-    }
+    for (const [k, v] of add) res.cookies.set(k, v, cookieOptions(k === GUARDIAN_COOKIE ? GUARDIAN_TTL : DEVICE_TTL, secure));
     return res;
   }
 
