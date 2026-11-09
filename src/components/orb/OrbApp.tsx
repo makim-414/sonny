@@ -819,8 +819,8 @@ export function OrbApp() {
 
   if (!mounted) return <main className="orb-root" />;
 
-  // Design options for the owner: ?eyes=1 adds two blinking dots, ?look=character shows a
-  // plain warm round character instead of particles. Default is the particle orb only.
+  // Default look is the 3D buddy. Design options stay for comparison: ?look=orb (particles),
+  // ?eyes=1, ?look=character, wave, bars, glow, smiley, classic.
   const params = new URLSearchParams(window.location.search);
   const lookParam = params.get("look");
   const look =
@@ -830,11 +830,12 @@ export function OrbApp() {
     lookParam === "glow" ||
     lookParam === "smiley" ||
     lookParam === "classic" ||
-    lookParam === "buddy"
+    lookParam === "buddy" ||
+    lookParam === "orb"
       ? lookParam
       : params.get("eyes") === "1"
         ? "eyes"
-        : "orb";
+        : "buddy"; // default look (owner, 11/9); the particle orb stays behind ?look=orb
 
   return (
     <main

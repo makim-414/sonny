@@ -1,9 +1,12 @@
 "use client";
 
-// ?look=buddy: the round yellow character in real 3D, raw WebGL, written from scratch.
+// Sonny's default look (owner, 11/9): the round yellow character in real 3D, floating,
+// raw WebGL, written from scratch.
 // One fullscreen fragment shader traces a single squashable sphere (analytic ray-ellipsoid
-// hit, no meshes, no three.js): soft top light, rim light, a ground shadow, two eyes and a
-// smile drawn in the head's own coordinates so they turn with it.
+// hit, no meshes, no three.js) with the gold-to-amber sheen of the flat character, a rim
+// light, and a warm light pool on the floor that shrinks as it floats up. Dot eyes, light
+// blush and a small mouth (smile, a pea-sized o with the voice, a little D when tapped)
+// are drawn in the head's own coordinates so they turn with it.
 // Interaction: the head and eyes follow the finger or cursor, a tap squashes it and makes
 // happy ^ ^ eyes, a drag tilts it like it is about to roll. States come from the same
 // signal as the orb (idle, listening, thinking, speaking with the real voice level, joy).
@@ -18,51 +21,63 @@ const VERT = `attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}`;
 const FRAG = `
 precision mediump float;
 uniform vec2 R;
-uniform vec3 C, K, Q; // body, rim, ink colors
-uniform float Y, X, T, S, B, Bl, W, H, M, L, D; // yaw, pitch, roll, squash, bounce, blink, wide, happy, mouth, look-up, dragX
+uniform vec3 C, K, Q, A, P; // brand, light gold, ink, amber, blush
+uniform float Y, X, T, S, B, Bl, W, H, M, L, D, Z; // yaw pitch roll squash height blink wide happy mouth look-up drag grow
 mat3 rx(float a){float c=cos(a),s=sin(a);return mat3(1.,0.,0.,0.,c,s,0.,-s,c);}
 mat3 ry(float a){float c=cos(a),s=sin(a);return mat3(c,0.,-s,0.,1.,0.,s,0.,c);}
 mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,s,0.,-s,c,0.,0.,0.,1.);}
+float soft(float d,float w){return 1.-smoothstep(-w,w,d);}
+// Dot eye; happy turns it into a small upside-down U (^).
 float eye(vec2 q, vec2 c){
-  vec2 d=(q-c)/vec2(.085*(1.+W*.2),.13*(1.+W*.25)*max(1.-Bl,.08));
-  float oval=1.-smoothstep(.85,1.,length(d));
-  float x=(q.x-c.x)/.1, arc=c.y+.02+.06*(1.-x*x);   // happy eyes: an upside-down U
-  float hap=(1.-smoothstep(.016,.03,abs(q.y-arc)))*step(abs(x),1.);
-  return mix(oval,hap,H);
+  float r=.075*(1.+W*.3);
+  float dotE=soft(length((q-c)/vec2(1.,max(1.-Bl,.1)))-r,.008);
+  float x=(q.x-c.x)/.085, arc=c.y+.045*(1.-x*x);
+  float hap=soft(abs(q.y-arc)-.012,.006)*step(abs(x),1.);
+  return mix(dotE,hap,H);
+}
+// Small mouth: idle smile, a pea-sized o with the voice, a little D when happy.
+float mouth(vec2 q){
+  vec2 m=q-vec2(0.,-.06);
+  float x=m.x/.15;
+  float smile=soft(abs(m.y-(-.03+.035*x*x))-.011,.005)*step(abs(x),1.);
+  float o=soft(length(m/vec2(.75,1.))-.045*M,.006)*step(.05,M);
+  float dTop=step(m.y,0.)*step(abs(m.x),.07);
+  float dShape=soft(length(m)-.07,.006)*dTop;
+  float idle=smile*(1.-step(.05,M));
+  return mix(max(idle,o),dShape,H);
 }
 void main(){
-  vec2 uv=(gl_FragCoord.xy-.5*R)/min(R.x,R.y);       // short side = 1, so phones fit
-  vec3 ro=vec3(0.,0.,3.4), rd=normalize(vec3(uv,-.9));  // radius about 0.27 of the short side
-  vec3 sc=vec3(1.+S*.45,1.-S,1.+S*.45);              // squash and stretch
-  vec3 c=vec3(D*.25,B-.05+(1.-sc.y)*-.9,0.);          // keep the bottom on the ground
+  vec2 uv=(gl_FragCoord.xy-.5*R)/min(R.x,R.y);
+  vec3 ro=vec3(0.,0.,3.6), rd=normalize(vec3(uv,-.95));
+  vec3 sc=vec3(1.+S*.45,1.-S,1.+S*.45)*(1.+Z);        // squash and stretch, grow with the voice
+  vec3 c=vec3(D*.25,.18+B,0.);                        // floating above the floor
   vec3 o=(ro-c)/sc, d=rd/sc;
   float a=dot(d,d), b=dot(o,d), k=dot(o,o)-1., h=b*b-a*k;
   vec4 col=vec4(0.);
-  // ground shadow on the plane under the body
-  float gy=-1.08, tg=(gy-ro.y)/rd.y;
+  // Warm gold light pool on the floor: smaller and fainter the higher the ball floats.
+  float gy=-1.25, tg=(gy-ro.y)/rd.y;
   if(tg>0.){
-    vec3 g=ro+rd*tg; vec2 e=(g.xz-c.xz)/vec2(1.05,.55);
-    float sh=(1.-smoothstep(.2,1.,length(e)))*.45*(1.-clamp(B*1.5,0.,.6));
-    col=vec4(0.,0.,0.,sh);
+    float lift=clamp((c.y+.1)/.8,0.,1.);
+    vec3 g=ro+rd*tg; vec2 e=(g.xz-c.xz)/(vec2(1.25,.5)*(1.-lift*.35));
+    float pool=(1.-smoothstep(0.,1.,length(e)))*(.3-lift*.15);
+    col=vec4(C*.9,pool);
   }
   if(h>0.){
-    float t=(-b-sqrt(h))/a; vec3 lp=o+d*t;            // local hit on the unit sphere
+    float t=(-b-sqrt(h))/a; vec3 lp=o+d*t;
     vec3 n=normalize(lp/sc);
     vec3 q=rz(-T)*rx(-X)*ry(-Y)*lp;                    // face coordinates follow the head
-    vec3 l=normalize(vec3(-.35,.9,.55));
-    float dif=max(dot(n,l),0.)*.75+.35;
+    vec3 l=normalize(vec3(-.45,.75,.6));
+    float ndl=dot(n,l);
+    vec3 base=mix(A,C,smoothstep(-.35,.55,ndl));        // amber shadow side to brand gold
+    base=mix(base,K,smoothstep(.75,1.,ndl)*.8);          // light gold sheen up top
     float rim=pow(1.-max(dot(n,-rd),0.),3.);
-    float spec=pow(max(dot(reflect(-l,n),-rd),0.),24.)*.35;
-    vec3 base=C*dif+K*rim*.55+spec;
+    base+=K*rim*.35+pow(max(dot(reflect(-l,n),-rd),0.),30.)*.25;
     float face=step(0.,q.z);
-    vec2 f=q.xy+vec2(0.,-L*.08);
-    float ink=max(eye(f,vec2(-.3,.2)),eye(f,vec2(.3,.2)))*face;
-    float mx=q.x/.34, smile=-.3+.13*mx*mx;
-    float stroke=1.-smoothstep(.016,.03,abs(q.y-smile));
-    float open=step(q.y,smile)*step(smile-M*.2*(1.-mx*mx),q.y);
-    ink=max(ink,max(stroke,open)*step(abs(mx),1.)*face);
-    vec3 shade=mix(base,Q,ink*.92);
-    col=vec4(shade,1.);
+    vec2 f=q.xy+vec2(0.,-L*.07);
+    float blush=soft(length((f-vec2(-.4,0.))/vec2(1.,.6))-.07,.04)+soft(length((f-vec2(.4,0.))/vec2(1.,.6))-.07,.04);
+    base=mix(base,P,blush*.35*face);
+    float ink=max(max(eye(f,vec2(-.24,.14)),eye(f,vec2(.24,.14))),mouth(f))*face;
+    col=vec4(mix(base,Q,ink*.94),1.);
   }
   gl_FragColor=vec4(col.rgb*col.a,col.a);
 }`;
@@ -115,10 +130,12 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     const U: Record<string, WebGLUniformLocation | null> = {};
-    for (const n of ["R", "C", "K", "Q", "Y", "X", "T", "S", "B", "Bl", "W", "H", "M", "L", "D"]) U[n] = gl.getUniformLocation(prog, n);
+    for (const n of ["R", "C", "K", "Q", "A", "P", "Y", "X", "T", "S", "B", "Bl", "W", "H", "M", "L", "D", "Z"]) U[n] = gl.getUniformLocation(prog, n);
     gl.uniform3fv(U.C, rgb(canvas, "--brand"));
     gl.uniform3fv(U.K, rgb(canvas, "--chart-1"));
     gl.uniform3fv(U.Q, rgb(canvas, "--dark"));
+    gl.uniform3fv(U.A, rgb(canvas, "--chart-7"));
+    gl.uniform3fv(U.P, rgb(canvas, "--chart-14"));
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -201,8 +218,8 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
       // spring for squash and stretch
       sqV += (-sq * 120 - sqV * 9) * dt;
       sq += sqV * dt;
-      const breath = s.mode === "idle" ? Math.sin(t * 1.5) * 0.04 : 0;
-      st.bounce += (breath + st.voice * 0.22 - st.bounce) * e(14);
+      const float = Math.sin(t * 0.9) * 0.09; // always drifting gently up and down
+      st.bounce += (float + st.voice * 0.18 - st.bounce) * e(14);
       if (now > nextBlink) {
         blinkUntil = now + 140;
         nextBlink = now + 3000 + Math.random() * 2000;
@@ -210,10 +227,11 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
       gl.uniform1f(U.Y, st.yaw);
       gl.uniform1f(U.X, st.pitch);
       gl.uniform1f(U.T, st.roll);
-      gl.uniform1f(U.S, Math.max(-0.25, Math.min(0.35, sq * 0.06 + st.voice * 0.06)));
-      gl.uniform1f(U.B, Math.max(0, st.bounce));
+      gl.uniform1f(U.S, Math.max(-0.25, Math.min(0.35, sq * 0.06)));
+      gl.uniform1f(U.B, st.bounce);
+      gl.uniform1f(U.Z, st.voice * 0.06);
       gl.uniform1f(U.Bl, now < blinkUntil ? 1 : 0);
-      gl.uniform1f(U.W, st.wide);
+      gl.uniform1f(U.W, Math.min(1.4, st.wide + st.voice * 0.6)); // eyes open with the voice
       gl.uniform1f(U.H, Math.min(1, happy * 1.4));
       gl.uniform1f(U.M, Math.min(1, st.voice * 1.4));
       gl.uniform1f(U.L, st.look);
