@@ -37,8 +37,10 @@ export function surfChannels(guide: Guide | null): number[] {
 }
 
 const SCENE_WORDS: [Scene, RegExp][] = [
-  ["trot", /트로트|가요|노래|콘서트|음악|명곡|복면가왕|임영웅|영웅/],
-  ["news", /뉴스|뉴스룸|YTN|이슈/],
+  ["trot", /트로트|가요|노래|콘서트|음악|명곡|복면가왕|임영웅|영웅|concert|music|songs?|singer|welk|rieu|idol|voice/i],
+  ["news", /뉴스|뉴스룸|YTN|이슈|news|newsroom|cnn|msnbc|fox|today|good morning|world|report/i],
+  ["health", /health|doctor|dr\.|fitness|exercise/i],
+  ["nature", /nature|planet|wild|travel|garden|outdoor|national geographic/i],
   ["temple", /법문|예불|사찰|불교|스님|BTN|BBS/],
   ["health", /건강|체조|명의|무릎|병원/],
   ["drama", /드라마|연속극|봄날|아침마당|생생정보|달인|퀴즈/],
