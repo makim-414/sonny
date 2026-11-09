@@ -29,6 +29,23 @@ function toWav16(samples: Float32Array, sampleRate: number): ArrayBuffer {
   return buf;
 }
 
+// Smart turn (POST /api/turn, pipecat smart-turn): did the speaker finish, judged from the audio?
+// Null when the service is missing or down, so the caller falls back to a fixed silence wait.
+export async function isTurnComplete(audio: Float32Array): Promise<boolean | null> {
+  try {
+    const res = await fetch("/api/turn", {
+      method: "POST",
+      headers: { "content-type": "audio/wav" },
+      body: toWav16(audio, VAD_SAMPLE_RATE),
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { complete?: boolean };
+    return typeof json.complete === "boolean" ? json.complete : null;
+  } catch {
+    return null;
+  }
+}
+
 export type SttResult = { ok: true; text: string } | { ok: false; unavailable: boolean };
 
 export async function transcribe(audio: Float32Array): Promise<SttResult> {
