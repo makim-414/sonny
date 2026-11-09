@@ -52,6 +52,8 @@ export const jsonMemory: MemoryStore = {
   backend: "json",
   async remember({ text, category = "taught", source = "grandma", provenance, at }) {
     const facts = await load();
+    const known = facts.find((f) => f.text === text);
+    if (known) return { ...known, duplicate: true };
     const fact: MemoryFact = { id: crypto.randomUUID(), text, category, source, at: at ?? new Date().toISOString(), provenance };
     facts.push(fact);
     await save();

@@ -317,9 +317,13 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
       stopWhen: isStepCount(5),
       maxOutputTokens: 2000, // Sonnet thinking counts toward this limit
       providerOptions: { anthropic: providerOptions(m) },
+      // A forced turn needs exactly one tool call; afterwards only the spoken answer
+      // (Haiku once saved the same lesson twice and the count jumped by two).
       prepareStep: ({ stepNumber }) =>
-        force && m.includes("haiku") && stepNumber === 0
-          ? { toolChoice: { type: "tool" as const, toolName: force } }
+        force && m.includes("haiku")
+          ? stepNumber === 0
+            ? { toolChoice: { type: "tool" as const, toolName: force } }
+            : { toolChoice: "none" as const }
           : { toolChoice: "auto" as const },
     });
   let usedModel = model;

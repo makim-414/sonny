@@ -24,7 +24,14 @@ export const isLesson = (f: Pick<MemoryFact, "category">) => f.category === "les
 
 export interface MemoryStore {
   readonly backend: "json" | "gbrain";
-  remember(input: { text: string; category?: MemoryCategory; source?: MemoryFact["source"]; provenance?: string; at?: string }): Promise<MemoryFact>;
+  /** `duplicate` is true when the exact fact was already known (GBrain status "duplicate"). */
+  remember(input: {
+    text: string;
+    category?: MemoryCategory;
+    source?: MemoryFact["source"];
+    provenance?: string;
+    at?: string;
+  }): Promise<MemoryFact & { duplicate?: boolean }>;
   /** Record a correction: the new fact replaces the old one (GBrain `--replaces`). */
   correct(id: string, text: string, provenance?: string): Promise<MemoryFact | null>;
   /** Withdraw a fact (GBrain `forget`). */
