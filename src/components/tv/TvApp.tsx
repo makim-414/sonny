@@ -17,6 +17,8 @@ type Caption = { who: "assistant" | "user"; text: string; en?: string };
 type Card = { title: string; body?: string; imageUrl?: string };
 
 const BOOT_MS = 3000;
+const LEARNED_CARD_MS = 4500;
+const LEARNED_FALLBACK = 37; // used only when the memory API is unreachable
 const BOOT_SEEN_KEY = "tv-boot-seen";
 
 // First visit (or ?boot) shows the "plugged in" screen for the demo video.
@@ -224,7 +226,7 @@ export function TvApp() {
   const openCard = useCallback((c: Card | null) => {
     if (cardTimer.current) clearTimeout(cardTimer.current);
     setCard(c);
-    if (c) cardTimer.current = setTimeout(() => setCard(null), CARD_MS);
+    if (c) cardTimer.current = setTimeout(() => setCard(null), learnedCount(c) !== null ? LEARNED_CARD_MS : CARD_MS);
   }, []);
 
   // ---------- program guide from the agent ----------
@@ -381,6 +383,29 @@ export function TvApp() {
     else flashOsd();
   };
 
+  // ---------- lesson counter (hidden L key, for filming) ----------
+
+  const showLessonCount = useCallback(() => {
+    enqueue(async () => {
+      let lessons = 0;
+      try {
+        const res = await fetch("/api/agent/memory", { cache: "no-store" });
+        if (res.ok) {
+          const json = (await res.json()) as { facts?: { category?: string }[] };
+          lessons = (json.facts ?? []).filter((f) => f.category === "lesson").length;
+        }
+      } catch {
+        // fall back to the demo count below
+      }
+      const n = lessons > 0 ? lessons : LEARNED_FALLBACK;
+      openCard({ title: `이번 달 배운 것 ${n}개` });
+      await say(
+        `할머니, 이번 달에 저한테 ${n}가지를 가르쳐 주셨어요. 고마워요!`,
+        `Grandma, you taught me ${n} things this month. Thank you!`,
+      );
+    });
+  }, [enqueue, openCard, say]);
+
   // ---------- next morning (hidden N key) ----------
 
   const goNextMorning = useCallback(() => {
@@ -520,6 +545,9 @@ export function TvApp() {
       case "KeyE":
         if (!e.repeat) setEnglish((v) => !v);
         break;
+      case "KeyL":
+        if (!e.repeat) showLessonCount();
+        break;
       case "KeyQ":
         if (!e.repeat) setShowQr((v) => !v);
         break;
@@ -614,10 +642,11 @@ export function TvApp() {
         <section className="tv-card is-learned" role="dialog" aria-label={card.title}>
           <span className="tv-learned-num">{learned}</span>
           <span className="tv-learned-text">
+            <span className="tv-learned-label">{english ? "What grandma taught me" : `${USER_TITLE}${subjectParticle(USER_TITLE)} 가르쳐 주신 것`}</span>
             <h2 className="tv-card-title">{card.title}</h2>
             {card.body && <p className="tv-card-body">{card.body}</p>}
           </span>
-          <span className="tv-demo-tag tv-card-tag">demo data</span>
+          <span className="tv-demo-tag tv-card-tag">demo count</span>
         </section>
       )}
 

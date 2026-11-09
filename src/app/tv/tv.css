@@ -570,7 +570,8 @@
 }
 .tv-learned-text { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; }
 .tv-card.is-learned .tv-card-title { font-size: var(--t-h2); }
-.tv-card.is-learned .tv-card-body { font-size: var(--t-sm); }
+.tv-learned-label { font-size: var(--t-sm); font-weight: var(--w-semi); color: var(--text-muted); }
+.tv-card.is-learned .tv-card-body { font-size: var(--t-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ---------- boot screen ("plugged in") ---------- */
 
