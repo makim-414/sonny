@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
 import { encode } from "uqr";
 import FamilyApp from "@/components/family/FamilyApp";
 import IncomingCall from "@/components/family/IncomingCall";
+import LightPage from "@/components/family/LightPage";
 import { clock } from "@/components/family/derive";
 import { T } from "@/components/family/strings";
 import type { WalletEntry } from "@/lib/types";
@@ -114,7 +115,8 @@ export default function AdminApp() {
     });
 
   return (
-    <div className="fa ad">
+    <div className="fa ad theme-light">
+      <LightPage />
       <IncomingCall />
       <header className="fa-header ad-header">
         <div>

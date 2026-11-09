@@ -1,6 +1,6 @@
 /* Family admin. Tokens come from the .fa scope in family.css. */
 .ad {
-  --max-w: 560px;
+  --max-w: calc(var(--sp-16) * 8.75); /* 560px */
 }
 .ad-header {
   align-items: flex-start;
@@ -18,18 +18,19 @@
   opacity: 0.5;
 }
 .ad-tabs {
-  display: flex;
-  gap: var(--sp-1);
-  overflow-x: auto;
-  scrollbar-width: none;
+  /* 3 x 2 on a phone, one row from 640px: every tab visible, no sideways scroll */
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   padding: 0 var(--sp-4);
   border-bottom: 1px solid var(--border);
 }
-.ad-tabs::-webkit-scrollbar {
-  display: none;
+@media (min-width: 640px) {
+  .ad-tabs {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
 }
 .ad-tab {
-  flex: none;
+  min-width: 0;
   min-height: var(--hit);
   padding: 0 var(--sp-3);
   border: 0;
@@ -84,7 +85,7 @@
 }
 .ad-caption {
   font-size: var(--t-xs);
-  color: var(--text-subtle);
+  color: var(--text-muted);
 }
 .ad-center {
   text-align: center;
@@ -166,8 +167,8 @@
   justify-items: center;
 }
 .ad-qr {
-  width: 220px;
-  height: 220px;
+  width: calc(var(--sp-16) * 3.5); /* 224px */
+  height: calc(var(--sp-16) * 3.5);
   max-width: 100%;
 }
 .ad-qr-bg {

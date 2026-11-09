@@ -1,6 +1,6 @@
 # Sonny: pitch (under 2 minutes, English)
 
-Spoken script first, about 300 words (about 1:55 at 160 words per minute; rehearse with a timer and drop the gallery sentence if it runs over). Then the judging map, answers to the hard questions, sources, and the evidence for the gstack and GBrain prize.
+Spoken script first, about 310 words (about 1:56 at 160 words per minute; rehearse with a timer and drop the gallery sentence if it runs over). Then the judging map, answers to the hard questions, sources, and the evidence for the gstack and GBrain prize.
 
 - **Customer:** the daughter (45 to 60) of a parent who lives alone pays. Grandma uses it. Speak to mom, and to every judge who has an aging parent.
 - **Insight:** mom is already grandma's agent. Sonny takes that job.
@@ -12,22 +12,22 @@ Spoken script first, about 300 words (about 1:55 at 160 words per minute; rehear
 Sonny is the grandkid who's always home: a voice agent for parents who live alone. Grandma just talks. Mom stops worrying.
 
 **The insight (0:08)**
-My grandmother lives alone. This morning at 8:04, my mom booked her a taxi to the doctor, from her own phone. Eight minutes, about four dollars. Mom is already grandma's agent: she books her rides and calls all day to check. In the US, one in four people over 65 lives alone. Sonny takes that job.
+My grandmother lives alone. This morning at 8:04, my mom booked her a taxi to the doctor, from her own phone. Mom is already grandma's agent: she books her rides and calls all day to check. She is one of 63 million family caregivers in America, up 45 percent since 2015. Americans over 75 watch four and a half hours of TV a day and spend about half an hour with people. Sonny takes that job.
 
 **One icon (0:32)**
-One icon, like the call button she already knows. No buttons, no menus. Sonny speaks first: "Did you take your pills? Take an umbrella to the temple."
+Most seniors own a phone; apps and setup are the barrier. Sonny is one icon, like the call button she already knows. No buttons, no menus. Sonny speaks first: pills, weather, the day ahead.
 
 **Say it, it's handled (0:42)**
-She says "call me a taxi", and it's done. Mom tops up an allowance; grandma spends it by voice; anything big waits for mom's OK. Two thousand hamburgers? Sonny double-checks, then calls mom first. Grandma keeps her independence; mom keeps the veto.
+She says "call me a taxi", and it's done. Mom tops up an allowance; grandma spends it by voice; anything big waits for mom's OK. Two thousand hamburgers? Sonny double-checks, then calls mom first. Americans over 60 lost almost five billion dollars to fraud in 2024; grandma keeps her independence, mom keeps the veto.
 
 **Mom stops calling (1:02)**
-Mom sets it up once: scans one QR on grandma's phone, done. Then she sees what got done, not what was said. "Don't tell my daughter" stays between them.
+Mom sets it up once: scans one QR on grandma's phone, done. She sees what got done, not what was said. "Don't tell my daughter" stays between them.
 
 **Why grandma keeps it on (1:14)**
 I ran an art gallery for years. My retired regulars loved teaching me. Care devices get unplugged; Sonny asks to be taught. What she teaches becomes its memory, and the next morning it uses it.
 
 **How, and what's next (1:28)**
-One Claude agent with real tools. Everything else is open source you can self-host: Kokoro voice, Silero VAD, GBrain memory, built today with gstack. Next, a TV dongle for the screen she watches all day, then Sonny calling mom on a real phone line.
+One Claude agent with real tools. Everything else is open source you can self-host: Kokoro voice, Silero VAD, GBrain memory. Next, a TV dongle for the screen she watches all day, then Sonny calling mom on a real phone line.
 
 **Invite (1:45)**
 Pickle covers your workday through Zoom. Sonny covers grandma's whole day. Scan the first code and be grandma. Scan the second and be her daughter.
@@ -99,7 +99,12 @@ No camera. Mom sees tasks and safety, not conversations; private talk is counted
 |---|---|---|
 | This morning's taxi | 2026-11-09, 8:04 to 8:12 AM, 8 minutes, 5,900 won, booked by mom from her own phone | Founder's family, screenshot of the ride receipt (blurred copy: `docs/pitch/assets/taxi-receipt-blurred.jpg`) |
 | "About four dollars" | 5,900 won is roughly $4 to $4.50 depending on the day's rate | **Estimate.** Say "about four dollars". |
-| One in four Americans over 65 lives alone | 26 percent of US adults 65+ lived alone in 2023 | [Pew Research Center, 2025-12-04](https://www.pewresearch.org/short-reads/2025/12/04/a-smaller-share-of-older-us-adults-live-alone-today-than-in-1990/), from Census decennial and ACS data |
+| 63 million family caregivers, up 45% since 2015 | 63 million Americans, 1 in 4 adults (24%), are family caregivers; up 45% since 2015 | National Alliance for Caregiving and AARP, Caregiving in the U.S. 2025 ([caregivingintheus.org](https://www.caregivingintheus.org/), [caregiving.org](https://www.caregiving.org/research/caregiving-in-the-us/)) |
+| Four and a half hours of TV, about half an hour with people | Americans 75+: 4.43 hours a day watching TV, 0.56 hours (about 34 minutes) socializing and communicating; 65 to 74: 4.20 and 0.55 | U.S. Bureau of Labor Statistics, American Time Use Survey, 2025 annual averages, [Table 11A](https://www.bls.gov/news.release/atus.t11a.htm) (opened 2026-11-09) |
+| Almost five billion dollars lost to fraud | Americans 60+ reported $4.885 billion in losses in 2024, 147,127 complaints | FBI Internet Crime Complaint Center, [2024 IC3 Report](https://ic3.gov/AnnualReport/Reports/2024_IC3Report.pdf) |
+| Most seniors own a phone | 79% of Americans 65+ own a smartphone | [Pew Research Center Mobile Fact Sheet](https://www.pewresearch.org/internet/fact-sheet/mobile/), survey 2026 |
+| Caregivers' hours (Q&A only) | 27 hours a week on average; 84% handle three or more everyday tasks | NAC and AARP, 2025 (same as above) |
+| One in four Americans over 65 lives alone (Q&A only) | 26 percent of US adults 65+ lived alone in 2023 | [Pew Research Center, 2025-12-04](https://www.pewresearch.org/short-reads/2025/12/04/a-smaller-share-of-older-us-adults-live-alone-today-than-in-1990/), from Census decennial and ACS data |
 | More than one in five Koreans is 65+ (Q&A only) | 21.6 percent, 11.12 million (2026) | Ministry of Data and Statistics, via [Korea Times, 2026-10-01](https://www.koreatimes.co.kr/southkorea/20261001/1-in-5-south-koreans-aged-65-and-older-in-2026-data) |
 | 38 percent of Korean senior households are one person (Q&A only) | 6.5 million senior households, 38 percent single person | Same source |
 | Ato | $179 device, $29 per month for full features; family texts read aloud, replies summarized | [Jon Peddie Research review](https://www.jonpeddie.com/reviews/ato-a-voice-first-ai-companion-built-for-seniors/) |
@@ -108,6 +113,8 @@ No camera. Mom sees tasks and safety, not conversations; private talk is counted
 | Gallery regulars loved teaching | Retired, 65 and older | **Founder's own account** from years running an art gallery. Not measured. |
 
 Do not use:
+- "Seniors can't use smartphones": 79% of Americans 65+ own one. Say "they own phones; apps and setup are the barrier. Sonny is one icon."
+- Percentages for rides, scheduling or check-in calls by caregivers: not confirmed in any source. Use this morning's taxi receipt instead.
 - "Mom calls three times a day": not confirmed with mom. Say "calls all day to check" only as the founder's description, or "calls to check".
 - Any fixed lesson count. The counter shows the real number in memory, tagged "demo count". Do not pad the seed data.
 - "16 million Americans 65+ live alone": secondary sources only; say "one in four" (Pew).

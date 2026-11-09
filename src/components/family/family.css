@@ -1,89 +1,50 @@
-/* Family app (mom's phone). Every color, size and radius lives here as a token.
-   Names follow the IRONACT design-system vocabulary; values are a light theme
-   scoped to .fa so the TV screen and the rest of the app are untouched. */
+/* Family app (mom's phone): /family, /admin, /login.
+   Every value comes from the IRONACT DS tokens (src/styles/tokens.css) on the light
+   surface (src/styles/theme-light.css, class "theme-light" on the page wrapper).
+   This block only names a few roles in terms of those tokens. The font is the
+   page's own (Geist, set on body), so nothing here sets font-family. */
 .fa {
-  /* surfaces */
-  --bg: oklch(0.975 0.003 240);
-  --bg-elev: oklch(1 0 0);
-  --bg-sunken: oklch(0.945 0.004 240);
-  --border: oklch(0.9 0.004 240);
-  --border-soft: oklch(0.935 0.004 240);
-  /* text */
-  --text: oklch(0.21 0.01 240);
-  --text-muted: oklch(0.46 0.01 240);
-  --text-subtle: oklch(0.6 0.008 240);
-  /* accent: one calm brand blue for primary actions */
-  --brand: oklch(0.5 0.13 255);
-  --brand-fg: oklch(0.99 0 0);
-  /* meaning colors, flat only */
-  --success: oklch(0.55 0.13 155);
-  --warning: oklch(0.6 0.14 60);
-  --danger: oklch(0.56 0.19 25);
-  --info: oklch(0.5 0.13 255);
-  /* feed tones: who or what each line is about */
-  --tone-grandma: oklch(0.45 0.1 300);
+  /* primary action: the light theme's emphasis slot (ink on paper) */
+  --brand-fg: var(--accent-fg);
+  /* feed labels: achromatic by default; meaning colors only for alerts */
+  --tone-grandma: var(--text);
   --tone-tv: var(--text-muted);
-  --tone-family: var(--brand);
-  --tone-memory: oklch(0.5 0.1 175);
-  --tone-info: var(--info);
+  --tone-family: var(--text);
+  --tone-memory: var(--text-muted);
+  --tone-info: var(--text);
   --tone-warn: var(--warning);
   --tone-urgent: var(--danger);
-  /* type */
-  --font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", system-ui, sans-serif;
-  --t-display: 34px;
-  --t-h2: 22px;
-  --t-title: 17px;
-  --t-body: 15px;
-  --t-sm: 13px;
-  --t-xs: 12px;
-  --t-input: 16px; /* 16px stops iOS from zooming into the field */
-  --w-reg: 400;
-  --w-med: 500;
-  --w-semi: 600;
-  --lh-snug: 1.3;
-  --lh-normal: 1.5;
-  /* space, 4px grid */
-  --sp-1: 4px;
-  --sp-2: 8px;
-  --sp-3: 12px;
-  --sp-4: 16px;
-  --sp-5: 20px;
-  --sp-6: 24px;
-  --sp-8: 32px;
-  --sp-12: 48px;
-  /* shape */
-  --r-md: 8px;
-  --r-card: 12px;
-  --r-xl: 16px;
-  --r-pill: 999px;
-  --hit: 44px;
-  --hit-lg: 52px;
-  --sh-card: 0 1px 2px oklch(0.2 0.01 240 / 6%);
-  --dur-press: 160ms;
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --press-scale: 0.97;
-  --max-w: 480px;
-  /* incoming call */
-  --call-bg: oklch(0.2 0.02 255);
-  --call-fg: oklch(0.98 0 0);
-  --call-muted: oklch(0.78 0.01 255);
-  --call-yes: oklch(0.6 0.15 155);
-  --call-no: oklch(0.58 0.19 25);
-  --call-orb: oklch(0.72 0.12 255);
-  --call-btn: 76px;
+  /* sizes built from the 4px grid */
+  --t-input: var(--t-title); /* 16px stops iOS from zooming into the field */
+  --hit: calc(var(--sp-12) - var(--sp-1)); /* 44px touch target */
+  --hit-lg: calc(var(--sp-12) + var(--sp-1)); /* 52px */
+  --max-w: calc(var(--sp-16) * 7.5); /* 480px phone column */
+  /* incoming call: an inverted surface (paper on ink) */
+  --call-bg: var(--text);
+  --call-fg: var(--bg);
+  --call-muted: color-mix(in oklch, var(--bg) 78%, var(--text));
+  --call-yes: var(--success);
+  --call-no: var(--danger);
+  --call-orb: var(--highlight);
+  --call-btn: calc(var(--sp-16) + var(--sp-3)); /* 76px */
 
+  /* Full width so no other surface shows at the sides; content stays in a phone column. */
   min-height: 100dvh;
   width: 100%;
-  max-width: var(--max-w);
-  margin: 0 auto;
+  padding-inline: max(0px, calc((100% - var(--max-w)) / 2));
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font);
   font-size: var(--t-body);
   line-height: var(--lh-normal);
+  font-variant-numeric: tabular-nums;
   display: flex;
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
+}
+/* The Today tab nests the family app inside the admin wrapper. */
+.fa .fa {
+  padding-inline: 0;
+  min-height: 0;
 }
 
 .fa *,
@@ -172,7 +133,7 @@
   overflow-wrap: anywhere;
 }
 .fa-ok {
-  color: var(--success);
+  color: var(--text);
 }
 
 /* approvals */
@@ -198,7 +159,7 @@
 .fa-approval-head h3 {
   font-size: var(--t-title);
   font-weight: var(--w-semi);
-  color: var(--warning);
+  color: var(--text);
 }
 .fa-approval-head time {
   font-size: var(--t-xs);
@@ -248,7 +209,7 @@
   margin-bottom: var(--sp-3);
 }
 .fa-empty {
-  color: var(--text-subtle);
+  color: var(--text-muted);
   font-size: var(--t-sm);
   padding: var(--sp-6) 0;
   text-align: center;
@@ -288,7 +249,7 @@
 }
 .fa-item-note {
   font-size: var(--t-xs);
-  color: var(--success);
+  color: var(--text-muted);
   font-weight: var(--w-semi);
 }
 .fa-tone-grandma { --tone: var(--tone-grandma); }
@@ -297,12 +258,9 @@
 .fa-tone-memory { --tone: var(--tone-memory); }
 .fa-tone-info { --tone: var(--tone-info); }
 .fa-tone-task { --tone: var(--text); }
-.fa-tone-warn,
-.fa-tone-urgent {
-  border-color: var(--tone);
-}
-.fa-tone-warn { --tone: var(--tone-warn); }
-.fa-tone-urgent { --tone: var(--tone-urgent); }
+/* Alerts: the meaning color is a flat 1px border; the small label stays ink for contrast. */
+.fa-tone-warn { --tone: var(--text); border-color: var(--tone-warn); }
+.fa-tone-urgent { --tone: var(--tone-urgent); border-color: var(--tone-urgent); }
 .fa-tone-urgent .fa-item-text {
   font-weight: var(--w-semi);
 }
@@ -415,7 +373,7 @@
 .fa-private {
   margin-top: var(--sp-4);
   font-size: var(--t-sm);
-  color: var(--text-subtle);
+  color: var(--text-muted);
   text-align: center;
 }
 
@@ -431,7 +389,6 @@
   gap: var(--sp-4);
   padding: calc(var(--sp-12) + env(safe-area-inset-top)) var(--sp-6) calc(var(--sp-8) + env(safe-area-inset-bottom));
   text-align: center;
-  font-family: var(--font);
 }
 .fa-call-top {
   display: grid;

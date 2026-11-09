@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import LightPage from "@/components/family/LightPage";
 import { L } from "../strings";
 import "@/components/family/family.css";
 import "../login.css";
@@ -18,7 +19,8 @@ async function Expired({ searchParams }: { searchParams: PageProps<"/login/devic
 
 export default function DevicePage({ searchParams }: PageProps<"/login/device">) {
   return (
-    <div className="fa lg">
+    <div className="fa lg theme-light">
+      <LightPage />
       <main className="lg-card">
         <h1 className="lg-title">{L.deviceTitle}</h1>
         <Suspense fallback={null}>
