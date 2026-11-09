@@ -1,0 +1,364 @@
+/* Family app (mom's phone). Every color, size and radius lives here as a token.
+   Names follow the IRONACT design-system vocabulary; values are a light theme
+   scoped to .fa so the TV screen and the rest of the app are untouched. */
+.fa {
+  /* surfaces */
+  --bg: oklch(0.975 0.003 240);
+  --bg-elev: oklch(1 0 0);
+  --bg-sunken: oklch(0.945 0.004 240);
+  --border: oklch(0.9 0.004 240);
+  --border-soft: oklch(0.935 0.004 240);
+  /* text */
+  --text: oklch(0.21 0.01 240);
+  --text-muted: oklch(0.46 0.01 240);
+  --text-subtle: oklch(0.6 0.008 240);
+  /* accent: one calm brand blue for primary actions */
+  --brand: oklch(0.5 0.13 255);
+  --brand-fg: oklch(0.99 0 0);
+  /* meaning colors, flat only */
+  --success: oklch(0.55 0.13 155);
+  --warning: oklch(0.6 0.14 60);
+  --danger: oklch(0.56 0.19 25);
+  --info: oklch(0.5 0.13 255);
+  /* feed tones: who or what each line is about */
+  --tone-grandma: oklch(0.45 0.1 300);
+  --tone-tv: var(--text-muted);
+  --tone-family: var(--brand);
+  --tone-memory: oklch(0.5 0.1 175);
+  --tone-info: var(--info);
+  --tone-warn: var(--warning);
+  --tone-urgent: var(--danger);
+  /* type */
+  --font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", system-ui, sans-serif;
+  --t-h2: 22px;
+  --t-title: 17px;
+  --t-body: 15px;
+  --t-sm: 13px;
+  --t-xs: 12px;
+  --t-input: 16px; /* 16px stops iOS from zooming into the field */
+  --w-reg: 400;
+  --w-med: 500;
+  --w-semi: 600;
+  --lh-snug: 1.3;
+  --lh-normal: 1.5;
+  /* space, 4px grid */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  /* shape */
+  --r-md: 8px;
+  --r-card: 12px;
+  --r-xl: 16px;
+  --r-pill: 999px;
+  --hit: 44px;
+  --sh-card: 0 1px 2px oklch(0.2 0.01 240 / 6%);
+  --sh-pop: 0 -6px 20px oklch(0.2 0.01 240 / 8%);
+  --dur-press: 160ms;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --press-scale: 0.97;
+  --max-w: 480px;
+
+  min-height: 100dvh;
+  width: 100%;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--t-body);
+  line-height: var(--lh-normal);
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+.fa *,
+.fa *::before,
+.fa *::after {
+  box-sizing: border-box;
+}
+
+.fa h1,
+.fa h2,
+.fa h3,
+.fa p,
+.fa dl,
+.fa dd,
+.fa ol {
+  margin: 0;
+  padding: 0;
+}
+
+.fa button,
+.fa input {
+  font: inherit;
+  color: inherit;
+}
+
+/* header */
+.fa-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-5) var(--sp-4) var(--sp-3);
+}
+.fa-title {
+  font-size: var(--t-h2);
+  font-weight: var(--w-semi);
+  line-height: var(--lh-snug);
+}
+.fa-sub {
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+}
+.fa-live {
+  width: var(--sp-2);
+  height: var(--sp-2);
+  border-radius: var(--r-pill);
+  background: var(--success);
+}
+.fa-live-off {
+  background: var(--text-subtle);
+}
+
+/* summary */
+.fa-summary {
+  margin: 0 var(--sp-4);
+  padding: var(--sp-4);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-card);
+  display: grid;
+  gap: var(--sp-3);
+}
+.fa-summary-title {
+  font-size: var(--t-sm);
+  font-weight: var(--w-med);
+  color: var(--text-muted);
+}
+.fa-summary-line {
+  font-size: var(--t-title);
+  font-weight: var(--w-semi);
+  line-height: var(--lh-snug);
+}
+.fa-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+.fa-stats > div {
+  background: var(--bg-sunken);
+  border-radius: var(--r-md);
+  padding: var(--sp-2) var(--sp-3);
+  min-width: 0;
+}
+.fa-stats dt {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+.fa-stats dd {
+  font-size: var(--t-sm);
+  font-weight: var(--w-semi);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.fa-ok {
+  color: var(--success);
+}
+
+/* approvals */
+.fa-approvals {
+  margin: var(--sp-4) var(--sp-4) 0;
+  display: grid;
+  gap: var(--sp-3);
+}
+.fa-approval {
+  background: var(--bg-elev);
+  border: 1px solid var(--warning);
+  border-radius: var(--r-xl);
+  padding: var(--sp-4);
+  display: grid;
+  gap: var(--sp-2);
+  box-shadow: var(--sh-card);
+}
+.fa-approval-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.fa-approval-head h3 {
+  font-size: var(--t-title);
+  font-weight: var(--w-semi);
+  color: var(--warning);
+}
+.fa-approval-head time {
+  font-size: var(--t-xs);
+  color: var(--text-subtle);
+  font-variant-numeric: tabular-nums;
+}
+.fa-approval-actions {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--sp-2);
+  margin-top: var(--sp-1);
+}
+
+/* buttons */
+.fa-btn {
+  min-height: var(--hit);
+  padding: 0 var(--sp-4);
+  border-radius: var(--r-card);
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  font-weight: var(--w-semi);
+  cursor: pointer;
+  transition: transform var(--dur-press) var(--ease-out), opacity var(--dur-press) var(--ease-out);
+}
+.fa-btn:active:not(:disabled),
+.fa-chip:active:not(:disabled) {
+  transform: scale(var(--press-scale));
+}
+.fa-btn:disabled,
+.fa-chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.fa-btn-primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--brand-fg);
+}
+
+/* feed */
+.fa-feed {
+  flex: 1;
+  padding: var(--sp-6) var(--sp-4) var(--sp-4);
+}
+.fa-section-title {
+  font-size: var(--t-sm);
+  font-weight: var(--w-med);
+  color: var(--text-muted);
+  margin-bottom: var(--sp-3);
+}
+.fa-empty {
+  color: var(--text-subtle);
+  font-size: var(--t-sm);
+  padding: var(--sp-6) 0;
+  text-align: center;
+}
+.fa-list {
+  list-style: none;
+  display: grid;
+  gap: var(--sp-2);
+}
+.fa-item {
+  --tone: var(--tone-tv);
+  background: var(--bg-elev);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-card);
+  padding: var(--sp-3) var(--sp-4);
+  display: grid;
+  gap: var(--sp-1);
+}
+.fa-item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-2);
+}
+.fa-item-label {
+  font-size: var(--t-xs);
+  font-weight: var(--w-semi);
+  color: var(--tone);
+}
+.fa-item-meta time {
+  font-size: var(--t-xs);
+  color: var(--text-subtle);
+  font-variant-numeric: tabular-nums;
+}
+.fa-item-text {
+  overflow-wrap: anywhere;
+}
+.fa-item-note {
+  font-size: var(--t-xs);
+  color: var(--success);
+  font-weight: var(--w-semi);
+}
+.fa-tone-grandma { --tone: var(--tone-grandma); }
+.fa-tone-tv { --tone: var(--tone-tv); }
+.fa-tone-family { --tone: var(--tone-family); }
+.fa-tone-memory { --tone: var(--tone-memory); }
+.fa-tone-info { --tone: var(--tone-info); }
+.fa-tone-warn,
+.fa-tone-urgent {
+  border-color: var(--tone);
+}
+.fa-tone-warn { --tone: var(--tone-warn); }
+.fa-tone-urgent { --tone: var(--tone-urgent); }
+.fa-tone-urgent .fa-item-text {
+  font-weight: var(--w-semi);
+}
+
+/* composer */
+.fa-composer {
+  position: sticky;
+  bottom: 0;
+  background: var(--bg-elev);
+  border-top: 1px solid var(--border);
+  box-shadow: var(--sh-pop);
+  padding: var(--sp-3) var(--sp-4) calc(var(--sp-3) + env(safe-area-inset-bottom));
+  display: grid;
+  gap: var(--sp-2);
+}
+.fa-notice {
+  font-size: var(--t-sm);
+  color: var(--success);
+  font-weight: var(--w-med);
+}
+.fa-quick {
+  display: flex;
+  gap: var(--sp-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 0 calc(var(--sp-4) * -1);
+  padding: 0 var(--sp-4);
+}
+.fa-quick::-webkit-scrollbar {
+  display: none;
+}
+.fa-chip {
+  flex: none;
+  min-height: var(--hit);
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-card);
+  border: 1px solid var(--border);
+  background: var(--bg-sunken);
+  font-size: var(--t-sm);
+  font-weight: var(--w-med);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.fa-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--sp-2);
+}
+.fa-input {
+  min-height: var(--hit);
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-card);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: var(--t-input);
+  min-width: 0;
+}
+.fa-input:focus {
+  outline: 2px solid var(--brand);
+  outline-offset: -1px;
+}
