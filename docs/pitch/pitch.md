@@ -1,6 +1,6 @@
 # Sonny: pitch (under 2 minutes, English)
 
-Spoken script first (v3, matches `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V3.md`), about 220 words (about 1:25 at 160 words per minute, leaving room for pauses; rehearse with a timer; the gallery story is in the Q&A now). Then the judging map, answers to the hard questions, sources, and the evidence for the gstack and GBrain prize. Ten judge questions with two-sentence answers: `docs/pitch/qa.md`.
+Spoken script first (v3, matches `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V3.md`), about 250 words (about 1:35 at 160 words per minute, leaving room for pauses; rehearse with a timer; the gallery story is in the Q&A now). Then the judging map, answers to the hard questions, sources, and the evidence for the gstack and GBrain prize. Ten judge questions with two-sentence answers: `docs/pitch/qa.md`.
 
 - **Customer:** the daughter (45 to 60) of a parent who lives alone pays. Grandma uses it. Speak to mom, and to every judge who has an aging parent.
 - **Insight:** "Mom is already grandma's assistant. Sonny takes the job."
@@ -8,7 +8,9 @@ Spoken script first (v3, matches `/Users/makim/_sessions/c0mpiled-17/video/DEMO-
 
 ## Spoken script
 
-Motif: the phone rings. Sentence to leave behind: "Mom is already grandma's assistant. Sonny takes the job."
+Four selling points, in this order: (1) she says it, the allowance pays; (2) Sonny calls first; (3) teach it once, Sonny does it that way; (4) Sonny calls mom only when it really matters.
+
+Motif: the phone rings. Axis: "Teach him how to do it." Killer line: "Grandma isn't the patient. She's the boss." Sentence to leave behind: "Mom is already grandma's assistant. Sonny takes the job."
 
 **Hook (0:00)**
 Sonny is the grandkid who's always home. Grandma just talks. Mom stops worrying.
@@ -16,20 +18,40 @@ Sonny is the grandkid who's always home. Grandma just talks. Mom stops worrying.
 **The insight (0:06)**
 My grandmother lives alone. This morning at 8:04, my mom booked her a taxi from her own phone. Mom is already grandma's assistant. Sonny takes the job. She is one of 63 million family caregivers in America, one in four adults.
 
-**Sonny calls first (0:22)**
+**She's the boss (0:20)**
+Grandma isn't the patient. She's the boss. She teaches Sonny how she likes things done, once, and Sonny does it that way from then on. Mom funds it and holds the veto.
+
+**Sonny calls first (0:30)**
 Most seniors own a phone; apps and setup are the barrier. So Sonny is one icon, and Sonny calls first: "Morning, June. Sarah's staying tonight. Groceries for two?" Paid from an allowance mom tops up.
 
 **When she gets stuck (0:38)**
 When grandma gets stuck, Sonny doesn't make her feel slow. It quietly calls mom. Mom taps "Book it for her", and the taxi is on its way. Two thousand burgers? Sonny asks again, and anything strange waits for mom.
 
 **What mom sees (0:56)**
-Mom sees what got done, not what was said; "don't tell my daughter" stays between them. Grandma is the teacher: what she teaches becomes Sonny's memory. And Sonny doesn't replace family; it nudges mom to call, with something to talk about.
+Mom sees what got done, not what was said; "don't tell my daughter" stays between them. And Sonny doesn't replace family; it nudges mom to call, with something to talk about.
 
 **Why now, and why us (1:16)**
 Agents can finally get things done by voice, on open source you can self-host: Kokoro voice, Silero VAD, GBrain memory. Companions talk. Sonny gets things done, and calls mom. Paid by the family, monthly.
 
 **Close (1:38)**
-Today a phone, next her TV. Scan the first code and be June. Scan the second and be Sarah.
+Today, one icon on her phone. Next, a Sonny app on the TV she already watches. Then our own Sonny device, plugged in by the family. Scan the first code and be June. Scan the second and be Sarah.
+
+## The four selling points
+
+| # | Point | One line | Shown in |
+|---|---|---|---|
+| 1 | Say it, the allowance pays | Grandma gives the order out loud; Sonny gets it done with the allowance mom funds. | Video scenes 4 and 5 |
+| 2 | Sonny calls first | Sonny opens every moment as a phone call she only has to answer. | Scene 4 |
+| 3 | Teach it once | She teaches Sonny how she likes things done, once (her Sunday groceries, a note to her friend Martha), and Sonny does it that way from then on. Grandma programs her agent by talking. | Scene 7 |
+| 4 | Mom only when it matters | Sonny calls mom only when something is big, strange, or grandma is stuck. | Scenes 5, 6, 8 |
+
+## Roadmap (owner, three steps)
+
+1. **Today: a one-icon web app on grandma's phone, set up by mom with one QR.**
+2. **Next: a Sonny app on the TV she already watches all day (Android TV / Google TV, Samsung Tizen).**
+3. **Then: our own Sonny device, plugged in by the family, nothing to install.** (This absorbs the earlier HDMI stick and pass-through box ideas: a box between the set-top box and the TV, drawing Sonny over live TV and driving the set-top box over HDMI-CEC or IR, is one form the device can take.)
+
+Why this order: "The phone ships today and proves the agent; the TV apps reuse the same web app; the device comes when we know exactly what grandma uses."
 
 ## How this maps to the three judging criteria
 
@@ -50,7 +72,7 @@ Today a phone, next her TV. Scan the first code and be June. Scan the second and
 ## The hard questions (office hours) and who pays
 
 1. **"This is a web page. How does grandma even get to it?"**
-   Mom adds it to grandma's home screen as one icon and pairs it with one QR from her admin. It stays signed in; grandma never sees a login. Next, the same agent on her TV: a dongle, an Android TV app, a pass-through box over the set-top box (HDMI-CEC or IR), then the TV itself.
+   Mom adds it to grandma's home screen as one icon and pairs it with one QR from her admin. It stays signed in; grandma never sees a login. Next, a Sonny app on the TV she already watches (Android TV / Google TV, Samsung Tizen), reusing the same web app. Then our own Sonny device, plugged in by the family, nothing to install.
 2. **"Seniors don't talk to devices."**
    She talks into a phone every day; tapping the icon feels like a call, and Sonny speaks first, by name. There is nothing on screen to get wrong. And she keeps using it because it asks to be taught.
 3. **"How is this different from Ato, Alexa or the voice remote she already has?"**

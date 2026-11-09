@@ -4,17 +4,19 @@ The form asks for three things: the 90 second demo video, the GitHub repo (https
 
 ## Short description (paste into the form)
 
-**Tagline (6 words):** Sonny: the grandkid who's always home.
+Words: use the language of authority and money (errand runner, orders, allowance, funds, veto). Avoid the usual elder-care words (care, companion, help, assist).
 
-Backup taglines: "Grandma just talks. Mom stops worrying." / "A voice agent for parents who live alone."
+**Tagline (1st choice):** Grandma isn't the patient. She's the boss.
 
-**About 50 words (52):**
+Other taglines: "Sonny: the grandkid who's always home." / "Grandma gives the orders. Sonny gets them done."
 
-Sonny is the grandkid who's always home: a voice agent for parents who live alone. Grandma taps one icon and talks. Sonny handles pills, rides and groceries from an allowance mom tops up, calls mom before anything big, and learns what grandma teaches. Mom sees what got done, never what was said.
+**About 50 words (45):**
 
-**About 150 words (147):**
+Sonny is an AI errand runner for parents who live alone. Grandma isn't the patient, she's the boss: she gives the orders out loud, Sonny gets them done with the allowance mom sets, and calls mom only when something is big, strange, or she's stuck.
 
-Sonny is the grandkid who's always home: a voice agent for parents who live alone, paid for by their worried adult children. Today those children are already their parent's remote agent: this morning my mom booked my grandmother's taxi from her own phone, then called to check. Sonny takes that job. Grandma taps one icon, nothing to learn, and Sonny speaks first: pills, weather, the day ahead. She asks for a ride or groceries and it's paid from an allowance mom tops up; anything big or strange, Sonny calls mom first. Grandma teaches Sonny her recipes and routines, and it remembers. Mom sees what got done, never what was said. Built with a Claude agent calling real tools, GBrain for long-term memory, Kokoro for the voice and Silero VAD for hands-free listening, all self-hostable open source. Next: a TV dongle for the screen she watches all day.
+**About 150 words (150):**
+
+Grandma isn't the patient. She's the boss. Every elder-care app watches grandma; Sonny works for her. It is an AI errand runner for parents who live alone: she taps one icon and gives the orders out loud, and Sonny books the taxi and orders the groceries, paid from an allowance her daughter funds. She teaches Sonny how she likes things done, once, and it does them her way from then on. Mom holds the veto: anything big or strange, or a task grandma is stuck on, and Sonny calls mom first. Today the daughter does these errands herself; this morning my mom booked my grandmother's taxi from her own phone. Sonny takes that job. Mom sees what got done, never what was said. Built on a Claude agent, GBrain memory and the Kokoro voice, all self-hostable open source. Next: the same errand runner on the TV she watches all day.
 
 ## Checklist
 
@@ -56,12 +58,13 @@ gh repo edit makim-414/sonny --visibility public --accept-visibility-change-cons
 
 The current README has the one-liner and run steps. Before submitting, make sure it has, in this order:
 
-- [ ] One-line pitch: "Pickle covers your whole workday through Zoom. We cover grandma's whole day through her TV."
+- [ ] One-line pitch: "Grandma isn't the patient. She's the boss." Then: "Every elder-care app watches grandma. Sonny works for her: she gives the orders out loud, mom funds it and holds the veto."
 - [ ] The demo video link at the top (YouTube or Loom).
 - [ ] The core message first: a screen with nothing to learn. "No buttons. No menus. One icon, like the call button she already knows." A GIF of the tap and the particle.
-- [ ] Two pillars: grandma hands things off to the agent; mom sees what got done, not what was said.
+- [ ] Four selling points, in order: (1) she says it, the allowance pays; (2) Sonny calls first; (3) teach it once, Sonny does it her way ("Teach him how to do it"); (4) Sonny calls mom only when it really matters.
+- [ ] Mom sees what got done, not what was said.
 - [ ] What it does in 5 bullets: speaks first (medicine, weather), taxi to the hospital, learns from grandma (memory, lesson counter), groceries with family approval, family messages both ways, favorite show (one tool among many).
-- [ ] Distribution in five steps: 0 phone web app on the home screen (today), 1 HDMI stick or USB app, 2 Android and Google TV app, 3 HDMI pass-through box over the set-top box (CEC or IR), 4 the TV itself.
+- [ ] Roadmap in three steps: Today: a one-icon web app on grandma's phone, set up by mom with one QR. Next: a Sonny app on the TV she already watches all day (Android TV / Google TV, Samsung Tizen). Then: our own Sonny device, plugged in by the family, nothing to install. Why this order: "The phone ships today and proves the agent; the TV apps reuse the same web app; the device comes when we know exactly what grandma uses."
 - [ ] Screenshot or GIF: TV screen next to mom's phone.
 - [ ] Open source, near the top: "Everything runs on open source you can self-host: Kokoro voice, Silero VAD, GBrain memory." Link `docs/OPEN_SOURCE.md` (every project 1,000+ stars, with license and how we use it).
 - [ ] Market line: launches in English for English-speaking seniors first; the founder's Korean grandmother is the origin story. The app language is one switch, `APP_LANG` in `src/lib/brand.ts`.
@@ -105,7 +108,7 @@ The current README has the one-liner and run steps. Before submitting, make sure
 - [ ] Reset the store just before judging so the judges see a clean feed.
 - [ ] Rehearse the judge loop three times: judge one scans "Be grandma" and talks, judge two scans "Be her daughter" and taps "I'll be there at 7 tonight", grandma's phone reads it, judge one answers, the reply card fills on judge two's phone.
 - [ ] Mic permission: iOS Safari asks on first use; have the judge tap Allow. If a phone blocks the mic, hand over the presenter's phone.
-- [ ] Optional: `/tv` on a monitor over HDMI to show "next, her TV" (boot screen with `?boot`).
+- [ ] Optional: `/tv` on a monitor to show step two, "a Sonny app on the TV she already watches" (boot screen with `?boot`).
 - [ ] Fallbacks: typed input on `/` if the mic fails, phone hotspot if Wi-Fi fails, the 90 second video on the desktop if both fail.
 
 ## Timeline (STATUS.md)
