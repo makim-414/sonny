@@ -1,13 +1,20 @@
 import { connection } from "next/server";
 import { logEvent, store } from "@/lib/store";
+import { summarize } from "@/components/family/derive";
 import { FAMILY_SENDER, familyState } from "./state";
+import { familyView } from "./view";
 
-// GET /api/family -> what the family app needs besides the event feed.
+// GET /api/family -> everything mom's phone needs in one poll.
+// The summary is computed from the raw log on the server, so it can say "약 드셨어요"
+// without sending grandma's own words to the phone.
 export async function GET() {
   await connection();
+  const view = familyView(store.events);
   return Response.json({
+    events: view.events,
+    hiddenCount: view.hiddenCount,
+    summary: summarize(store.events, store.currentChannel),
     approvedIds: familyState.approvedIds,
-    currentChannel: store.currentChannel,
     inboxWaiting: store.tvInbox.length,
   });
 }
