@@ -40,7 +40,22 @@ export async function POST(request: Request) {
   }
 
   const verb = call.status === "approved" ? "approved" : call.status === "declined" ? "declined" : "missed";
-  store.tvInbox.push({ id: randomUUID(), at: new Date().toISOString(), from: who, text: `${who} ${verb} call ${call.id}` });
-  logEvent("call", `${T.callLog(verb)}: ${call.script}`, undefined, { visibility: "family", familyText: T.callLog(verb) });
+  const at = new Date().toISOString();
+
+  if (call.reason === "nudge") {
+    // A nudge has no money in it: "approve" means she is calling grandma now,
+    // anything else means "remind me at 7 PM".
+    const now = call.status === "approved";
+    const text = now
+      ? `${who} approved call ${call.id}: ${who} is calling grandma now. Tell grandma "${who}'s going to call you."`
+      : `${who} missed call ${call.id}: ${who} will call grandma at 7 PM.`;
+    store.tvInbox.push({ id: randomUUID(), at, from: who, text });
+    logEvent("call", `${T.nudgeLog(verb)}: ${call.script}`, at, { visibility: "family", familyText: T.nudgeLog(verb) });
+    if (!now) logEvent("task", T.nudgeReminder, at, { visibility: "family" });
+    return Response.json({ ok: true, call });
+  }
+
+  store.tvInbox.push({ id: randomUUID(), at, from: who, text: `${who} ${verb} call ${call.id}` });
+  logEvent("call", `${T.callLog(verb)}: ${call.script}`, at, { visibility: "family", familyText: T.callLog(verb) });
   return Response.json({ ok: true, call });
 }
