@@ -62,9 +62,11 @@ curl -s -X POST '<SITE>/api/family/calls/demo?demo=1' -H 'content-type: applicat
 curl -s -X POST '<SITE>/api/family/calls/demo?demo=1' -H 'content-type: application/json' -d '{"amount":250000,"label":"2,000 burgers","script":"Hi Sarah, it is Sonny. June just asked me to order two thousand burgers. That seems unusual. Should I go ahead?"}'
 ```
 
-### 7. Teacher and privacy (0:48 to 0:58)
-1. June teaches the rainy-day line. Hold on the real lesson counter (if `/` does not show it: `<SITE>/tv?demo=1&noqr`, press `L` right after recording starts).
-2. June: "Don't tell my daughter. I'm knitting her a scarf." Phone G shows the lock. Phone M, bottom of Today: only "1 private conversation not shown".
+### 7. Teach it once, and privacy (0:48 to 0:58)
+1. June teaches the Sunday groceries procedure (line in the script). Hold on Sonny's "Got it, June. Sunday groceries, your way." and the real lesson counter (if `/` does not show it: `<SITE>/tv?demo=1&noqr`, press `L` right after recording starts).
+2. Jump to Sunday morning: press `N` (next morning 8:00) on grandma's screen, repeating until the demo clock reads Sunday, or cut on a "Next Sunday" title card and press `P`. Sonny calls first and reads back her list. June: "Yes." Phone M shows the order paid from the allowance.
+3. June: "Don't tell my daughter. I'm knitting her a scarf." Phone G shows the lock. Phone M, bottom of Today: only "1 private conversation not shown".
+- If the agent does not reuse the procedure on its own, type the Sunday request with `T` ("It's Sunday, do my usual groceries") and keep rolling; the order must still match what she taught.
 
 ### 8. Nudge (0:58 to 1:06)
 Phone M rings with a nudge; answer; tap "Call grandma now". Camera B: a daughter smiling (B-roll).

@@ -4,6 +4,8 @@ Source of truth for the cut: `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V3.m
 
 - **The one image to remember: the phone rings.** Sonny opens every moment as a call, on grandma's phone and on mom's. The last shot is both phones ringing together.
 - **Killer line (owner's pick):** "Grandma isn't the patient. She's the boss." It opens the solution, right after the problem (scene 3).
+- **Axis:** "Teach him how to do it." She teaches Sonny how she likes things done, once, and Sonny does it that way from then on (scene 7).
+- **Four selling points, in order:** say it and the allowance pays (4, 5); Sonny calls first (4); teach it once (7); mom only when it matters (5, 6, 8).
 - **The one sentence to remember:** "Mom is already grandma's assistant. Sonny takes the job."
 - **Comparison line:** "Companions talk. Sonny gets things done, and calls mom."
 - **Business line:** "Paid by the family, monthly." (Add mom's price when we have it.)
@@ -33,7 +35,7 @@ Source of truth for the cut: `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V3.m
 | 4 | 0:13 to 0:24 | Grandma's phone: "Sonny is calling". She answers. Sonny: "Morning, June. Sarah's staying tonight. Groceries for two?" June: "Yes, please." An allowance payment card. Right side, mom's phone feed: "Groceries ordered, $18 from allowance" | | "Sonny calls first." |
 | 5 | 0:24 to 0:40 | June tries to book a taxi and can't name the clinic. Sonny: "No rush, June. I'll ask Sarah to help." Mom's phone: "Sonny is calling", the Kokoro voice reads the request, mom taps "Book it for her". Grandma's screen: the taxi card with the plate in huge letters | "When grandma gets stuck, Sonny doesn't make her feel slow. It quietly calls mom." | "Stuck? Sonny quietly calls mom." |
 | 6 | 0:40 to 0:48 | June: "Order 2000 burgers." Sonny: "Did you mean 2, or 2,000?" Fast: over the limit, mom's phone rings | | "Anything strange waits for mom." |
-| 7 | 0:48 to 0:58 | June teaches Sonny something; the real lesson counter appears (it read 31 at the last check; film whatever it shows). Then "Don't tell my daughter": a lock on grandma's screen, and on mom's phone only "1 private conversation not shown" | | "She's the teacher." / "Mom sees what got done, not what was said." |
+| 7 | 0:48 to 0:58 | June teaches Sonny how she does her Sunday groceries, once. Cut to "Next Sunday": Sonny calls first and runs her list exactly, paid from the allowance; the real lesson counter ticks up. Then "Don't tell my daughter": a lock on grandma's screen, and on mom's phone only "1 private conversation not shown" | "Teach it once. Sonny does it her way." | "Teach him how to do it." / "Mom sees what got done, not what was said." |
 | 8 | 0:58 to 1:06 | Mom's phone rings with a nudge: "June mentioned you twice. She'd love a call tonight." Mom smiles (B-roll of a daughter) | "Sonny doesn't replace family; it nudges mom to call, with something to talk about." | "Sonny brings them closer." |
 | 9 | 1:06 to 1:18 | One structure strip: Claude agent · GBrain memory · Kokoro voice · open source. "real product, not mocked". Then "Companions talk. Sonny gets things done." and "Paid by the family, monthly." | | One number per screen |
 | 10 | 1:18 to 1:30 | Roadmap strip "Phone today → HDMI stick → her TV" (2 seconds of `/tv`). Last shot: grandma's phone and mom's phone side by side, ringing together. "Sonny. The grandkid who's always home." github.com/makim-414/sonny | | Ends on the last beat |
@@ -43,7 +45,8 @@ Source of truth for the cut: `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V3.m
 - Scene 4, Sonny: "Morning, June. Sarah's staying tonight. Groceries for two?" June: "Yes, please." Sonny: "Done. Eighteen dollars from your allowance."
 - Scene 5, June: "Call me a taxi to the... the doctor, the one near the bank." Sonny: "No rush, June. I'll ask Sarah to help." Sonny to mom (Kokoro): "Hi Sarah, it's Sonny. June has been trying to book a taxi to the doctor for fifteen minutes and can't remember the clinic's name. Shall I book Dr. Kim's clinic for her, or would you like to call her?" Mom taps "Book it for her". Sonny to June: "Your taxi to Dr. Kim's is on its way, June."
 - Scene 6, June: "Order two thousand burgers." Sonny: "Did you mean two, or two thousand?" June: "Two thousand." Sonny: "That's more than your allowance lets me spend. I'll check with Sarah."
-- Scene 7, June: "Let me teach you something. When it rains, my knees know first. So on rainy days, remind me to take the bus." Sonny: "Thank you for teaching me, June." June: "Don't tell my daughter. I'm knitting her a scarf." Sonny: "Just between us."
+- Scene 7, June: "Let me teach you how I do my Sunday groceries. Milk, eggs, the small tofu, and bananas that aren't too ripe. From Kim's market, and keep it under twenty dollars." Sonny: "Got it, June. Sunday groceries, your way." Cut to next Sunday. Sonny (calling first): "Morning, June. It's Sunday. Milk, eggs, the small tofu, bananas not too ripe, from Kim's market. Seventeen dollars. Shall I order?" June: "Yes." Then June: "Don't tell my daughter. I'm knitting her a scarf." Sonny: "Just between us."
+- Other teach-it-once examples if there is time: "When I say 'tell Martha', send her a note that I'm thinking of her, and sign it June."
 - Scene 8, Sonny to mom: "Hi Sarah, it's Sonny. June mentioned you twice today. She'd love a call tonight. You could ask her about the temple." (Never hint at anything she kept private, like the scarf.)
 
 ## Live demo at the judging table

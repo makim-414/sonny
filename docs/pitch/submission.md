@@ -14,9 +14,9 @@ Other taglines: "Sonny: the grandkid who's always home." / "Grandma gives the or
 
 Sonny is an AI errand runner for parents who live alone. Grandma isn't the patient, she's the boss: she gives the orders out loud, Sonny gets them done with the allowance mom sets, and calls mom only when something is big, strange, or she's stuck.
 
-**About 150 words (146):**
+**About 150 words (150):**
 
-Grandma isn't the patient. She's the boss. Every elder-care app watches grandma; Sonny works for her. It is an AI errand runner for parents who live alone: she taps one icon and gives the orders out loud, and Sonny books the taxi, orders the groceries and keeps her schedule, paid from an allowance her daughter funds. Mom holds the veto: anything big or strange, or a task grandma is stuck on, and Sonny calls mom first. Today the daughter does these errands herself; this morning my mom booked my grandmother's taxi from her own phone. Sonny takes that job. Mom sees what got done, never what was said. Built with a Claude agent calling real tools, GBrain for long-term memory, Kokoro for the voice and Silero VAD for hands-free listening, all self-hostable open source. Next: the same errand runner on the TV she watches all day.
+Grandma isn't the patient. She's the boss. Every elder-care app watches grandma; Sonny works for her. It is an AI errand runner for parents who live alone: she taps one icon and gives the orders out loud, and Sonny books the taxi and orders the groceries, paid from an allowance her daughter funds. She teaches Sonny how she likes things done, once, and it does them her way from then on. Mom holds the veto: anything big or strange, or a task grandma is stuck on, and Sonny calls mom first. Today the daughter does these errands herself; this morning my mom booked my grandmother's taxi from her own phone. Sonny takes that job. Mom sees what got done, never what was said. Built on a Claude agent, GBrain memory and the Kokoro voice, all self-hostable open source. Next: the same errand runner on the TV she watches all day.
 
 ## Checklist
 
@@ -61,7 +61,8 @@ The current README has the one-liner and run steps. Before submitting, make sure
 - [ ] One-line pitch: "Grandma isn't the patient. She's the boss." Then: "Every elder-care app watches grandma. Sonny works for her: she gives the orders out loud, mom funds it and holds the veto."
 - [ ] The demo video link at the top (YouTube or Loom).
 - [ ] The core message first: a screen with nothing to learn. "No buttons. No menus. One icon, like the call button she already knows." A GIF of the tap and the particle.
-- [ ] Two pillars: grandma hands things off to the agent; mom sees what got done, not what was said.
+- [ ] Four selling points, in order: (1) she says it, the allowance pays; (2) Sonny calls first; (3) teach it once, Sonny does it her way ("Teach him how to do it"); (4) Sonny calls mom only when it really matters.
+- [ ] Mom sees what got done, not what was said.
 - [ ] What it does in 5 bullets: speaks first (medicine, weather), taxi to the hospital, learns from grandma (memory, lesson counter), groceries with family approval, family messages both ways, favorite show (one tool among many).
 - [ ] Distribution in five steps: 0 phone web app on the home screen (today), 1 HDMI stick or USB app, 2 Android and Google TV app, 3 HDMI pass-through box over the set-top box (CEC or IR), 4 the TV itself.
 - [ ] Screenshot or GIF: TV screen next to mom's phone.
