@@ -162,6 +162,22 @@ function safeLine(ran: string[]): string {
   return "네, 할머니.";
 }
 
+// The greeting follows grandma's clock (the demo clock when given), never a fixed "Good morning".
+const GRANDMA_NAME = EN ? "June" : "할머니";
+function greetingFor(d: Date): string {
+  const h = kstParts(d).hour;
+  if (EN) return `Good ${h < 5 ? "evening" : h < 12 ? "morning" : h < 17 ? "afternoon" : "evening"}, ${GRANDMA_NAME}`;
+  return h < 5 ? "할머니, 편안한 밤이에요" : h < 12 ? "할머니, 좋은 아침이에요" : h < 17 ? "할머니, 좋은 오후예요" : "할머니, 좋은 저녁이에요";
+}
+/** Replace a wrong time-of-day greeting the model produced ("Good morning" at noon). */
+function fixGreeting(say: string, d: Date): string {
+  if (!EN) return say;
+  const right = greetingFor(d);
+  return say.replace(/^\s*(good (morning|afternoon|evening)|morning|hello)(,?\s*(grandma|june))?\s*[!.,]?/i, (m) =>
+    /^\s*hello/i.test(m) ? m : `${right}${/!/.test(m) ? "!" : "."}`,
+  );
+}
+
 // Older listeners: at most two sentences on stage (the prompt asks for about 15 words each).
 function twoSentences(s: string): string {
   const parts = s.match(/[^.!?]+[.!?]+["')]?\s*/g);
@@ -407,9 +423,12 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
       : ` 오늘은 일요일이고 할머니가 "${sundaySkill.name}" 하는 법을 가르쳐 주셨다. "일요일이에요. 늘 하시던 장보기 해 드릴까요?" 처럼 한 줄로 제안한다.`;
   } else if (req.source === "proactive" && /^(morning-checkin|evening-checkin)$/.test(req.text.trim()) && taughtNewest) {
     focusLine = EN
-      ? ` Open with what she taught you most recently: "${taughtNewest.text}". Turn it into one warm, useful offer for today (for example, if family is coming for dinner: "Sarah's staying tonight, want me to get groceries for two?"). That offer is your one question. Do not just repeat the fact: make the offer. Mention the 8 AM pill only as a short reminder, not a question.`
+      ? ` Open with what she taught you most recently: "${taughtNewest.text}". Turn it into one warm, useful offer for today (for example, if family is coming for dinner: "Sarah's staying tonight, want me to get groceries for two?"). That offer is your one question. Do not just repeat the fact: make the offer. Do not talk about pills or weather in this greeting.`
       : ` 할머니가 최근에 가르쳐 주신 것으로 시작한다: "${taughtNewest.text}". 그걸로 오늘 쓸모 있는 제안 하나를 한다(예: 가족이 저녁에 오면 "오늘 수진이 오니까 장 좀 봐 드릴까요?"). 질문은 그 제안 하나. 약은 짧게 알려 드리기만 한다.`;
   }
+  // The offer replaces the generic check-in task (which talks about the pill and
+  // pulled the model away from the offer).
+  if (focusLine) task = "";
   // She said yes to the offer made while speaking first: carry it out.
   const offer = shared.offer;
   shared.offer = undefined;
@@ -432,6 +451,9 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   const instructions = [
     PERSONA,
     `${L.now}: ${kstLabel(now)} (ISO ${nowIso}, ${L.tz})`,
+    EN
+      ? `If you greet her, say exactly "${greetingFor(now)}" (it is ${greetingFor(now).split(" ")[1]} now). Call her June.`
+      : `인사한다면 "${greetingFor(now)}" 라고 한다.`,
     `${L.tv}: ${ch ? L.chan(ch, channelName(ch) ?? "") : L.tvOff}`,
     `${L.meds}: ${tookMeds ? L.medsTaken : L.medsNot}`,
     `${L.agenda}:\n${todayAgenda(now).map((a) => `- ${a}`).join("\n") || `- ${L.none}`}`,
@@ -462,7 +484,7 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   // Sunday morning with a Sunday skill: say the offer as is (the model kept talking
   // about the pill instead) and remember it, so "Yes, please" runs the skill.
   if (sundaySkill && focusLine && req.source === "proactive") {
-    const line = EN ? `Good morning, June. It's Sunday. Want your usual groceries?` : `할머니, 좋은 아침이에요. 일요일이에요. 늘 하시던 장보기 해 드릴까요?`;
+    const line = EN ? `${greetingFor(now)}. It's Sunday. Want your usual groceries?` : `${greetingFor(now)}. 일요일이에요. 늘 하시던 장보기 해 드릴까요?`;
     shared.offer = { kind: "skill", said: line, basis: sundaySkill.name };
     logEvent("said", line, nowIso, { visibility: "summary", familyText: `${kstClock(now)} ${EN ? "Offered her usual Sunday groceries" : "일요일 장보기를 제안함"}` });
     pushTurn(userTurn, line);
@@ -549,7 +571,7 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
       console.warn("[agent] replaced a leaked tool-looking reply:", JSON.stringify(spoken));
       spoken = safeLine(ran);
     }
-    if (spoken.length >= 4) say = EN ? twoSentences(spoken) : spoken;
+    if (spoken.length >= 4) say = EN ? fixGreeting(twoSentences(spoken), now) : spoken;
     if (EN) sayEn = say;
     else sayEn = tag(raw, "en") ? clean(tag(raw, "en")!) : undefined;
     heardEn = heardEn ?? (tag(raw, "heard") ? clean(tag(raw, "heard")!) || undefined : undefined);
