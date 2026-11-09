@@ -79,7 +79,7 @@ curl -s -X POST '<SITE>/api/family/calls/demo?demo=1' -H 'content-type: applicat
 Edit only: "Claude agent · GBrain memory · Kokoro voice · open source", "real product, not mocked", "Companions talk. Sonny gets things done.", "Paid by the family, monthly." One number per screen.
 
 ### 10. Roadmap and both phones ringing (1:18 to 1:30)
-1. Roadmap strip "Phone today → HDMI stick → her TV" with 2 seconds of `<SITE>/tv?boot&noqr&demo=1`.
+1. Roadmap strip "Today: one icon on her phone → Next: a Sonny app on her TV (Android TV / Google TV, Samsung Tizen) → Then: our own Sonny device, plugged in by the family" with 2 seconds of `<SITE>/tv?boot&noqr&demo=1` for "Next".
 2. Camera B: Phone G and Phone M side by side, both ringing. Ring Phone M with any demo call above while Sonny calls Phone G (`P`).
 3. End card: "Sonny. The grandkid who's always home." github.com/makim-414/sonny.
 

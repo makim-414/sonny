@@ -64,7 +64,7 @@ The current README has the one-liner and run steps. Before submitting, make sure
 - [ ] Four selling points, in order: (1) she says it, the allowance pays; (2) Sonny calls first; (3) teach it once, Sonny does it her way ("Teach him how to do it"); (4) Sonny calls mom only when it really matters.
 - [ ] Mom sees what got done, not what was said.
 - [ ] What it does in 5 bullets: speaks first (medicine, weather), taxi to the hospital, learns from grandma (memory, lesson counter), groceries with family approval, family messages both ways, favorite show (one tool among many).
-- [ ] Distribution in five steps: 0 phone web app on the home screen (today), 1 HDMI stick or USB app, 2 Android and Google TV app, 3 HDMI pass-through box over the set-top box (CEC or IR), 4 the TV itself.
+- [ ] Roadmap in three steps: Today: a one-icon web app on grandma's phone, set up by mom with one QR. Next: a Sonny app on the TV she already watches all day (Android TV / Google TV, Samsung Tizen). Then: our own Sonny device, plugged in by the family, nothing to install. Why this order: "The phone ships today and proves the agent; the TV apps reuse the same web app; the device comes when we know exactly what grandma uses."
 - [ ] Screenshot or GIF: TV screen next to mom's phone.
 - [ ] Open source, near the top: "Everything runs on open source you can self-host: Kokoro voice, Silero VAD, GBrain memory." Link `docs/OPEN_SOURCE.md` (every project 1,000+ stars, with license and how we use it).
 - [ ] Market line: launches in English for English-speaking seniors first; the founder's Korean grandmother is the origin story. The app language is one switch, `APP_LANG` in `src/lib/brand.ts`.
@@ -108,7 +108,7 @@ The current README has the one-liner and run steps. Before submitting, make sure
 - [ ] Reset the store just before judging so the judges see a clean feed.
 - [ ] Rehearse the judge loop three times: judge one scans "Be grandma" and talks, judge two scans "Be her daughter" and taps "I'll be there at 7 tonight", grandma's phone reads it, judge one answers, the reply card fills on judge two's phone.
 - [ ] Mic permission: iOS Safari asks on first use; have the judge tap Allow. If a phone blocks the mic, hand over the presenter's phone.
-- [ ] Optional: `/tv` on a monitor over HDMI to show "next, her TV" (boot screen with `?boot`).
+- [ ] Optional: `/tv` on a monitor to show step two, "a Sonny app on the TV she already watches" (boot screen with `?boot`).
 - [ ] Fallbacks: typed input on `/` if the mic fails, phone hotspot if Wi-Fi fails, the 90 second video on the desktop if both fail.
 
 ## Timeline (STATUS.md)

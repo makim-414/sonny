@@ -34,7 +34,7 @@ Mom sees what got done, not what was said; "don't tell my daughter" stays betwee
 Agents can finally get things done by voice, on open source you can self-host: Kokoro voice, Silero VAD, GBrain memory. Companions talk. Sonny gets things done, and calls mom. Paid by the family, monthly.
 
 **Close (1:38)**
-Today a phone, next her TV. Scan the first code and be June. Scan the second and be Sarah.
+Today, one icon on her phone. Next, a Sonny app on the TV she already watches. Then our own Sonny device, plugged in by the family. Scan the first code and be June. Scan the second and be Sarah.
 
 ## The four selling points
 
@@ -44,6 +44,14 @@ Today a phone, next her TV. Scan the first code and be June. Scan the second and
 | 2 | Sonny calls first | Sonny opens every moment as a phone call she only has to answer. | Scene 4 |
 | 3 | Teach it once | She teaches Sonny how she likes things done, once (her Sunday groceries, a note to her friend Martha), and Sonny does it that way from then on. Grandma programs her agent by talking. | Scene 7 |
 | 4 | Mom only when it matters | Sonny calls mom only when something is big, strange, or grandma is stuck. | Scenes 5, 6, 8 |
+
+## Roadmap (owner, three steps)
+
+1. **Today: a one-icon web app on grandma's phone, set up by mom with one QR.**
+2. **Next: a Sonny app on the TV she already watches all day (Android TV / Google TV, Samsung Tizen).**
+3. **Then: our own Sonny device, plugged in by the family, nothing to install.** (This absorbs the earlier HDMI stick and pass-through box ideas: a box between the set-top box and the TV, drawing Sonny over live TV and driving the set-top box over HDMI-CEC or IR, is one form the device can take.)
+
+Why this order: "The phone ships today and proves the agent; the TV apps reuse the same web app; the device comes when we know exactly what grandma uses."
 
 ## How this maps to the three judging criteria
 
@@ -64,7 +72,7 @@ Today a phone, next her TV. Scan the first code and be June. Scan the second and
 ## The hard questions (office hours) and who pays
 
 1. **"This is a web page. How does grandma even get to it?"**
-   Mom adds it to grandma's home screen as one icon and pairs it with one QR from her admin. It stays signed in; grandma never sees a login. Next, the same agent on her TV: a dongle, an Android TV app, a pass-through box over the set-top box (HDMI-CEC or IR), then the TV itself.
+   Mom adds it to grandma's home screen as one icon and pairs it with one QR from her admin. It stays signed in; grandma never sees a login. Next, a Sonny app on the TV she already watches (Android TV / Google TV, Samsung Tizen), reusing the same web app. Then our own Sonny device, plugged in by the family, nothing to install.
 2. **"Seniors don't talk to devices."**
    She talks into a phone every day; tapping the icon feels like a call, and Sonny speaks first, by name. There is nothing on screen to get wrong. And she keeps using it because it asks to be taught.
 3. **"How is this different from Ato, Alexa or the voice remote she already has?"**

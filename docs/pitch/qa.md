@@ -1,4 +1,4 @@
-# Sonny: judge Q&A (twelve questions, two sentences each)
+# Sonny: judge Q&A (thirteen questions, two sentences each)
 
 Killer line, use it once early: "Grandma isn't the patient. She's the boss."
 
@@ -18,10 +18,11 @@ Say the first sentence; add the second only if they lean in. Numbers are sourced
 | 10 | **How big is this?** | 63 million Americans already do this job unpaid, and about one in four Americans 65+ lives alone (Pew, 2023 data). At an assumed $20 a month, one million paying families would be $240 million a year (estimate, our arithmetic, not a market study). |
 | 11 | **Isn't this the family spying on grandma?** | No: mom sees what got done (pills, rides, orders, safety), never what was said, and grandma's private conversations are hidden on the server, not just on screen; "don't tell my daughter" stays between them. There is no camera, and anything grandma teaches leaves her own Sonny only with her consent and her family's, anonymized. |
 | 12 | **What if grandma doesn't use it?** | She doesn't have to start anything: Sonny is always on and calls her first at the times she already keeps, like a grandkid checking in. If she doesn't answer at her usual time, or seems stuck, Sonny calls mom, so silence itself becomes useful information. |
+| 13 | **Why start on the phone if the TV is the goal?** | The phone ships today and proves the agent; the TV apps reuse the same web app; the device comes when we know exactly what grandma uses. Next is a Sonny app on the TV she already watches (Android TV / Google TV, Samsung Tizen), then our own Sonny device, plugged in by the family. |
 
 ## If they push further
 
 - **"Will she really talk to it?"** Our riskiest assumption and we say so. We bet on two things: it calls her first, so she only has to answer, and it asks to be taught, so it feels like a grandkid, not a caretaker.
-- **"Why a phone and not the TV?"** The phone is the one device she already answers; the same agent moves to her TV next (HDMI stick, then a box, then the TV itself) because the TV is where she spends her day.
+- **"What is the roadmap?"** Today: a one-icon web app on grandma's phone, set up by mom with one QR. Next: a Sonny app on the TV she already watches all day (Android TV / Google TV, Samsung Tizen); then our own Sonny device, plugged in by the family, nothing to install.
 - **"Why you?"** It is my grandmother and my mom; and I ran an art gallery for years where my regulars were retired, and what they loved most was teaching me (founder's own account, not measured).
 - **"What does Pickle have to do with it?"** Pickle covers your workday through Zoom; Sonny covers grandma's day through the phone she already answers.

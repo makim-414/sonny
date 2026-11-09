@@ -38,7 +38,7 @@ Source of truth for the cut: `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V3.m
 | 7 | 0:48 to 0:58 | June teaches Sonny how she does her Sunday groceries, once. Cut to "Next Sunday": Sonny calls first and runs her list exactly, paid from the allowance; the real lesson counter ticks up. Then "Don't tell my daughter": a lock on grandma's screen, and on mom's phone only "1 private conversation not shown" | "Teach it once. Sonny does it her way." | "Teach him how to do it." / "Mom sees what got done, not what was said." |
 | 8 | 0:58 to 1:06 | Mom's phone rings with a nudge: "June mentioned you twice. She'd love a call tonight." Mom smiles (B-roll of a daughter) | "Sonny doesn't replace family; it nudges mom to call, with something to talk about." | "Sonny brings them closer." |
 | 9 | 1:06 to 1:18 | One structure strip: Claude agent · GBrain memory · Kokoro voice · open source. "real product, not mocked". Then "Companions talk. Sonny gets things done." and "Paid by the family, monthly." | | One number per screen |
-| 10 | 1:18 to 1:30 | Roadmap strip "Phone today → HDMI stick → her TV" (2 seconds of `/tv`). Last shot: grandma's phone and mom's phone side by side, ringing together. "Sonny. The grandkid who's always home." github.com/makim-414/sonny | | Ends on the last beat |
+| 10 | 1:18 to 1:30 | Roadmap strip "Today: one icon on her phone → Next: a Sonny app on her TV → Then: our own Sonny device" (2 seconds of `/tv`). Last shot: grandma's phone and mom's phone side by side, ringing together. "Sonny. The grandkid who's always home." github.com/makim-414/sonny | | Ends on the last beat |
 
 ## Lines in full (for the voice and captions)
 
