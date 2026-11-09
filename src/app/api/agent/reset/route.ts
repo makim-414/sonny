@@ -1,12 +1,17 @@
 import { resetSession } from "@/lib/agent/session";
+import { shared } from "@/lib/agent/tools";
 import { getMemory, resetMemory } from "@/lib/memory";
 import { store } from "@/lib/store";
 
-// POST /api/agent/reset : demo reset (memory back to seed, conversation cleared, timers dropped).
+// POST /api/agent/reset : demo reset. Memory back to seed (a new GBrain run entity),
+// conversation, health log, pending approvals and TV timers cleared.
 export async function POST() {
   resetSession();
   await resetMemory();
+  shared.health.length = 0;
+  shared.requests.length = 0;
   store.pending.length = 0;
   store.currentChannel = null;
-  return Response.json({ ok: true, memory: (await getMemory()).backend });
+  const memory = await getMemory();
+  return Response.json({ ok: true, memory: memory.backend, facts: (await memory.all()).length });
 }

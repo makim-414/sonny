@@ -2,6 +2,7 @@ import { jsonMemory, resetJsonMemory } from "./json-store";
 import type { MemoryStore } from "./types";
 
 export type { MemoryFact, MemoryStore, MemoryCategory } from "./types";
+export { isLesson } from "./types";
 
 // GBrain (keyless PGLite) is the default; HYODO_MEMORY=json forces the JSON file.
 // Any GBrain failure at startup falls back to JSON so the demo never stalls.
