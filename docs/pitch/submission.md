@@ -4,19 +4,19 @@ The form asks for three things: the 90 second demo video, the GitHub repo (https
 
 ## Short description (paste into the form)
 
-Final (12:55). Messages: the killer line "Grandma isn't the patient. She's the boss.", the video card "Grandma says it. Sonny does it.", new skills by talking with accounts and cards connected once by mom, Sonny calls mom only when it matters, and the three-step roadmap. The caretaker/family line is out of the video, so it is out of the form text too. Words of authority and money (errand runner, orders, allowance, veto), not the usual elder-care words.
+Final (13:18). The owner took "Grandma isn't the patient. She's the boss." out of the video, so it is out of the form text and the README too. Messages: the video card "Grandma says it. Sonny does it.", new skills by talking with accounts and cards connected once by mom, Sonny calls mom only when it matters, and the three-step roadmap. The caretaker/family line is out of the video, so it is out of the form text too. Words of authority and money (errand runner, orders, allowance, veto), not the usual elder-care words.
 
-**Tagline:** Grandma isn't the patient. She's the boss.
+**Tagline:** Grandma says it. Sonny does it.
 
-Backup taglines: "Grandma says it. Sonny does it." / "Sonny: the grandkid who's always home."
+Backup tagline: "Sonny: the grandkid who's always home."
 
-**About 50 words (51):**
+**About 50 words (50):**
 
-Grandma isn't the patient. She's the boss. Sonny is an AI errand runner for parents who live alone: she says it, Sonny does it, paid from the allowance mom sets. She builds new skills just by talking, mom connects accounts and cards once, and Sonny calls mom only when it matters.
+Sonny is an AI errand runner for parents who live alone: grandma says it, Sonny does it, paid from the allowance mom sets. She builds new skills just by talking, mom connects accounts and cards once, and Sonny calls mom only when it matters, then sends her a simple report.
 
-**About 150 words (154):**
+**About 150 words (147):**
 
-Grandma isn't the patient. She's the boss. Sonny is an AI errand runner for parents who live alone: grandma says it, Sonny does it. This morning my mom booked my grandmother's taxi from her own phone, then called to check. Sonny takes that job. She asks for a ride or groceries, and Sonny pays from the allowance mom funds. Grandma builds new skills just by talking ("learn to get me my usual ride"). Anything that needs an account or a card, mom connects once from her phone, so grandma never types a password. Sonny calls mom only when it matters: something big or strange, or grandma stuck. Mom sees what got done, never what was said. Sonny calls for a daily blood-pressure reading and a weekly two-minute memory check, then sends mom a simple report. Built on Claude, GBrain and Kokoro. Today a phone app, next a Sonny TV app, then our own device.
+Sonny is an AI errand runner for parents who live alone: grandma says it, Sonny does it. This morning my mom booked my grandmother's taxi from her own phone, then called to check. Sonny takes that job. She asks for a ride or groceries, and Sonny pays from the allowance mom funds. Grandma builds new skills just by talking ("learn to get me my usual ride"). Anything that needs an account or a card, mom connects once from her phone, so grandma never types a password. Sonny calls mom only when it matters: something big or strange, or grandma stuck. Mom sees what got done, never what was said. Sonny calls for a daily blood-pressure reading and a weekly two-minute memory check, then sends mom a simple report. Built on Claude, GBrain and Kokoro. Today a phone app, next a Sonny TV app, then our own device.
 
 ## Checklist
 
@@ -58,7 +58,7 @@ gh repo edit makim-414/sonny --visibility public --accept-visibility-change-cons
 
 The current README has the one-liner and run steps. Before submitting, make sure it has, in this order:
 
-- [ ] One-line pitch: "Grandma isn't the patient. She's the boss." Then: "Every elder-care app watches grandma. Sonny works for her: she gives the orders out loud, mom funds it and holds the veto."
+- [ ] One-line pitch: "Grandma says it. Sonny does it." Then: "Every elder-care app watches grandma. Sonny works for her: she gives the orders out loud, mom funds it and holds the veto."
 - [ ] The demo video link at the top (YouTube or Loom).
 - [ ] The core message first: a screen with nothing to learn. "No buttons. No menus. One icon, like the call button she already knows." A GIF of the tap and the particle.
 - [ ] Four selling points, in order: (1) she says it, the allowance pays; (2) Sonny calls first; (3) teach it once, Sonny does it her way ("Teach him how to do it"); (4) Sonny calls mom only when it really matters.
