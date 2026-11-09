@@ -4,7 +4,7 @@ import { timingSafeEqual } from "node:crypto";
 // A real deployment would store hashed passwords; this demo has no database.
 type Guardian = { email: string; password: string; name: string };
 
-const GUARDIANS: Guardian[] = [{ email: "mom@sonju.demo", password: "grandma-demo", name: "Mom" }];
+const GUARDIANS: Guardian[] = [{ email: "mom@sonny.demo", password: "grandma-demo", name: "Mom" }];
 
 export const DEMO_GUARDIAN = GUARDIANS[0];
 export const DEMO_DEVICE_ID = "demo-device";
