@@ -2,9 +2,9 @@
 
 **Grandma isn't the patient. She's the boss.**
 
-Sonny is an AI errand runner for parents who live alone: grandma taps one icon and gives the orders out loud, and Sonny gets them done.
+Sonny is an AI errand runner for parents who live alone: grandma taps one icon and gives the orders out loud, and Sonny gets them done. Grandma says it. Sonny does it.
 Mom funds an allowance and holds the veto; Sonny calls her only when something is big, strange, or grandma is stuck.
-Families don't want to be caretakers. They want to be family. Sonny handles the errands, so family can just be family.
+Grandma builds new skills just by talking ("learn to get me my usual ride"). Anything that needs an account or a card, mom connects once from her phone, so grandma never types a password.
 
 Built at c0mpiled-17 Seoul, 2026-11-09 (YC Request for Startups, Fall 2026: AI for the Aging Population).
 
@@ -12,7 +12,7 @@ Built at c0mpiled-17 Seoul, 2026-11-09 (YC Request for Startups, Fall 2026: AI f
 
 1. **Say it, the allowance pays.** Grandma asks out loud for a taxi or her groceries; Sonny books and pays from an allowance her daughter tops up. Anything over the per-purchase limit waits for mom.
 2. **Sonny calls first.** One icon on her phone, no app to learn. Sonny opens every moment as a phone call she only has to answer: pills, weather, the day ahead.
-3. **Teach it once.** Grandma teaches Sonny how she likes things done ("my Sunday groceries", "a note to Martha"), once, and Sonny does it her way from then on. Her lessons become its long-term memory.
+3. **Teach it once.** Grandma teaches Sonny how she likes things done ("my Sunday groceries", "a note to Martha", "learn to get me my usual ride"), once, and Sonny does it her way from then on. Her lessons become its long-term memory. Anything that needs an account or a card, mom connects once from her phone, so grandma never types a password.
 4. **Mom only when it matters.** When grandma gets stuck, Sonny doesn't make her feel slow; it quietly calls mom ("Book it for her" or "I'll call her"). A strange order gets a double-check, then a call. And when grandma has been quiet, Sonny nudges mom to call, with something to talk about.
 
 Mom sees what got done, never what was said: grandma's private conversations are redacted on the server, and "don't tell my daughter" stays between them. There is no camera.
