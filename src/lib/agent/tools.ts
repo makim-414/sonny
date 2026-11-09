@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { channelName, nowOn, searchEpg } from "@/lib/epg";
+import { liveSearch, TVMAZE_ATTRIBUTION, type LiveHit } from "@/lib/epg/live";
 import { isLesson, type MemoryFact, type MemoryStore } from "@/lib/memory";
 import { addSchedule, kstClock, kstParts } from "@/lib/scheduler";
 import { logEvent, store } from "@/lib/store";
@@ -84,6 +85,25 @@ function callGuardian(ctx: AgentContext, pay: ReturnType<typeof spend>, what: st
   ctx.actions.push({ type: "showCard", title: T.callCardTitle, body: `${T.callCardBody(what, cost)}\n${DEMO}` });
   log(ctx, "call", `${T.callLog(cost, what)} (call ${call.id})`, { visibility: "family" });
   return call;
+}
+
+/** English demo: answer from live TVmaze listings (no channel numbers in the US, so a card, not a tune). */
+function liveAnswer(ctx: AgentContext, hits: LiveHit[]) {
+  const top = hits[0];
+  ctx.actions.push({
+    type: "showCard",
+    title: `${top.show} on ${top.network}`,
+    body: `${top.when} (US Eastern)\n${top.guest ? "Guest" : top.role}\n${TVMAZE_ATTRIBUTION}`,
+  });
+  shared.lastLater = hits
+    .filter((h) => h.status === "later")
+    .slice(0, 2)
+    .map((h) => ({ channel: 0, channelName: h.network, title: h.show, startISO: h.startISO, startsAt: h.when, startsInMin: h.startsInMin }));
+  return {
+    source: "live TV listings (TVmaze)",
+    results: hits.map((h) => ({ show: h.show, network: h.network, when: h.when, startISO: h.startISO, status: h.status, guest: h.guest })),
+    note: "No channel numbers for US live listings. Tell her the show, network and day/time, and offer a reminder: schedule_at with then=showCard at startISO.",
+  };
 }
 
 export function createTools(ctx: AgentContext) {
@@ -196,7 +216,17 @@ export function createTools(ctx: AgentContext) {
             channel = hit.channel;
             ms = Date.parse(hit.start);
           } else if (!channelName(channel)) {
-            return { ok: false, error: "편성표에서 그 프로그램을 못 찾았어요. tv_play 로 먼저 찾아 주세요." };
+            // Live US listing (no channel number): remind with a card at its start instead.
+            const liveShow = shared.lastLater?.find((l) => l.channel === 0 && label.toLowerCase().includes(l.title.toLowerCase().slice(0, 6)));
+            if (liveShow) {
+              ms = Date.parse(liveShow.startISO);
+              const iso = new Date(ms).toISOString();
+              const inner: TvAction = { type: "showCard", title: `${liveShow.title} starts now on ${liveShow.channelName}`, body: TVMAZE_ATTRIBUTION };
+              ctx.actions.push(addSchedule(iso, label, inner));
+              log(ctx, "scheduled", `${liveShow.startsAt} ${label}`, { visibility: "family" });
+              return { ok: true, at: iso, spoken: liveShow.startsAt };
+            }
+            return { ok: false, error: "That show is not in the guide. Use tv_play first." };
           }
         }
         if (!Number.isFinite(ms)) return { ok: false, error: "시간 형식이 틀렸어요. ISO로 다시." };
@@ -370,6 +400,8 @@ export function createTools(ctx: AgentContext) {
         "프로그램을 찾아 지금 방송 중이면 바로 튼다. 곧 시작하는 것은 later 로 알려 준다(시작할 때 틀어 드릴지 여쭙고, 그러라고 하시면 schedule_at). TV 요청은 이 도구 하나면 된다.",
       inputSchema: z.object({ query: z.string().describe("사람 이름이나 제목. 예: '임영웅', '가요무대', '뉴스'") }),
       execute: async ({ query }) => {
+        const liveHits = await liveSearch(query, ctx.now);
+        if (liveHits) return liveAnswer(ctx, liveHits);
         const hits = searchEpg(query, ctx.now);
         const live = hits.find((h) => h.status === "now");
         const later = hits.filter((h) => h.status === "later").slice(0, 2).map((h) => ({
@@ -398,6 +430,8 @@ export function createTools(ctx: AgentContext) {
       description: "오늘 편성표만 찾아본다(틀지 않음). 틀어 달라는 요청엔 tv_play 를 쓴다.",
       inputSchema: z.object({ query: z.string().describe("예: '임영웅', '가요무대', '뉴스'") }),
       execute: async ({ query }) => {
+        const liveHits = await liveSearch(query, ctx.now);
+        if (liveHits) return liveAnswer(ctx, liveHits);
         const hits = searchEpg(query, ctx.now);
         shared.lastLater = hits
           .filter((h) => h.status === "later")
