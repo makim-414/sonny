@@ -5,7 +5,7 @@
 
 const ASSETS = "/api/tts/vad/";
 
-export type Vad = { start(): void; pause(): void; destroy(): void };
+export type Vad = { start(): void; pause(): void; destroy(): void; setSilenceMs(ms: number): void };
 
 export type VadOptions = { redemptionMs: number };
 
@@ -45,6 +45,7 @@ export async function createVad(h: VadHandlers, o: VadOptions): Promise<Vad | nu
       start: () => void vad.start(),
       pause: () => void vad.pause(),
       destroy: () => void vad.destroy(),
+      setSilenceMs: (ms) => vad.setOptions({ redemptionMs: ms }),
     };
   } catch (err) {
     console.warn("[vad] unavailable, falling back to Web Speech end-of-turn", err);

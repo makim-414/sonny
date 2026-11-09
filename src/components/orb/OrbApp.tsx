@@ -6,7 +6,7 @@ import { isListenSupported, listenOnce, type Listener } from "@/lib/voice/listen
 import { splitSentences, unlockSpeech } from "@/lib/voice/speak";
 import { speakSentences, stopVoice, unlockAudio, voiceLevel, warmTts } from "@/lib/tts/player";
 import { createVad, type Vad } from "@/lib/voice/vad";
-import { transcribe } from "@/lib/voice/stt";
+import { isTurnComplete, transcribe } from "@/lib/voice/stt";
 import { APP_LANG } from "@/lib/brand";
 import { callAgent } from "@/components/tv/agent-client";
 import { formatTime, useDemoClock } from "@/components/tv/use-demo-clock";
@@ -27,6 +27,28 @@ const RETRY_MS = 1200;
 const DEFAULT_WAIT_MS = 2000;
 // Kokoro and browser voice speed, a little slow and clear (?rate=0.9).
 const DEFAULT_RATE = 0.85;
+// Smart turn: after this much silence ask /api/turn whether she finished; if not, wait up to
+// SMART_MAX_EXTRA_MS more. Falls back to the fixed wait when /api/turn is down. ?wait= or ?noturn = fixed.
+const SMART_PROBE_MS = 700;
+const SMART_MAX_EXTRA_MS = 4000;
+const VAD_RATE = 16_000;
+const TURN_AUDIO_MAX_S = 8; // what the turn model looks at
+const UTTERANCE_MAX_S = 30; // what the server STT gets
+
+function joinTail(parts: Float32Array[], seconds: number): Float32Array {
+  const max = seconds * VAD_RATE;
+  const total = parts.reduce((n, p) => n + p.length, 0);
+  const out = new Float32Array(Math.min(total, max));
+  let w = out.length;
+  for (let i = parts.length - 1; i >= 0 && w > 0; i--) {
+    const p = parts[i];
+    const take = Math.min(p.length, w);
+    out.set(p.subarray(p.length - take), w - take);
+    w -= take;
+  }
+  return out;
+}
+
 // If the VAD misses the end of speech, Web Speech is closed this long after the last word.
 const SAFETY_EXTRA_MS = 2500;
 
@@ -122,6 +144,10 @@ export function OrbApp() {
   const webSpeechOkRef = useRef(!hasFlag("stt")); // ?stt forces the server path
   const sttOkRef = useRef(true);
   const serverListeningRef = useRef(false);
+  const smartTurnRef = useRef(!hasFlag("wait") && !hasFlag("noturn"));
+  const turnAudioRef = useRef<Float32Array[]>([]);
+  const turnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const listenGenRef = useRef(0);
   const cardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -183,6 +209,8 @@ export function OrbApp() {
   );
 
   const stopListening = useCallback(() => {
+    if (turnTimerRef.current) clearTimeout(turnTimerRef.current);
+    turnTimerRef.current = null;
     const l = listenerRef.current;
     listenerRef.current = null;
     l?.abort();
@@ -245,8 +273,52 @@ export function OrbApp() {
     [enqueue, runTurn, setMode],
   );
 
+  // The turn is over: hand the words to the agent (Web Speech) or the audio to the server STT.
+  const finishTurn = useCallback(() => {
+    if (turnTimerRef.current) clearTimeout(turnTimerRef.current);
+    turnTimerRef.current = null;
+    if (serverListeningRef.current) onUtterance(joinTail(turnAudioRef.current, UTTERANCE_MAX_S));
+    else listenerRef.current?.stop();
+  }, [onUtterance]);
+
+  const waitThenFinish = useCallback(
+    (ms: number) => {
+      if (turnTimerRef.current) clearTimeout(turnTimerRef.current);
+      turnTimerRef.current = setTimeout(finishTurn, Math.max(0, ms));
+    },
+    [finishTurn],
+  );
+
+  // VAD heard silence after speech. Fixed mode: the VAD already waited. Smart mode: ask the model.
+  const onSpeechPause = useCallback(
+    (audio: Float32Array) => {
+      const listening = serverListeningRef.current || listenerRef.current !== null;
+      if (!listening) return;
+      turnAudioRef.current.push(audio);
+      if (!smartTurnRef.current) {
+        finishTurn();
+        return;
+      }
+      const gen = listenGenRef.current;
+      void isTurnComplete(joinTail(turnAudioRef.current, TURN_AUDIO_MAX_S)).then((complete) => {
+        if (gen !== listenGenRef.current) return;
+        if (complete === true) finishTurn();
+        else if (complete === false) waitThenFinish(SMART_MAX_EXTRA_MS);
+        else {
+          // No turn model: switch to the fixed silence wait for good.
+          smartTurnRef.current = false;
+          vadRef.current?.setSilenceMs(waitMs());
+          waitThenFinish(waitMs() - SMART_PROBE_MS);
+        }
+      });
+    },
+    [finishTurn, waitThenFinish],
+  );
+
   const listen = useCallback(() => {
     if (!startedRef.current || pendingRef.current > 0 || listenerRef.current || serverListeningRef.current) return;
+    listenGenRef.current++;
+    turnAudioRef.current = [];
     if (!listenOkRef.current) {
       setMode("idle");
       setTyping(true);
@@ -324,22 +396,22 @@ export function OrbApp() {
       void createVad({
         onSpeechStart: () => {
           signal.current.pulse = 1;
+          // She kept talking: cancel a pending end of turn.
+          if (turnTimerRef.current) clearTimeout(turnTimerRef.current);
+          turnTimerRef.current = null;
         },
-        onSpeechEnd: (audio) => {
-          if (serverListeningRef.current) onUtterance(audio);
-          else listenerRef.current?.stop();
-        },
+        onSpeechEnd: (audio) => onSpeechPause(audio),
         onLevel: (lv) => {
           if (signal.current.mode === "listening") signal.current.pulse = Math.max(signal.current.pulse, lv);
         },
-      }, { redemptionMs: waitMs() }).then((v) => {
+      }, { redemptionMs: smartTurnRef.current ? SMART_PROBE_MS : waitMs() }).then((v) => {
         vadRef.current = v;
         if (!v || pendingRef.current > 0) return;
         if (listenerRef.current) v.start();
         else listenRef.current(); // was waiting for the VAD to use the server STT
       });
     }
-  }, [turn, onUtterance]);
+  }, [turn, onSpeechPause]);
 
   // A tap after start interrupts the voice, closes a card and goes back to listening.
   const onTap = () => {
