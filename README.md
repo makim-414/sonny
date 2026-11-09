@@ -20,9 +20,17 @@ Mom sees what got done, never what was said: grandma's private conversations are
 
 ## Screens
 
-| Grandma's phone (`/`) | Sonny calls mom | Family admin (`/admin`) |
+<img src="docs/screens/00-sonny.png" alt="Sonny, a little yellow cockatiel, on grandma's phone" width="240">
+
+Sonny is a little yellow cockatiel. Parrots learn by repeating what you teach them, and so does Sonny.
+
+| Grandma's phone (`/`) | Mom's phone (`/family`) | Allowance (`/admin/allowance`) |
 |---|---|---|
-| ![Grandma's phone](docs/screens/grandma.png) | ![Sonny is calling](docs/screens/call.png) | ![Family admin](docs/screens/admin.png) |
+| ![Sonny calling grandma](docs/screens/01-grandma-call.png) | ![Mom's feed](docs/screens/02-family.png) | ![Allowance](docs/screens/07-admin-allowance.png) |
+
+| Hidden setup (`/setup`) | TV mode (`/tv`) |
+|---|---|
+| ![Setup](docs/screens/10-setup.png) | ![TV mode](docs/screens/13-tv.png) |
 
 Screenshots live in `docs/screens/`.
 
