@@ -83,3 +83,18 @@ export type ActivityEvent = {
   visibility?: "family" | "summary" | "private";
   familyText?: string;
 };
+
+// "Grandma builds by talking": a skill that needs an outside account (ride app, pharmacy,
+// grocery) is connected once by the guardian. Grandma is never asked for an id, password
+// or card. Demo only: no secret is stored, the screen shows masked values.
+export type ServiceConnection = {
+  id: string;
+  service: "ride" | "pharmacy" | "grocery";
+  skillName: string; // the skill that asked for it, e.g. "usual ride to Dr. Lee"
+  status: "requested" | "connected";
+  requestedAt: string; // ISO time
+  connectedAt?: string;
+  account?: string; // masked, e.g. "sarah•••@demo"
+  card?: string; // masked, e.g. "•••• 4242"; payments still come from the allowance wallet
+  demo: true;
+};
