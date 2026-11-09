@@ -64,7 +64,7 @@ curl -s -X POST '<SITE>/api/family/calls/demo?demo=1' -H 'content-type: applicat
 Seedance live action 3 (B-roll B). Cut if it does not arrive.
 
 ### 9. The goal (0:54 to 1:00)
-Edit only: "Protect the family's time. Let grandma run her own day."
+Edit only: "Sonny handles the errands, so family can just be family."
 
 ### 10. Going to market (1:00 to 1:12)
 1. Phone G real screen for "Today".

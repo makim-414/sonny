@@ -1,6 +1,6 @@
 # Sonny: pitch (under 2 minutes, English)
 
-Spoken script first (v4, matches `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V4.md`), about 247 words (about 1:32 at 160 words per minute; rehearse with a timer). Then the judging map, answers to the hard questions, sources, and the evidence for the gstack and GBrain prize. Ten judge questions with two-sentence answers: `docs/pitch/qa.md`.
+Spoken script first (v4, matches `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V4.md`), about 294 words (about 1:50 at 160 words per minute; rehearse with a timer; if it runs over, cut the second number sentence in going to market). Then the judging map, answers to the hard questions, sources, and the evidence for the gstack and GBrain prize. Ten judge questions with two-sentence answers: `docs/pitch/qa.md`.
 
 - **Customer:** the daughter (45 to 60) of a parent who lives alone pays. Grandma uses it. Speak to mom, and to every judge who has an aging parent.
 - **Insight:** "Mom is already grandma's assistant. Sonny takes the job."
@@ -14,21 +14,21 @@ Order: my scene, the numbers, the product, the goal, going to market, the vision
 This morning, I saw my mom calling a taxi for my grandmother, to the hospital. Mom is already grandma's assistant.
 
 **The numbers (0:08)**
-She is one of 63 million Americans who care for family, one in four adults, giving 27 hours a week.
+She is one of 63 million Americans who care for family, one in four adults, giving 27 hours a week. Families don't want to be caretakers. They want to be family. Grandma wants mom to call and say hi, not to manage her errands. Sonny takes the errands, so mom can live her day with peace of mind, and the call home is just a call home.
 
-**The product (0:16)**
+**The product (0:30)**
 So we built Sonny, the grandkid who's always home. Grandma isn't the patient. She's the boss. One icon on her phone, and Sonny calls first. Mom loads the allowance; grandma just says it: "Do my Sunday groceries." She teaches Sonny how she likes things done, once, and Sonny does it that way from then on. When she gets stuck, Sonny doesn't make her feel slow. It quietly calls mom. Anything big or strange waits for mom's OK, and mom sees what got done, not what was said.
 
-**The goal (0:56)**
-Protect the family's time. Let grandma run her own day.
+**The goal (1:12)**
+Sonny handles the errands, so family can just be family.
 
-**Going to market (1:02)**
+**Going to market (1:16)**
 Today, a web app on her phone, set up by mom with one QR. Next, a Sonny app on the TV she already watches: people over 75 watch four and a half hours of TV a day, and 61 percent of U.S. internet households already stream mainly on a smart TV. Then our own Sonny device, plugged in by the family. Paid by the family, monthly.
 
-**The vision (1:26)**
+**The vision (1:38)**
 Sonny is the easiest first step into AI for the oldest generation. Then health check-ins, then the rest of their daily life.
 
-**Close (1:36)**
+**Close (1:46)**
 Companions talk. Sonny gets things done, and calls mom. Scan the first code and be June. Scan the second and be Sarah.
 
 ## The four selling points
@@ -56,7 +56,8 @@ Why the TV is worth it (confirmed numbers, one at a time, never added together):
 
 ## Goal and vision
 
-- Goal: "Protect the family's time. Let grandma run her own day."
+- Goal: "Sonny handles the errands, so family can just be family." (earlier wording, still true: "Protect the family's time. Let grandma run her own day.")
+- Core message (owner): "Families don't want to be caretakers. They want to be family. Grandma wants mom to call and say hi, not to manage her errands. Sonny takes the errands, so mom can live her day with peace of mind, and the call home is just a call home."
 - Vision: "The easiest first step into AI for the oldest generation. Then health check-ins, then the rest of their daily life."
 - Out of scope, never in the pitch, video or repo: gambling or betting extensions. They would read as targeting seniors' money, and online gambling is illegal in Korea.
 
@@ -159,5 +160,5 @@ Do not use:
 
 - **"Will she really talk to it?"** Our riskiest assumption, not tested with her yet. Our bet: she answers when it speaks first, and keeps it on because it asks to be taught.
 - **"What about the real phone call?"** Today mom's app rings full screen. Next: Sonny places a real call through a telephony voice agent (pipecat or livekit, both in `docs/OPEN_SOURCE.md` as roadmap).
-- **"Doesn't this replace family?"** No. "Sonny doesn't replace family; it nudges mom to call, with something to talk about." It even rings mom when grandma has been quiet, with a topic for the call.
+- **"Doesn't this replace family?"** The opposite: Sonny nudges mom to call, with something to talk about. It even rings mom when grandma has been quiet, with a topic for the call.
 - **"What is the long-term vision?"** "The easiest first step into AI for the oldest generation. Then health check-ins, then the rest of their daily life." No betting or gambling.

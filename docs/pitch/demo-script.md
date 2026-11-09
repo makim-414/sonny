@@ -6,7 +6,8 @@ Order: my scene → the numbers → the product (allowance, agent, calls mom whe
 
 - **Motif: the phone rings.** Sonny opens every moment as a call; the last shot is both phones ringing together.
 - **Killer line:** "Grandma isn't the patient. She's the boss."
-- **Goal line:** "Protect the family's time. Let grandma run her own day."
+- **Goal line:** "Sonny handles the errands, so family can just be family."
+- **Core message (owner):** "Families don't want to be caretakers. They want to be family. Grandma wants mom to call and say hi, not to manage her errands. Sonny takes the errands, so mom can live her day with peace of mind, and the call home is just a call home." (narration or captions around scenes 3 and 9)
 - **Vision line:** "The easiest first step into AI for the oldest generation. Then health check-ins, then the rest of their daily life."
 - **Names on screen:** grandma is June, mom is Sarah (demo names).
 - **Language:** English. Captions always on; the center emphasis line is 2 to 4 words; one number per screen.
@@ -25,7 +26,7 @@ Order: my scene → the numbers → the product (allowance, agent, calls mom whe
 | 6 | 0:32 to 0:37 | Grandma's hand hesitating over the phone | (captions only) | | Seedance live action 2 (B-roll A) |
 | 7 | 0:37 to 0:50 | June tries to book a taxi and gets lost. Sonny: "No rush, June. I'll ask Sarah to help." Mom's phone: "Sonny is calling", the request read aloud, "Book it for her". The taxi card on grandma's screen | "When grandma gets stuck, Sonny doesn't make her feel slow. It quietly calls mom." | "Stuck? Sonny quietly calls mom." | Real screen |
 | 8 | 0:50 to 0:54 | Sarah stepping out of a meeting room to take the call | (captions only) | | Seedance live action 3 (B-roll B) |
-| 9 | 0:54 to 1:00 | The goal, one card | "Protect the family's time. Let grandma run her own day." | | Motion |
+| 9 | 0:54 to 1:00 | The goal, one card | "Sonny handles the errands, so family can just be family." | | Motion |
 | 10 | 1:00 to 1:12 | Going to market: (1) phone today (real screen); (2) a Sonny TV app, 2 seconds of `/tv`, with "Seniors 75+ watch 4.4 hours of TV a day" (BLS 2025) and "61% of U.S. internet households stream mainly on a smart TV" (Parks Associates 2026), one per screen; (3) our own Sonny device | | "Same Sonny. Bigger screen." | Real screen and motion |
 | 11 | 1:12 to 1:22 | The vision: the first AI to cross the doorstep | "The easiest first step into AI for the oldest generation. Then health check-ins, then the rest of their daily life." | | Motion |
 | 12 | 1:22 to 1:30 | Both phones ringing at once, then the logo | "Sonny. The grandkid who's always home." github.com/makim-414/sonny | | Real screen |
