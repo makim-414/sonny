@@ -719,3 +719,42 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+/* join card: first visit on a phone, unlocks sound for later rings */
+.fa-join {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-8) var(--sp-6) calc(var(--sp-8) + env(safe-area-inset-bottom));
+  text-align: center;
+}
+.fa-join .fa-call-orb {
+  align-self: center;
+}
+.fa-join-title {
+  font-size: var(--t-h1);
+  font-weight: var(--w-semi);
+  line-height: var(--lh-snug);
+}
+.fa-join-body {
+  color: var(--text-muted);
+}
+.fa-join-field {
+  display: grid;
+  gap: var(--sp-1);
+  text-align: left;
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+}
+.fa-join-btn {
+  min-height: var(--call-btn);
+  font-size: var(--t-title);
+  border-radius: var(--r-pill);
+}

@@ -165,6 +165,8 @@ Do not use:
 
 ## Other likely questions
 
+- **"Why is it called Sonny?"** Sonny sounds like Sunny, a classic name for a little yellow bird, and 'sonny' is what grandmas call a grandkid. One word, both ideas: a parrot that learns, and the grandkid who's always home.
+
 - **"Will she really talk to it?"** Our riskiest assumption, not tested with her yet. Our bet: she answers when it speaks first, and keeps it on because it asks to be taught.
 - **"What about the real phone call?"** Today mom's app rings full screen. Next: Sonny places a real call through a telephony voice agent (pipecat or livekit, both in `docs/OPEN_SOURCE.md` as roadmap).
 - **"Doesn't this replace family?"** The opposite: Sonny nudges mom to call, with something to talk about. It even rings mom when grandma has been quiet, with a topic for the call.
