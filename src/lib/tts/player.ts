@@ -3,9 +3,11 @@
 // Plays Kokoro clips from POST /api/tts through WebAudio so the orb can read the real voice level.
 // Falls back to the browser voice (speechSynthesis) for any clip that fails.
 
-import { speak as speakBrowser, stopSpeaking as stopBrowser } from "@/lib/voice/speak";
+import { setSpeechVolume as setBrowserVolume, speak as speakBrowser, stopSpeaking as stopBrowser } from "@/lib/voice/speak";
 
-type Ctx = { ctx: AudioContext; analyser: AnalyserNode; data: Uint8Array<ArrayBuffer> };
+type Ctx = { ctx: AudioContext; analyser: AnalyserNode; gain: GainNode; data: Uint8Array<ArrayBuffer> };
+
+let volume = 1;
 
 let audio: Ctx | null = null;
 let current: AudioBufferSourceNode | null = null;
@@ -19,9 +21,20 @@ function ensureAudio(): Ctx | null {
   const analyser = ctx.createAnalyser();
   analyser.fftSize = 1024;
   analyser.smoothingTimeConstant = 0.6;
-  analyser.connect(ctx.destination);
-  audio = { ctx, analyser, data: new Uint8Array(new ArrayBuffer(analyser.fftSize)) };
+  // source -> analyser (orb reads the level before volume) -> gain -> speakers
+  const gain = ctx.createGain();
+  gain.gain.value = volume;
+  analyser.connect(gain);
+  gain.connect(ctx.destination);
+  audio = { ctx, analyser, gain, data: new Uint8Array(new ArrayBuffer(analyser.fftSize)) };
   return audio;
+}
+
+// Voice volume 0..1 (family setting). Applies to Kokoro and the browser voice.
+export function setVoiceVolume(v: number) {
+  volume = Math.max(0, Math.min(1, v));
+  if (audio) audio.gain.gain.value = volume;
+  setBrowserVolume(volume);
 }
 
 // Call from a tap: browsers only start audio after a user gesture.

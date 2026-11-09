@@ -1,13 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from "react";
 import type { AgentRequest, TvAction } from "@/lib/types";
 import { isListenSupported, listenOnce, type Listener } from "@/lib/voice/listen";
 import { splitSentences, unlockSpeech } from "@/lib/voice/speak";
-import { speakSentences, stopVoice, unlockAudio, voiceLevel, warmTts } from "@/lib/tts/player";
+import { setVoiceVolume, speakSentences, stopVoice, unlockAudio, voiceLevel, warmTts } from "@/lib/tts/player";
 import { createVad, type Vad } from "@/lib/voice/vad";
+import { getSettings } from "./settings";
 import { isTurnComplete, transcribe } from "@/lib/voice/stt";
-import { APP_LANG } from "@/lib/brand";
 import { callAgent } from "@/components/tv/agent-client";
 import { formatTime, useDemoClock } from "@/components/tv/use-demo-clock";
 import { Orb } from "./Orb";
@@ -24,10 +25,8 @@ const TOAST_MS = 3500;
 const RELISTEN_MS = 250;
 const RETRY_MS = 1200;
 
-// Older speakers pause mid-sentence: wait this long in silence before taking the turn (?wait=2.5 s).
-const DEFAULT_WAIT_MS = 2000;
-// Kokoro and browser voice speed, a little slow and clear (?rate=0.9).
-const DEFAULT_RATE = 0.85;
+// Hidden family setup: hold the top-left corner (or the remote's Menu / S key) this long.
+const SETUP_HOLD_MS = 2000;
 // Smart turn: after this much silence ask /api/turn whether she finished; if not, wait up to
 // SMART_MAX_EXTRA_MS more. Falls back to the fixed wait when /api/turn is down. ?wait= or ?noturn = fixed.
 const SMART_PROBE_MS = 700;
@@ -53,31 +52,24 @@ function joinTail(parts: Float32Array[], seconds: number): Float32Array {
 // If the VAD misses the end of speech, Web Speech is closed this long after the last word.
 const SAFETY_EXTRA_MS = 2500;
 
-function numberParam(name: string, min: number, max: number): number | null {
-  if (typeof window === "undefined") return null;
-  const v = Number(new URLSearchParams(window.location.search).get(name));
-  return Number.isFinite(v) && v >= min && v <= max ? v : null;
-}
-
-// ?wait= takes seconds (2.5) or milliseconds (2500).
+// ?wait= / ?rate= and the family settings (sonny.* in localStorage) resolve in settings.ts.
 function waitMs(): number {
-  const v = numberParam("wait", 0.2, 20_000);
-  if (v === null) return DEFAULT_WAIT_MS;
-  return v <= 20 ? v * 1000 : v;
+  return getSettings().waitMs;
 }
 
 function speechRate(): number {
-  return numberParam("rate", 0.5, 1.5) ?? DEFAULT_RATE;
+  return getSettings().rate;
 }
 const INBOX_POLL_MS = 1500;
 const INBOX_MISSING_POLL_MS = 15_000;
 
 const noopSubscribe = () => () => {};
 
-const LANG = APP_LANG === "en" ? "en-US" : "ko-KR";
+// Language can be changed per phone in /setup (sonny.lang); default is APP_LANG.
+const speechLang = () => (getSettings().lang === "en" ? "en-US" : "ko-KR");
 
 // Screen words in the conversation language (brand.ts APP_LANG).
-const COPY = {
+const COPY_BY = {
   en: {
     start: "Start",
     micBlocked: "Please allow the microphone",
@@ -102,7 +94,8 @@ const COPY = {
     taught: "할머니가 가르쳐 주신 것",
     nextDay: "다음 날 아침",
   },
-}[APP_LANG];
+};
+const copy = () => COPY_BY[getSettings().lang];
 
 function hasFlag(name: string) {
   return typeof window !== "undefined" && new URLSearchParams(window.location.search).has(name);
@@ -175,10 +168,10 @@ export function OrbApp() {
     async (text: string, en?: string) => {
       const gen = sayGenRef.current;
       const parts = splitSentences(text);
-      const eng = APP_LANG === "en" ? parts.map(() => undefined) : pairEnglish(parts, en);
+      const eng = getSettings().lang === "en" ? parts.map(() => undefined) : pairEnglish(parts, en);
       setMode("speaking");
       await speakSentences(parts, {
-        lang: LANG,
+        lang: speechLang(),
         rate: speechRate(),
         onSentence: (i) => setLine({ who: "assistant", text: parts[i], en: eng[i] }),
         isCancelled: () => sayGenRef.current !== gen,
@@ -194,15 +187,15 @@ export function OrbApp() {
           const learned = learnedCount(a.title, a.body);
           showCard({ title: a.title, body: a.body, learned }, learned ? LEARNED_MS : CARD_MS);
         } else if (a.type === "tune") {
-          showCard({ title: COPY.channel, body: `${COPY.channelBody(a.channel)}${a.reason ? ` · ${a.reason}` : ""}` }, TUNE_CARD_MS);
+          showCard({ title: copy().channel, body: `${copy().channelBody(a.channel)}${a.reason ? ` · ${a.reason}` : ""}` }, TUNE_CARD_MS);
         } else if (a.type === "schedule") {
           const at = Date.parse(a.at);
           if (!Number.isNaN(at)) {
             timersRef.current = [...timersRef.current, { at, label: a.label, action: a.action }];
-            showToast(`${COPY.reminder} · ${formatTime(new Date(at))} ${a.label}`);
+            showToast(`${copy().reminder} · ${formatTime(new Date(at))} ${a.label}`);
           }
         } else if (a.type === "notifyFamily") {
-          showToast(COPY.family);
+          showToast(copy().family);
         }
       }
     },
@@ -243,7 +236,7 @@ export function OrbApp() {
       const { reply } = await callAgent({ ...req, now: getNow().toISOString() });
       if (req.source === "voice" && reply.heardEn) setLine({ who: "user", text: req.text, en: reply.heardEn });
       runActions(reply.actions);
-      if (reply.private) showToast(COPY.private);
+      if (reply.private) showToast(copy().private);
       await say(reply.say, reply.sayEn);
     },
     [getNow, runActions, say, setMode, showToast],
@@ -359,7 +352,7 @@ export function OrbApp() {
       onError: (code) => {
         if (code === "not-allowed" || code === "audio-capture") {
           listenOkRef.current = false;
-          setNotice(COPY.micBlocked);
+          setNotice(copy().micBlocked);
           setTyping(true);
         } else if (code === "service-not-allowed" || code === "network" || code === "language-not-supported") {
           // The recognizer itself is unavailable (iPhone home-screen app, offline): use the server STT.
@@ -373,7 +366,7 @@ export function OrbApp() {
         // Silence or a hiccup: keep listening, like an open phone line.
         setTimeout(() => listenRef.current(), listenOkRef.current ? RELISTEN_MS : RETRY_MS);
       },
-    }, LANG, { continuous: vadDecides });
+    }, speechLang(), { continuous: vadDecides });
     listenerRef.current = self;
     if (!self) setMode("idle");
     else vadRef.current?.start();
@@ -439,6 +432,7 @@ export function OrbApp() {
       Object.assign(window, { __orbVoiceLevel: voiceLevel, __orbTranscribe: transcribe });
     }
     warmTts();
+    setVoiceVolume(getSettings().volume);
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
   }, []);
 
@@ -537,7 +531,7 @@ export function OrbApp() {
         jumpTo(target);
         sayGenRef.current++;
         stopVoice();
-        showCard({ title: COPY.nextDay, body: formatTime(target) }, 2500);
+        showCard({ title: copy().nextDay, body: formatTime(target) }, 2500);
         startedRef.current = true;
         setStarted(true);
         turn({ text: "morning-checkin", source: "proactive" });
@@ -550,6 +544,43 @@ export function OrbApp() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  const router = useRouter();
+  const goToSetup = useCallback(() => router.push("/setup"), [router]);
+
+  // Remote: hold Menu or S for 2 s to open the hidden setup. A short press does nothing.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const isSetupKey = (e: KeyboardEvent) => e.key === "ContextMenu" || e.key === "Menu" || e.code === "KeyS";
+    const down = (e: KeyboardEvent) => {
+      if (!isSetupKey(e) || e.repeat || timer || e.target instanceof HTMLInputElement) return;
+      timer = setTimeout(goToSetup, SETUP_HOLD_MS);
+    };
+    const up = (e: KeyboardEvent) => {
+      if (!isSetupKey(e) || !timer) return;
+      clearTimeout(timer);
+      timer = null;
+    };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    return () => {
+      if (timer) clearTimeout(timer);
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+    };
+  }, [goToSetup]);
+
+  // Touch: hold the invisible top-left corner for 2 s. Taps there are swallowed.
+  const cornerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cornerDown = (e: React.PointerEvent) => {
+    e.stopPropagation();
+    if (cornerTimer.current) clearTimeout(cornerTimer.current);
+    cornerTimer.current = setTimeout(goToSetup, SETUP_HOLD_MS);
+  };
+  const cornerUp = () => {
+    if (cornerTimer.current) clearTimeout(cornerTimer.current);
+    cornerTimer.current = null;
+  };
 
   useEffect(
     () => () => {
@@ -578,7 +609,20 @@ export function OrbApp() {
   if (!mounted) return <main className="orb-root" />;
 
   return (
-    <main className={`orb-root is-${mode}`} onPointerDown={onTap}>
+    <main
+      className={`orb-root is-${mode}`}
+      onPointerDown={onTap}
+      style={{ "--text-scale": getSettings().textScale } as React.CSSProperties}
+    >
+      <div
+        className="orb-corner"
+        aria-hidden
+        onPointerDown={cornerDown}
+        onPointerUp={cornerUp}
+        onPointerLeave={cornerUp}
+        onPointerCancel={cornerUp}
+        onContextMenu={(e) => e.preventDefault()}
+      />
       <Orb signal={signal} />
 
       {!started && (
@@ -587,9 +631,9 @@ export function OrbApp() {
           className="orb-start"
           onPointerDown={(e) => e.stopPropagation()}
           onClick={start}
-          aria-label={COPY.start}
+          aria-label={copy().start}
         >
-          {COPY.start}
+          {copy().start}
         </button>
       )}
       {notice && <p className="orb-notice">{notice}</p>}
@@ -598,7 +642,7 @@ export function OrbApp() {
         <section className={`orb-card ${card.learned ? "is-learned" : ""}`} role="dialog" aria-label={card.title}>
           {card.learned && <span className="orb-card-num">{card.learned}</span>}
           <span className="orb-card-text">
-            {card.learned && <span className="orb-card-label">{COPY.taught}</span>}
+            {card.learned && <span className="orb-card-label">{copy().taught}</span>}
             <h2 className="orb-card-title">{card.title}</h2>
             {card.body && <p className="orb-card-body">{card.body}</p>}
           </span>
@@ -607,10 +651,12 @@ export function OrbApp() {
 
       {toast && <p className="orb-toast">{toast}</p>}
 
-      <div className="orb-line" aria-live="polite">
-        {line && <p className={`orb-line-ko ${line.who === "user" ? "is-user" : ""}`}>{line.text}</p>}
-        {english && line?.en && <p className="orb-line-en">{line.en}</p>}
-      </div>
+      {getSettings().captions && (
+        <div className="orb-line" aria-live="polite">
+          {line && <p className={`orb-line-ko ${line.who === "user" ? "is-user" : ""}`}>{line.text}</p>}
+          {english && line?.en && <p className="orb-line-en">{line.en}</p>}
+        </div>
+      )}
 
       {typing && (
         <form
@@ -625,8 +671,8 @@ export function OrbApp() {
             className="orb-type-input"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder={COPY.type}
-            aria-label={COPY.type}
+            placeholder={copy().type}
+            aria-label={copy().type}
           />
         </form>
       )}
