@@ -37,6 +37,24 @@ export type AgentReply = {
   actions: TvAction[];
 };
 
+// Grandma's allowance. The family tops it up (Stripe test mode when keys exist),
+// grandma spends it by voice. Amounts are in the smallest currency unit (cents).
+export type WalletEntry = {
+  id: string;
+  at: string; // ISO time
+  amount: number; // + top-up, - spend
+  label: string; // "Top-up from Mom", "Taxi to clinic"
+  status: "done" | "pending_approval" | "declined";
+  by: "family" | "grandma";
+};
+
+export type Wallet = {
+  currency: "usd" | "krw";
+  balance: number;
+  perSpendLimit: number; // above this, the family must approve first
+  ledger: WalletEntry[];
+};
+
 // One line in the shared activity log the family app reads.
 export type ActivityEvent = {
   id: string;
