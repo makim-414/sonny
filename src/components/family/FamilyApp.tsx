@@ -18,6 +18,9 @@ type FamilyData = {
   approvedIds: string[];
 };
 
+// A skill grandma taught that needs an account mom connects once (see lib/agent/connections.ts).
+const CONNECTION_TAG = /\s*\(connection [\w-]+\)/;
+
 const EMPTY: FamilyData = { events: [], hiddenCount: 0, summary: null, approvedIds: [] };
 
 export default function FamilyApp({ embedded = false }: { embedded?: boolean }) {
@@ -100,7 +103,7 @@ export default function FamilyApp({ embedded = false }: { embedded?: boolean }) 
     setBusyId(item.event.id);
     try {
       await post({ approve: item.event.id });
-      setNotice(item.request === "taxi" ? T.approvedTaxi : T.approvedOrder);
+      setNotice(CONNECTION_TAG.test(item.event.text) ? T.connected : item.request === "taxi" ? T.approvedTaxi : T.approvedOrder);
       refresh();
     } catch {
       setNotice(T.approveFail);
@@ -152,10 +155,10 @@ export default function FamilyApp({ embedded = false }: { embedded?: boolean }) 
                 <h3>{p.label}</h3>
                 <time>{clock(p.event.at)}</time>
               </div>
-              <p>{p.text}</p>
+              <p>{p.text.replace(CONNECTION_TAG, "")}</p>
               <div className="fa-approval-actions">
                 <button className="fa-btn fa-btn-primary" disabled={busyId === p.event.id} onClick={() => approve(p)}>
-                  {busyId === p.event.id ? T.approving : T.approve}
+                  {busyId === p.event.id ? T.approving : CONNECTION_TAG.test(p.event.text) ? T.connect : T.approve}
                 </button>
                 <button className="fa-btn" onClick={() => setDismissed((d) => [...d, p.event.id])}>
                   {T.later}
@@ -230,7 +233,7 @@ export default function FamilyApp({ embedded = false }: { embedded?: boolean }) 
                     <span className="fa-item-label">{f.label}</span>
                     <time>{clock(f.event.at)}</time>
                   </div>
-                  <p className="fa-item-text">{f.text}</p>
+                  <p className="fa-item-text">{f.text.replace(CONNECTION_TAG, "")}</p>
                   {approved && <p className="fa-item-note">{T.approved}</p>}
                 </li>
               );
