@@ -40,6 +40,11 @@ export type AgentReply = {
 export type ActivityEvent = {
   id: string;
   at: string; // ISO time
-  kind: "heard" | "said" | "tuned" | "scheduled" | "alert" | "memory" | "family";
+  kind: "heard" | "said" | "tuned" | "scheduled" | "alert" | "memory" | "family" | "task";
   text: string;
+  // Who may see this line. "family": tasks and safety (orders, rides, medicine, alerts)
+  // shown to mom as-is. "summary": mom sees only `familyText`, never the raw words.
+  // "private": grandma's own talk and personal lessons, never shown to the family.
+  visibility?: "family" | "summary" | "private";
+  familyText?: string;
 };

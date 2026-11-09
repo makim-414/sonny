@@ -15,8 +15,13 @@ const g = globalThis as unknown as { __hyodoStore?: Store };
 export const store: Store =
   g.__hyodoStore ?? (g.__hyodoStore = { events: [], pending: [], currentChannel: null, tvInbox: [] });
 
-export function logEvent(kind: ActivityEvent["kind"], text: string, at = new Date().toISOString()) {
-  const event: ActivityEvent = { id: crypto.randomUUID(), at, kind, text };
+export function logEvent(
+  kind: ActivityEvent["kind"],
+  text: string,
+  at = new Date().toISOString(),
+  opts: Pick<ActivityEvent, "visibility" | "familyText"> = {},
+) {
+  const event: ActivityEvent = { id: crypto.randomUUID(), at, kind, text, ...opts };
   store.events.push(event);
   return event;
 }
