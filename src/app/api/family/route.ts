@@ -2,6 +2,8 @@ import { connection } from "next/server";
 import { logEvent, store } from "@/lib/store";
 import { requestKind, summarize } from "@/components/family/derive";
 import { T } from "@/components/family/strings";
+import { currentGuardian } from "@/lib/auth/server";
+import { FAMILY_MEMBERS, memberByEmail } from "@/lib/auth/members";
 import { FAMILY_SENDER, familyState } from "./state";
 import { familyView } from "./view";
 
@@ -10,6 +12,7 @@ import { familyView } from "./view";
 // without sending grandma's own words to the phone.
 export async function GET() {
   await connection();
+  const me = memberByEmail((await currentGuardian())?.email);
   const view = familyView(store.events);
   return Response.json({
     events: view.events,
@@ -17,6 +20,16 @@ export async function GET() {
     summary: summarize(store.events, store.currentChannel),
     approvedIds: familyState.approvedIds,
     inboxWaiting: store.tvInbox.length,
+    me: me ? { name: me.name, relation: me.relation, role: me.role, email: me.email, card: me.card } : null,
+    members: FAMILY_MEMBERS.map(({ email, name, relation, role }) => ({ email, name, relation, role })),
+    wallet: {
+      currency: store.wallet.currency,
+      balance: store.wallet.balance,
+      perSpendLimit: store.wallet.perSpendLimit,
+      spentThisWeek: store.wallet.ledger
+        .filter((e) => e.status === "done" && e.amount < 0 && Date.now() - Date.parse(e.at) < 7 * 24 * 3600 * 1000)
+        .reduce((sum, e) => sum - e.amount, 0),
+    },
   });
 }
 
@@ -31,7 +44,9 @@ type FamilyPost = {
 //   { approve, text? }     -> mom approves a pending request; the TV is told to go ahead
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as FamilyPost | null;
-  const from = body?.from?.trim() || FAMILY_SENDER;
+  // Whoever is signed in sends it; the feed and Sonny see their name ("Sarah: ...").
+  const g = await currentGuardian();
+  const from = memberByEmail(g?.email)?.name || g?.name || body?.from?.trim() || FAMILY_SENDER;
 
   if (body?.approve) {
     const target = store.events.find((e) => e.id === body.approve);

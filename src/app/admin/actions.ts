@@ -84,6 +84,6 @@ export async function decideSpend(id: string, approve: boolean): Promise<{ ok: b
   if (!r.ok) return r;
   const text = approve ? `${g.name} approved: ${r.label}` : `${g.name} said not this time: ${r.label}`;
   store.tvInbox.push({ id: randomUUID(), at: new Date().toISOString(), from: T.mom, text });
-  logEvent("family", `${T.mom}: ${approve ? "Approved" : "Declined"} ${r.label}`, undefined, { visibility: "family" });
+  logEvent("family", `${g.name}: ${approve ? "Approved" : "Declined"} ${r.label}`, undefined, { visibility: "family" });
   return { ok: true };
 }
