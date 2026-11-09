@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ActivityEvent } from "@/lib/types";
 import { clock, toFeedItem, type FeedItem, type Summary } from "./derive";
+import IncomingCall from "./IncomingCall";
 import { T } from "./strings";
 import "./family.css";
 
@@ -112,6 +113,7 @@ export default function FamilyApp({ embedded = false }: { embedded?: boolean }) 
 
   return (
     <div className={embedded ? "fa fa-embedded" : "fa"}>
+      {!embedded && <IncomingCall />}
       <header className="fa-header">
         <div>
           <h1 className="fa-title">{T.title}</h1>

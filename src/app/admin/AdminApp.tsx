@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { encode } from "uqr";
 import FamilyApp from "@/components/family/FamilyApp";
+import IncomingCall from "@/components/family/IncomingCall";
 import { clock } from "@/components/family/derive";
 import { T } from "@/components/family/strings";
 import type { WalletEntry } from "@/lib/types";
@@ -114,6 +115,7 @@ export default function AdminApp() {
 
   return (
     <div className="fa ad">
+      <IncomingCall />
       <header className="fa-header ad-header">
         <div>
           <h1 className="fa-title">{A.title}</h1>
@@ -294,10 +296,10 @@ function Allowance({ data, busy, run }: { data: AdminData; busy: boolean; run: R
               </div>
               <p>{e.label}</p>
               <div className="fa-approval-actions">
-                <button className="fa-btn fa-btn-primary" disabled={busy} onClick={() => run(() => decideSpend(e.id, true), A.approve)}>
+                <button className="fa-btn fa-btn-primary" disabled={busy} onClick={() => run(() => decideSpend(e.id, true), T.approved)}>
                   {A.approve}
                 </button>
-                <button className="fa-btn" disabled={busy} onClick={() => run(() => decideSpend(e.id, false), A.decline)}>
+                <button className="fa-btn" disabled={busy} onClick={() => run(() => decideSpend(e.id, false), A.declined)}>
                   {A.decline}
                 </button>
               </div>
