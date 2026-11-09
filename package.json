@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "ANTHROPIC_API_KEY=\"$(security find-generic-password -s anthropic-hackathon-key -w)\" next dev",
+    "dev": "NODE_OPTIONS=--network-family-autoselection-attempt-timeout=2000 ANTHROPIC_API_KEY=\"$(security find-generic-password -s anthropic-hackathon-key -w)\" next dev",
     "build": "next build",
-    "start": "ANTHROPIC_API_KEY=\"$(security find-generic-password -s anthropic-hackathon-key -w)\" next start",
+    "start": "NODE_OPTIONS=--network-family-autoselection-attempt-timeout=2000 ANTHROPIC_API_KEY=\"$(security find-generic-password -s anthropic-hackathon-key -w)\" next start",
     "lint": "eslint"
   },
   "dependencies": {
