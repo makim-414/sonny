@@ -45,6 +45,27 @@ function dayPart(d: Date): "morning" | "afternoon" | "evening" {
 }
 
 // "Grandma's name is June" (or "이름은 순자") in the agent's memory.
+// Last known name, so the greeting is personal even before memory answers.
+function cachedName(): string | null {
+  try {
+    return window.localStorage.getItem("sonny.name");
+  } catch {
+    return null;
+  }
+}
+
+// Registers the service worker at most once per page, production only, and gives up quietly on
+// failure: no retries and no reload on controller change (owner saw resets on 3005, 11/9).
+let swTried = false;
+function registerServiceWorker() {
+  if (swTried || process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) return;
+  swTried = true;
+  navigator.serviceWorker
+    .getRegistration("/")
+    .then((reg) => reg ?? navigator.serviceWorker.register("/sw.js"))
+    .catch(() => {});
+}
+
 async function loadName(): Promise<string | null> {
   try {
     const res = await fetch("/api/agent/memory", { cache: "no-store" });
@@ -52,7 +73,14 @@ async function loadName(): Promise<string | null> {
     const json = (await res.json()) as { facts?: { text?: string }[] };
     for (const f of json.facts ?? []) {
       const m = f.text?.match(/name is (\p{Lu}[\p{L}'-]+)/u) ?? f.text?.match(/이름은\s*([가-힣]{1,4})/);
-      if (m) return m[1];
+      if (m) {
+        try {
+          window.localStorage.setItem("sonny.name", m[1]);
+        } catch {
+          // private mode: fine, it is read again next time
+        }
+        return m[1];
+      }
     }
   } catch {
     // offline: plain hello
@@ -128,7 +156,7 @@ const COPY_BY = {
     taught: "What grandma taught me",
     calling: "Sonny is calling",
     greet: (part: "morning" | "afternoon" | "evening", name: string | null) =>
-      name ? `Good ${part}, ${name}` : "Hello",
+      name ? `Good ${part}, ${name}` : `Good ${part}`,
     callSub: "Answer to talk with Sonny",
     answer: "Answer",
     missed: "Missed call from Sonny",
@@ -209,7 +237,7 @@ export function OrbApp() {
   const lastActivityRef = useRef(0); // real ms, for dimming the resting orb
   const [resting, setResting] = useState(false);
   const [calling, setCalling] = useState(false);
-  const [name, setName] = useState<string | null>(null);
+  const [name, setName] = useState<string | null>(() => (typeof window === "undefined" ? null : cachedName()));
   const answerRef = useRef<((answered: boolean) => void) | null>(null);
   const cardTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -520,9 +548,9 @@ export function OrbApp() {
       Object.assign(window, { __orbVoiceLevel: voiceLevel, __orbTranscribe: transcribe });
     }
     warmTts();
-    void loadName().then(setName);
+    void loadName().then((n) => n && setName(n));
     setVoiceVolume(getSettings().volume);
-    if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
+    registerServiceWorker();
   }, []);
 
   // ---------- reminders on the demo clock ----------
