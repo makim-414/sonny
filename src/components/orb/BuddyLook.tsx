@@ -22,7 +22,7 @@ const FRAG = `
 precision mediump float;
 uniform vec2 R;
 uniform vec3 C, K, Q, A, P; // brand, light gold, ink, amber, blush
-uniform float Y, X, T, S, B, Bl, W, H, M, L, D, Z, G, N; // yaw pitch roll squash height blink wide happy mouth look-up drag grow glasses-lift glasses-on
+uniform float Y, X, T, S, B, Bl, W, H, M, L, D, Z, G, N, V, Tm; // yaw pitch roll squash height blink wide happy mouth look-up drag grow glasses-lift glasses-on parrot time
 mat3 rx(float a){float c=cos(a),s=sin(a);return mat3(1.,0.,0.,0.,c,s,0.,-s,c);}
 mat3 ry(float a){float c=cos(a),s=sin(a);return mat3(c,0.,-s,0.,1.,0.,s,0.,c);}
 mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,s,0.,-s,c,0.,0.,0.,1.);}
@@ -45,6 +45,32 @@ float mouth(vec2 q){
   float dShape=soft(length(m)-.045,.005)*dTop;
   float idle=smile*(1.-step(.05,M));
   return mix(max(idle,o),dShape,H);
+}
+// Parrot beak: small amber hook under the eyes; upper and lower halves part with the voice.
+float beak(vec2 q){
+  vec2 b=q-vec2(0.,-.04);
+  float gap=max(M,H)*.035;
+  float upper=soft(length((b-vec2(0.,.005))/vec2(1.,.85))-.05,.004)*step(-.012,b.y);
+  float hook=soft(length(b-vec2(0.,-.03))-.018,.004);
+  float lower=soft(length((b-vec2(0.,-.03-gap))/vec2(1.,.7))-.035,.004)*step(b.y,-.02-gap);
+  return max(max(upper,hook*step(gap,.01)),lower);
+}
+// Cockatiel crest: three tapered feathers rising from the top of the head and curling back.
+float crest(vec2 p, vec2 top, vec2 up, float r, float erect, float wig){
+  vec2 side=vec2(up.y,-up.x);
+  float a=0.;
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    vec2 base=top+side*r*(-.1+fi*.1);
+    float len=r*(.55+.2*fi-.1*fi*fi)*(.85+.3*erect);
+    float bend=(.45-.25*erect+wig*sin(Tm*18.+fi*1.7))*(1.+.2*fi);
+    vec2 d=p-base;
+    float t=clamp(dot(d,up)/len,0.,1.);
+    float off=dot(d,side)-bend*t*t*len;
+    float w=r*(.075*(1.-t)+.012);
+    a=max(a,soft(abs(off)-w,.004)*step(0.,dot(d,up))*step(dot(d,up),len*1.02));
+  }
+  return a;
 }
 // Round reading glasses: two thin gold rims around the eyes and a bridge. Returns rim, shine.
 vec2 glasses(vec2 q){
@@ -73,6 +99,16 @@ void main(){
     float pool=(1.-smoothstep(0.,1.,length(e)))*(.3-lift*.15);
     col=vec4(C*.9,pool);
   }
+  if(V>.5){
+    // project the head's top into the screen; the crest grows from there along the head's up
+    vec3 upv=rz(T)*rx(X)*ry(Y)*vec3(0.,1.,0.);
+    float k2=.95/(ro.z-c.z);
+    vec2 cen=(c.xy-ro.xy)*k2, up2=normalize(upv.xy+1e-4);
+    float r2=sc.y*k2;
+    vec2 top=cen+up2*r2*.82;
+    float cr=crest(uv,top,up2,r2,W,(M+H)*.25);
+    if(cr>0.) col=vec4(mix(C,K,.45)*(.9+.1*cr),cr);
+  }
   if(h>0.){
     float t=(-b-sqrt(h))/a; vec3 lp=o+d*t;
     vec3 n=normalize(lp/sc);
@@ -86,10 +122,14 @@ void main(){
     float face=step(0.,q.z);
     vec2 f=q.xy+vec2(0.,-L*.07);
     float blush=soft(length((f-vec2(-.3,-.05))/vec2(1.,.6))-.055,.035)+soft(length((f-vec2(.3,-.05))/vec2(1.,.6))-.055,.035);
-    base=mix(base,P,blush*.35*face);
+    base=mix(base,P,blush*.35*face*(1.-V));
+    // parrot: round orange cheek patches
+    float patch=soft(length(f-vec2(-.3,-.06))-.075,.01)+soft(length(f-vec2(.3,-.06))-.075,.01);
+    base=mix(base,A,min(1.,patch)*.85*face*V);
     // eyes close together (spacing 15% of the diameter), a little above the middle
-    float ink=max(max(eye(f,vec2(-.15,.05)),eye(f,vec2(.15,.05))),mouth(f))*face;
+    float ink=max(max(eye(f,vec2(-.15,.05)),eye(f,vec2(.15,.05))),mouth(f)*(1.-V))*face;
     vec3 shade=mix(base,Q,ink*.94);
+    shade=mix(shade,mix(A,Q,.2),beak(f)*face*V);           // amber beak
     vec2 gl=glasses(f)*face;
     float drop=glasses(f+vec2(-.012,.018)).x*face*(1.-gl.x); // soft shadow: the frame floats off the skin
     shade=mix(shade,A*.7,drop*.35);
@@ -112,7 +152,16 @@ function rgb(el: HTMLElement, name: string): [number, number, number] {
   return [r / 255, g / 255, b / 255];
 }
 
-export function BuddyLook({ signal, ringing = false }: { signal: React.RefObject<OrbSignal>; ringing?: boolean }) {
+export function BuddyLook({
+  signal,
+  ringing = false,
+  parrot = false,
+}: {
+  signal: React.RefObject<OrbSignal>;
+  ringing?: boolean;
+  parrot?: boolean; // ?look=parrot: cockatiel crest, beak and orange cheeks, no glasses
+}) {
+  const parrotRef = useRef(parrot);
   const ref = useRef<HTMLCanvasElement | null>(null);
   const [failed, setFailed] = useState(false);
   // The 2D face shows at once and gives way when the first 3D frame is drawn.
@@ -157,9 +206,10 @@ export function BuddyLook({ signal, ringing = false }: { signal: React.RefObject
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     const U: Record<string, WebGLUniformLocation | null> = {};
-    for (const n of ["R", "C", "K", "Q", "A", "P", "Y", "X", "T", "S", "B", "Bl", "W", "H", "M", "L", "D", "Z", "G", "N"]) U[n] = gl.getUniformLocation(prog, n);
+    for (const n of ["R", "C", "K", "Q", "A", "P", "Y", "X", "T", "S", "B", "Bl", "W", "H", "M", "L", "D", "Z", "G", "N", "V", "Tm"]) U[n] = gl.getUniformLocation(prog, n);
+    gl.uniform1f(U.V, parrotRef.current ? 1 : 0);
     // Reading glasses are part of the default look (owner, 11/9); ?acc=none takes them off.
-    gl.uniform1f(U.N, new URLSearchParams(window.location.search).get("acc") === "none" ? 0 : 1);
+    gl.uniform1f(U.N, parrotRef.current || new URLSearchParams(window.location.search).get("acc") === "none" ? 0 : 1);
     gl.uniform3fv(U.C, rgb(canvas, "--brand"));
     gl.uniform3fv(U.K, rgb(canvas, "--chart-1"));
     gl.uniform3fv(U.Q, rgb(canvas, "--dark"));
@@ -276,6 +326,7 @@ export function BuddyLook({ signal, ringing = false }: { signal: React.RefObject
       gl.uniform1f(U.H, Math.min(1, happy * 1.4));
       gl.uniform1f(U.M, Math.min(1, st.voice * 1.4));
       gl.uniform1f(U.L, st.look);
+      gl.uniform1f(U.Tm, t);
       gl.uniform1f(U.D, drag);
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
