@@ -55,8 +55,8 @@
   --r-xl: 16px;
   --r-pill: 999px;
   --hit: 44px;
+  --hit-lg: 52px;
   --sh-card: 0 1px 2px oklch(0.2 0.01 240 / 6%);
-  --sh-pop: 0 -6px 20px oklch(0.2 0.01 240 / 8%);
   --dur-press: 160ms;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --press-scale: 0.97;
@@ -219,12 +219,10 @@
   cursor: pointer;
   transition: transform var(--dur-press) var(--ease-out), opacity var(--dur-press) var(--ease-out);
 }
-.fa-btn:active:not(:disabled),
-.fa-chip:active:not(:disabled) {
+.fa-btn:active:not(:disabled) {
   transform: scale(var(--press-scale));
 }
-.fa-btn:disabled,
-.fa-chip:disabled {
+.fa-btn:disabled {
   opacity: 0.5;
   cursor: default;
 }
@@ -294,6 +292,7 @@
 .fa-tone-family { --tone: var(--tone-family); }
 .fa-tone-memory { --tone: var(--tone-memory); }
 .fa-tone-info { --tone: var(--tone-info); }
+.fa-tone-task { --tone: var(--text); }
 .fa-tone-warn,
 .fa-tone-urgent {
   border-color: var(--tone);
@@ -304,45 +303,47 @@
   font-weight: var(--w-semi);
 }
 
-/* composer */
+/* composer: inline under the summary so a first-time visitor sees it without scrolling */
 .fa-composer {
-  position: sticky;
-  bottom: 0;
-  background: var(--bg-elev);
-  border-top: 1px solid var(--border);
-  box-shadow: var(--sh-pop);
-  padding: var(--sp-3) var(--sp-4) calc(var(--sp-3) + env(safe-area-inset-bottom));
+  margin: var(--sp-6) var(--sp-4) 0;
   display: grid;
   gap: var(--sp-2);
+}
+.fa-composer .fa-section-title {
+  margin-bottom: 0;
 }
 .fa-notice {
   font-size: var(--t-sm);
   color: var(--success);
   font-weight: var(--w-med);
 }
+.fa-hint {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
 .fa-quick {
-  display: flex;
+  display: grid;
   gap: var(--sp-2);
-  overflow-x: auto;
-  scrollbar-width: none;
-  margin: 0 calc(var(--sp-4) * -1);
+}
+.fa-quick-btn {
+  min-height: var(--hit-lg);
   padding: 0 var(--sp-4);
-}
-.fa-quick::-webkit-scrollbar {
-  display: none;
-}
-.fa-chip {
-  flex: none;
-  min-height: var(--hit);
-  padding: 0 var(--sp-3);
   border-radius: var(--r-card);
-  border: 1px solid var(--border);
-  background: var(--bg-sunken);
-  font-size: var(--t-sm);
-  font-weight: var(--w-med);
-  white-space: nowrap;
+  border: 1px solid var(--brand);
+  background: var(--bg-elev);
+  color: var(--brand);
+  font-size: var(--t-title);
+  font-weight: var(--w-semi);
+  text-align: left;
   cursor: pointer;
   transition: transform var(--dur-press) var(--ease-out);
+}
+.fa-quick-btn:active:not(:disabled) {
+  transform: scale(var(--press-scale));
+}
+.fa-quick-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 .fa-form {
   display: grid;
@@ -361,4 +362,55 @@
 .fa-input:focus {
   outline: 2px solid var(--brand);
   outline-offset: -1px;
+}
+
+/* reassurance line in the summary */
+.fa-reassure {
+  font-size: var(--t-body);
+  font-weight: var(--w-semi);
+}
+.fa-reassure-ok {
+  color: var(--success);
+}
+.fa-reassure-urgent {
+  color: var(--danger);
+}
+
+/* the message mom just sent and grandma's answer */
+.fa-reply {
+  margin: var(--sp-4) var(--sp-4) 0;
+  padding: var(--sp-4);
+  background: var(--bg-elev);
+  border: 1px solid var(--brand);
+  border-radius: var(--r-xl);
+  display: grid;
+  gap: var(--sp-2);
+}
+.fa-reply span {
+  display: block;
+  font-size: var(--t-xs);
+  font-weight: var(--w-semi);
+  color: var(--text-muted);
+}
+.fa-reply-sent {
+  color: var(--text-muted);
+}
+.fa-reply-answer {
+  font-size: var(--t-title);
+  font-weight: var(--w-semi);
+}
+.fa-reply-answer span {
+  color: var(--tone-info);
+}
+.fa-reply-wait {
+  font-size: var(--t-sm);
+  color: var(--text-subtle);
+}
+
+/* private conversations are counted, never shown */
+.fa-private {
+  margin-top: var(--sp-4);
+  font-size: var(--t-sm);
+  color: var(--text-subtle);
+  text-align: center;
 }
