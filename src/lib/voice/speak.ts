@@ -10,6 +10,11 @@ const DEFAULT_RATE = 0.85;
 const PITCH = 1.1;
 
 const cachedVoice = new Map<string, SpeechSynthesisVoice>();
+let volume = 1;
+
+export function setSpeechVolume(v: number) {
+  volume = Math.max(0, Math.min(1, v));
+}
 // Chrome can garbage collect an utterance mid-sentence and never fire onend.
 let current: SpeechSynthesisUtterance | null = null;
 let cancelCurrent: (() => void) | null = null;
@@ -91,6 +96,7 @@ export async function speak(text: string, lang = "ko-KR", rate = DEFAULT_RATE): 
     const u = new SpeechSynthesisUtterance(clean);
     u.lang = lang;
     u.rate = rate;
+    u.volume = volume;
     u.pitch = PITCH;
     const voice = pickVoice(s, lang);
     if (voice) u.voice = voice;
