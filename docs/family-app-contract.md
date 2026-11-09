@@ -76,3 +76,11 @@ From the raw log: last time grandma spoke (`heard`, ignoring proactive triggers)
 - `missed`: tvInbox gets "Mom missed call <id>: Mom will call grandma at 7 PM." and Today shows a task line "7 PM: call grandma".
 - Demo: `POST /api/family/calls/demo?demo=1 { "reason": "nudge", "script"? }`.
 - The Kokoro read-out waits at most 5 seconds, then the browser voice reads the script instead.
+
+## Struggle calls (`reason: "struggle"`)
+
+- Sonny rings mom when grandma has been stuck on a task (for example booking a taxi) for 10 to 20 minutes. No wallet entry.
+- The call screen shows "Grandma needs a hand", then "Book it for her" (decision `approve`) and "I'll call her" (decision `decline`; a spoken "no" means the same). Decline on the ringing screen is `missed`.
+- `approve`: tvInbox "Mom approved call <id>: book it for grandma now and tell her it's done."
+- `decline`: tvInbox "Mom declined call <id>: Mom will call grandma to help. Tell grandma "Mom's going to call you."".
+- Demo: `POST /api/family/calls/demo?demo=1 { "reason": "struggle", "script"? }`.

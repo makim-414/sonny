@@ -8,6 +8,18 @@ import type { GuardianCall, WalletEntry } from "@/lib/types";
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as { script?: string; amount?: number; label?: string; reason?: string };
 
+  // { reason: "struggle" }: grandma has been stuck on a task for a while; Sonny quietly asks mom.
+  if (body.reason === "struggle") {
+    const at = new Date().toISOString();
+    const script =
+      body.script?.trim().slice(0, 400) ||
+      "Hi, it's Sonny. Grandma has been trying to book a taxi to the doctor for fifteen minutes, and she can't remember the clinic's name. Shall I book Dr. Kim's clinic for her, or would you like to call her?";
+    const call: GuardianCall = { id: randomUUID(), at, script, amount: 0, reason: "struggle", status: "ringing" };
+    store.calls.push(call);
+    logEvent("call", `Sonny is calling: ${script}`, at, { visibility: "family", familyText: "Sonny called: grandma needs a hand with a taxi" });
+    return Response.json({ ok: true, call }, { status: 201 });
+  }
+
   // { reason: "nudge" }: Sonny suggests mom calls grandma, with something to talk about. No money.
   if (body.reason === "nudge") {
     const at = new Date().toISOString();

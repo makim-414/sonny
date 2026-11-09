@@ -155,7 +155,7 @@ export default function IncomingCall() {
       // A nudge has nothing to decline: "no" means "remind me at 7 PM".
       const nudge = call.reason === "nudge";
       const d = nudge && decision === "decline" ? "missed" : decision;
-      const done = nudge ? T.nudgeDone : T.callDone;
+      const done = nudge ? T.nudgeDone : call.reason === "struggle" ? T.struggleDone : T.callDone;
       try {
         const res = await fetch("/api/family/calls", {
           method: "POST",
@@ -217,13 +217,15 @@ export default function IncomingCall() {
   if (!call) return null;
 
   const nudge = call.reason === "nudge";
+  const struggle = call.reason === "struggle";
   const dollars = new Intl.NumberFormat(T.locale, { style: "currency", currency: "USD" }).format(call.amount / 100);
+  const sub = nudge ? T.nudgeSub : struggle ? T.struggleSub : `${T.callSub} · ${dollars}`;
   return (
     <div className="fa-call" role="dialog" aria-modal="true" aria-label={T.callTitle}>
       <div className="fa-call-top">
         <span className={phase === "ringing" ? "fa-call-orb is-ringing" : "fa-call-orb"} aria-hidden />
         <h2 className="fa-call-title">{T.callTitle}</h2>
-        <p className="fa-call-sub">{nudge ? T.nudgeSub : `${T.callSub} · ${dollars}`}</p>
+        <p className="fa-call-sub">{sub}</p>
       </div>
 
       {phase !== "ringing" && <p className="fa-call-script">{call.script}</p>}
@@ -253,7 +255,17 @@ export default function IncomingCall() {
             </button>
           </>
         )}
-        {(phase === "deciding" || phase === "speaking") && !nudge && (
+        {(phase === "deciding" || phase === "speaking") && struggle && (
+          <>
+            <button className="fa-call-btn is-later" onClick={() => void finish("decline")}>
+              {T.struggleCallHer}
+            </button>
+            <button className="fa-call-btn is-yes" onClick={() => void finish("approve")}>
+              {T.struggleBook}
+            </button>
+          </>
+        )}
+        {(phase === "deciding" || phase === "speaking") && !nudge && !struggle && (
           <>
             <button className="fa-call-btn is-no" onClick={() => void finish("decline")}>
               {T.callDecline}
