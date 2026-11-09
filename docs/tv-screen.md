@@ -16,7 +16,10 @@
 - First screen: one round Start button (about 100 px) under the orb; it disappears once the talk begins. VAD and recognition pause while the assistant thinks or speaks. Model, worklet and onnxruntime wasm come from `/api/tts/vad/<file>` (served from node_modules, no CDN). `?novad` turns VAD off.
 - No Web Speech (iPhone home-screen app, `service-not-allowed`, `network`): the VAD's utterance (16 kHz) goes to `POST /api/stt` as WAV and the transcript starts the turn. `?stt` forces this path. If `/api/stt` answers 503 the type line appears.
 - TV remotes: OK / Enter starts, or stops the voice and listens. Back (Escape, Backspace, webOS 461, Tizen 10009) closes a card and never leaves the app.
-- Particles stay canvas 2D (smooth at 1000 to 1400 particles); three.js was not needed.
+- Particles: `src/components/orb/WebGLOrb.tsx` is a raw WebGL orb written from scratch for this repo (no three.js, no client code reused): Fibonacci sphere computed once, all motion from a few sines in the vertex shader, one additive `drawArrays(POINTS)` per frame, no float render targets. 1100 points on phones, 1500 on desktop. Core color is `--brand` lifted toward white, far side `--chart-2`; the soft glow is a CSS gradient behind the canvas. It stops drawing when the tab is hidden or the orb is off screen.
+- `Orb.tsx` picks it, and falls back to the canvas 2D `ParticleOrb.tsx` when WebGL or the shaders fail, on `webglcontextlost`, with `prefers-reduced-motion`, or with `?orb=2d`. Both read the same signal (state, pulse, real voice level).
+- Size (esbuild 0.25 minify, measured 11/9): WebGLOrb 5.1 KB min / 2.5 KB gzip; WebGLOrb + ParticleOrb + Orb 8.5 KB min / 3.7 KB gzip (target 15 KB).
+- Dev server only: if a client drops while `/api/tts` requests are queued behind Kokoro, `next dev` exits (ECONNRESET in the router process). `next start` survived the same test (4 parallel requests aborted at 1.5 s and 3 s). Demo on `pnpm start`.
 - PWA: `src/app/manifest.ts` serves `/manifest.webmanifest` (name from `src/lib/brand.ts`, standalone, dark colors). Icons in `public/icons/` (192, 512, maskable 512, apple-touch 180), generated from `public/icons/orb-icon.svg` with ImageMagick. `public/sw.js` only exists so the app can be installed. The Claude browser pane blocks service workers; real Chrome registers it.
 
 
