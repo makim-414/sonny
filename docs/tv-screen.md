@@ -7,6 +7,8 @@
 - Captions: only the last sentence, small and faint at the bottom. E or `?en` adds the English line.
 - `showCard` floats over the orb (6 s, learned-count cards 4.5 s with the big number). `tune` becomes a 3 s '채널을 바꿨어요' card. `notifyFamily` and `private` show a small top toast.
 - If the mic is blocked or speech recognition is missing (possible in an iOS home-screen app), a small '말 대신 글로 적기' line appears.
+- Hidden setup: hold the invisible 64x64 top-left corner, or the remote's Menu or S key, for 2 s to open `/setup`. Short taps do nothing there.
+- Family settings (localStorage, written by `/setup`): `sonny.rate`, `sonny.waitMs`, `sonny.textScale` (normal/large/xlarge or 1/1.25/1.5), `sonny.captions` (on/off), `sonny.volume` (0..1), `sonny.lang` (en/ko). URL `?rate=` and `?wait=` win. Read in `src/components/orb/settings.ts`.
 - Desktop demo keys: Enter or Space (tap), E, T (text line), P (greet again), N (next morning 08:00 + greeting), F (+30 min).
 - It also polls `/api/family/inbox`. Only one screen should consume the inbox: open the other with `?noinbox` (orb) when `/tv` is the one showing family messages.
 - Voice (APP_LANG en): Kokoro 82M via `POST /api/tts {text}` -> 16-bit WAV, voice af_heart, about 1.3 to 1.6 s per sentence on the M-series laptop; the next sentence is fetched while one plays. Model cache `~/.cache/hyodo-tts` (96 MB, `TTS_CACHE_DIR` to move it); the page calls `GET /api/tts` on open to preload. `next.config.ts` must keep `serverExternalPackages: ["kokoro-js"]`. Hangul lines and failed clips use the browser voice.
