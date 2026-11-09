@@ -11,16 +11,19 @@ export type OrbSignal = {
   pulse: number;
   // Real loudness of the assistant's voice (WebAudio analyser), or null when unknown.
   level?: () => number | null;
+  // 0..1 impulse for a happy moment (thanks, something learned); decays by itself.
+  joy?: number;
 };
 
-export type Target = { radius: number; spin: number; wobble: number; spread: number };
+// lean: extra forward tilt (radians) so listening reads as "leaning in".
+export type Target = { radius: number; spin: number; wobble: number; spread: number; lean: number };
 
 // How each state looks. The canvas eases toward these so changes are smooth.
 export const TARGETS: Record<OrbMode, Target> = {
-  idle: { radius: 1.0, spin: 0.1, wobble: 0.035, spread: 0 },
-  listening: { radius: 0.56, spin: 0.18, wobble: 0.015, spread: 0 },
-  thinking: { radius: 0.6, spin: 1.1, wobble: 0.01, spread: 0 },
-  speaking: { radius: 1.08, spin: 0.28, wobble: 0.05, spread: 1 },
+  idle: { radius: 1.0, spin: 0.1, wobble: 0.035, spread: 0, lean: 0 },
+  listening: { radius: 0.56, spin: 0.12, wobble: 0.015, spread: 0, lean: 0.45 },
+  thinking: { radius: 0.6, spin: 0.7, wobble: 0.01, spread: 0, lean: 0 },
+  speaking: { radius: 1.08, spin: 0.28, wobble: 0.05, spread: 1, lean: 0 },
 };
 
 const COUNT_DESKTOP = 1400;
@@ -101,7 +104,12 @@ export function ParticleOrb({ signal }: { signal: React.RefObject<OrbSignal> }) 
       cur.spin += (goal.spin - cur.spin) * ease;
       cur.wobble += (goal.wobble - cur.wobble) * ease;
       cur.spread += (goal.spread - cur.spread) * ease;
+      cur.lean += (goal.lean - cur.lean) * ease;
       s.pulse = Math.max(0, s.pulse - dt * 1.6);
+      s.joy = Math.max(0, (s.joy ?? 0) - dt * 0.9);
+      const joy = s.joy ?? 0;
+      // Joy: one hop up (half a sine over the impulse) and a brighter orb.
+      const hop = Math.sin((1 - joy) * Math.PI) * joy;
 
       const motion = reduced ? 0.25 : 1;
       angle += cur.spin * dt * motion;
@@ -119,10 +127,10 @@ export function ParticleOrb({ signal }: { signal: React.RefObject<OrbSignal> }) 
 
       const base = Math.min(w, h) * 0.3 * (cur.radius + breath + talk * 0.12 * motion);
       const cx = w / 2;
-      const cy = h / 2;
+      const cy = h / 2 - hop * Math.min(w, h) * 0.12 * motion;
       const cosA = Math.cos(angle);
       const sinA = Math.sin(angle);
-      const tilt = 0.35;
+      const tilt = 0.35 + cur.lean;
       const cosT = Math.cos(tilt);
       const sinT = Math.sin(tilt);
 
@@ -161,7 +169,7 @@ export function ParticleOrb({ signal }: { signal: React.RefObject<OrbSignal> }) 
         const sx = cx + x * base * persp * 1.6;
         const sy = cy + y * base * persp * 1.6;
         const depth = (z + 1) / 2; // 0 back .. 1 front
-        ctx.globalAlpha = 0.18 + depth * 0.8;
+        ctx.globalAlpha = Math.min(1, (0.18 + depth * 0.8) * (1 + joy * 0.6));
         ctx.fillStyle = depth > 0.45 ? core : edge;
         const size = dot * (0.6 + depth * 0.9);
         ctx.fillRect(sx - size / 2, sy - size / 2, size, size);

@@ -15,7 +15,7 @@ const COUNT_PHONE = 1100;
 const VERT = `
 attribute vec3 a_pos;
 attribute float a_seed;
-uniform float u_time, u_angle, u_tilt, u_scale, u_wobble, u_wave, u_tremble, u_dot, u_aspect;
+uniform float u_time, u_angle, u_tilt, u_scale, u_wobble, u_wave, u_tremble, u_dot, u_aspect, u_lift;
 varying float v_depth;
 void main() {
   vec3 p = a_pos;
@@ -31,17 +31,18 @@ void main() {
   p *= r;
   float persp = 1.0 / (1.9 - p.z * 0.6);
   v_depth = (p.z + 1.0) * 0.5;
-  gl_Position = vec4(p.x * u_scale * persp / u_aspect, p.y * u_scale * persp, 0.0, 1.0);
+  gl_Position = vec4(p.x * u_scale * persp / u_aspect, p.y * u_scale * persp + u_lift, 0.0, 1.0);
   gl_PointSize = u_dot * (0.7 + v_depth * 1.1);
 }`;
 
 const FRAG = `
 precision mediump float;
 uniform vec3 u_core, u_edge;
+uniform float u_glow;
 varying float v_depth;
 void main() {
   float d = length(gl_PointCoord - 0.5);
-  float a = smoothstep(0.5, 0.1, d) * (0.18 + v_depth * 0.8);
+  float a = min(1.0, smoothstep(0.5, 0.1, d) * (0.18 + v_depth * 0.8) * u_glow);
   gl_FragColor = vec4(mix(u_edge, u_core, smoothstep(0.3, 0.6, v_depth)) * a, a);
 }`;
 
@@ -126,12 +127,12 @@ export function WebGLOrb({ signal, onFail }: { signal: React.RefObject<OrbSignal
     const U = {
       time: u("u_time"), angle: u("u_angle"), tilt: u("u_tilt"), scale: u("u_scale"), wobble: u("u_wobble"),
       wave: u("u_wave"), tremble: u("u_tremble"), dot: u("u_dot"), aspect: u("u_aspect"), core: u("u_core"), edge: u("u_edge"),
+      lift: u("u_lift"), glow: u("u_glow"),
     };
     // Core is the brand gold lifted toward white; the far side takes the cool chart-2.
     const brand = cssColor(canvas, "--brand");
     gl.uniform3f(U.core, ...(brand.map((c) => c + (1 - c) * 0.45) as [number, number, number]));
     gl.uniform3fv(U.edge, cssColor(canvas, "--chart-2"));
-    gl.uniform1f(U.tilt, 0.35);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE); // additive glow on the dark screen
     gl.clearColor(0, 0, 0, 0);
@@ -172,7 +173,11 @@ export function WebGLOrb({ signal, onFail }: { signal: React.RefObject<OrbSignal
       cur.spin += (goal.spin - cur.spin) * ease;
       cur.wobble += (goal.wobble - cur.wobble) * ease;
       cur.spread += (goal.spread - cur.spread) * ease;
+      cur.lean += (goal.lean - cur.lean) * ease;
       s.pulse = Math.max(0, s.pulse - dt * 1.6);
+      s.joy = Math.max(0, (s.joy ?? 0) - dt * 0.9);
+      const joy = s.joy ?? 0;
+      const hop = Math.sin((1 - joy) * Math.PI) * joy; // one hop up over the impulse
       angle += cur.spin * dt;
       if (s.mode === "speaking") {
         const raw = s.level?.() ?? speechEnvelope(t);
@@ -190,6 +195,9 @@ export function WebGLOrb({ signal, onFail }: { signal: React.RefObject<OrbSignal
       gl.uniform1f(U.wobble, cur.wobble);
       gl.uniform1f(U.wave, cur.spread * voice * 0.28);
       gl.uniform1f(U.tremble, s.mode === "listening" ? s.pulse * 0.12 : 0);
+      gl.uniform1f(U.tilt, 0.35 + cur.lean); // listening leans in toward her
+      gl.uniform1f(U.lift, hop * 0.24);
+      gl.uniform1f(U.glow, 1 + joy * 0.6);
       gl.drawArrays(gl.POINTS, 0, n);
       raf = requestAnimationFrame(frame);
     };

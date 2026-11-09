@@ -282,6 +282,9 @@ export function OrbApp() {
       if (req.source === "voice" && reply.heardEn) setLine({ who: "user", text: req.text, en: reply.heardEn });
       runActions(reply.actions);
       if (reply.private) showToast(copy().private);
+      // A happy moment (thanks, something learned): the orb hops once and brightens.
+      const happy = `${reply.say} ${reply.actions.map((a) => (a.type === "showCard" ? a.title : "")).join(" ")}`;
+      if (/thank|learned|taught|고마|배웠|가르쳐/i.test(happy)) signal.current.joy = 1;
       await say(reply.say, reply.sayEn);
     },
     [getNow, runActions, say, setMode, showToast],
@@ -750,6 +753,11 @@ export function OrbApp() {
 
   if (!mounted) return <main className="orb-root" />;
 
+  // Design options for the owner: ?eyes=1 adds two blinking dots, ?look=character shows a
+  // plain warm round character instead of particles. Default is the particle orb only.
+  const params = new URLSearchParams(window.location.search);
+  const look = params.get("look") === "character" ? "character" : params.get("eyes") === "1" ? "eyes" : "orb";
+
   return (
     <main
       className={`orb-root is-${mode} ${resting ? "is-resting" : ""}`}
@@ -765,7 +773,14 @@ export function OrbApp() {
         onPointerCancel={cornerUp}
         onContextMenu={(e) => e.preventDefault()}
       />
-      <Orb signal={signal} />
+      {look !== "character" && <Orb signal={signal} />}
+      {look === "character" && <span className={`orb-character is-${mode}`} aria-hidden />}
+      {(look === "eyes" || look === "character") && (
+        <span className={`orb-eyes is-${mode} ${look === "character" ? "on-character" : ""}`} aria-hidden>
+          <i />
+          <i />
+        </span>
+      )}
 
       {!started && (
         <button
