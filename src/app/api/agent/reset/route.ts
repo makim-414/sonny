@@ -1,11 +1,13 @@
+import { familyState } from "@/app/api/family/state";
 import { resetSession } from "@/lib/agent/session";
 import { shared } from "@/lib/agent/tools";
 import { resetWatch } from "@/lib/agent/watch";
 import { getMemory, resetMemory } from "@/lib/memory";
 import { store } from "@/lib/store";
 
-// POST /api/agent/reset : demo reset. Memory back to seed (a new GBrain run entity),
-// conversation, health log, pending approvals and TV timers cleared.
+// POST /api/agent/reset : demo reset before a recording. Memory back to the seed (a new
+// GBrain run entity); conversation, health log, pending approvals, calls, the TV inbox,
+// TV timers, mom's feed and her approvals cleared; wallet back to $80.
 export async function POST() {
   resetSession();
   await resetMemory();
@@ -14,6 +16,11 @@ export async function POST() {
   shared.lastLater = undefined;
   shared.confirmOrder = undefined;
   shared.offer = undefined;
+  shared.lastRide = undefined;
+  store.tvInbox.length = 0; // approvals or messages left from an earlier run
+  store.events.length = 0; // mom's feed starts empty for the next recording
+  // Family app approvals from the last run. Paired devices and routines stay.
+  familyState.approvedIds.length = 0;
   resetWatch();
   store.calls.length = 0;
   store.pending.length = 0;

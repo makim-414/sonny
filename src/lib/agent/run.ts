@@ -207,6 +207,7 @@ function answerHelpCall(reason: "struggle" | "nudge", verdict: string, text: str
     const ride = requestRide({ to: "clinic", now });
     const pay = spend(ride.fareCents, `Taxi to ${ride.destination.name} (${DEMO})`, at);
     taskDone();
+    shared.lastRide = { at: now.getTime(), status: "booked", car: ride.carModel, plate: ride.plate, pickupISO: ride.pickupAt, destination: ride.destination.name };
     actions.push({ type: "showCard", title: T.rideCardTitle, body: `${T.rideBody(ride.pickup.name, ride.destination.name, ride.carModel, ride.plate, ride.etaMin)}\n${T.approvedTag}\n${DEMO}` });
     logEvent("family", `${T.logRidePaid(T.usd(ride.fareCents), ride.destination.name, ride.carModel, ride.plate, kstClock(new Date(ride.pickupAt)))} (${DEMO})${pay.status === "done" ? "" : " [pending]"}`, at, { visibility: "family" });
     say = EN ? `Sarah asked me to book it. A ${ride.carModel} comes in ${ride.etaMin} minutes.` : `따님이 대신 불러 달래요. ${ride.carModel} 택시가 ${ride.etaMin}분 뒤에 와요.`;
@@ -219,6 +220,16 @@ function answerHelpCall(reason: "struggle" | "nudge", verdict: string, text: str
   if (say) logEvent("said", say, at, { visibility: "family" });
   pushTurn(L.approvalTurn(text), say ? `${say} ${L.doneNote(`${reason} call ${verdict}`)}` : L.doneNote(`${reason} call ${verdict}`));
   return { say, sayEn: EN ? say : undefined, actions, meta: { ms: 0, model: `none (${reason} call)`, tools: [] } };
+}
+
+const ASK_AGAIN = /^\s*(what|huh|pardon|sorry|eh|say (that|it) again|again|when|what time|which car|is it coming|did you( book it)?)\s*[?!.]*\s*$|^\s*(뭐|뭐라고|응\?|언제|다시)\s*[?!.]*\s*$/i;
+const RIDE_FRESH_MS = 45 * 60_000;
+function recentRide(now: Date) {
+  const r = shared.lastRide;
+  return r && now.getTime() - r.at < RIDE_FRESH_MS ? r : undefined;
+}
+function rideLine(r: NonNullable<typeof shared.lastRide>) {
+  return r.status === "booked" ? T.rideStatus(kstClock(new Date(r.pickupISO)), r.car) : T.rideWaiting;
 }
 
 const SECRET_TEXT = /말하지 마|비밀|don't tell|secret|between us/i;
@@ -253,6 +264,8 @@ function handleCallAnswer(text: string, now: Date): Reply | null {
       actions.push({ type: "showCard", title: T.declinedCard, body: req.kind === "taxi" ? T.whatRide(req.ride.destination.name) : req.order.items.map((i) => T.qty(i.name, i.qty)).join(", ") });
     } else if (req.kind === "taxi") {
       const r = req.ride;
+    shared.lastRide = { at: now.getTime(), status: "booked", car: r.carModel, plate: r.plate, pickupISO: new Date(now.getTime() + 5 * 60_000).toISOString(), destination: r.destination.name };
+      shared.lastRide = { at: now.getTime(), status: "booked", car: r.carModel, plate: r.plate, pickupISO: new Date(now.getTime() + 5 * 60_000).toISOString(), destination: r.destination.name };
       say = T.rideOkSay(r.carModel, 5);
       actions.push({ type: "showCard", title: T.rideCardTitle, body: `${T.rideBody(r.pickup.name, r.destination.name, r.carModel, r.plate, 5)}\n${T.approvedTag}\n${DEMO}` });
     } else {
@@ -283,6 +296,7 @@ function handleApproval(text: string, now: Date): Reply | null {
   let say: string;
   if (req.kind === "taxi") {
     const r = req.ride;
+    shared.lastRide = { at: now.getTime(), status: "booked", car: r.carModel, plate: r.plate, pickupISO: new Date(now.getTime() + 5 * 60_000).toISOString(), destination: r.destination.name };
     const eta = 5;
     const plate = EN ? r.plate : r.plate.slice(-4);
     actions.push({
@@ -343,7 +357,15 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
     shared.offer = undefined;
   }
   sessionDay.day = dayKey;
-  const ctx: AgentContext = { now, memory, actions: [], private: false };
+  const lastAssistant = [...session.messages].reverse().find((m) => m.role === "assistant");
+  const ctx: AgentContext = {
+    now,
+    memory,
+    actions: [],
+    private: false,
+    heard: req.source === "voice" ? req.text : undefined,
+    lastSaid: typeof lastAssistant?.content === "string" ? lastAssistant.content : undefined,
+  };
 
   if (req.source === "family") {
     const approved = handleCallAnswer(req.text, now) ?? handleApproval(req.text, now);
@@ -355,6 +377,11 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
     logEvent("heard", req.text, nowIso, { visibility: "private" });
     const q = onVoice(req.text, now);
     if (q) return { ...quickReply(q, req.text, nowIso), heardEn: EN ? req.text : undefined };
+    // "what?" right after a taxi: the same facts again, shorter, never a different story.
+    const ride = recentRide(now);
+    if (ride && ASK_AGAIN.test(req.text)) {
+      return { ...quickReply({ say: rideLine(ride), actions: [], note: "taxi status repeated" }, req.text, nowIso), heardEn: EN ? req.text : undefined };
+    }
   } else {
     const q = struggleCheck(now);
     if (q) return quickReply(q, `[${req.source}] ${req.text}`, nowIso);
@@ -362,8 +389,9 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   if (req.source === "proactive" && req.text.trim() === "family-nudge") {
     return quickReply(onNudge(now, (t) => SECRET_TEXT.test(t)), "[family-nudge]", nowIso);
   }
-  if (req.source === "proactive" && req.text.trim() === "idle-checkin") {
-    const r = onIdle(now);
+  const idle = req.source === "proactive" ? req.text.trim().match(/^idle-checkin(?::(\d+))?$/) : null;
+  if (idle) {
+    const r = onIdle(now, idle[1] ? Number(idle[1]) : 1);
     if (r !== "ask-model") return quickReply(r, "[idle-checkin]", nowIso);
   }
 
@@ -460,6 +488,11 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
     `${L.facts}:\n${facts.map((f) => `- (${f.id}) ${f.text}`).join("\n")}`,
     recentTaught.length ? `${L.recent}:\n${recentTaught.map((f) => `- (${f.id}) ${f.text}`).join("\n")}` : "",
     L.lessons(lessons.length),
+    recentRide(now)
+      ? EN
+        ? `Taxi status (true, never contradict it): ${recentRide(now)!.status === "booked" ? `booked, a ${recentRide(now)!.car}, plate ${recentRide(now)!.plate}, pickup ${kstClock(new Date(recentRide(now)!.pickupISO))}, to ${recentRide(now)!.destination}` : "waiting for Sarah's OK"}.`
+        : `택시 상태(사실, 절대 뒤집지 않는다): ${recentRide(now)!.status === "booked" ? `예약됨, ${recentRide(now)!.car} ${recentRide(now)!.plate}, ${kstClock(new Date(recentRide(now)!.pickupISO))} 도착, ${recentRide(now)!.destination}행` : "따님 확인 대기"}.`
+      : "",
     skills.length
       ? `${EN ? "Skills she taught you (when she asks, do them exactly this way with skill_run; if she changes a step, skill_correct)" : "할머니가 가르쳐 준 하는 법 (요청하시면 skill_run 으로 그대로, 바꾸시면 skill_correct)"}:\n${skills.map((k) => `- ${k.name} (${k.action}): ${k.steps.join("; ")}`).join("\n")}`
       : "",
@@ -549,7 +582,11 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
     let raw = (result.finalStep.text || result.text).trim();
     let ran = result.toolResults.map((r) => r.toolName);
     const first = sayTag(raw) ?? raw;
-    const lied = CLAIMS.some((c) => c.words.test(first) && !c.tools.some((t) => ran.includes(t)));
+    // A taxi that really is booked may be talked about without calling the tool again.
+    const rideOn = recentRide(now)?.status === "booked";
+    const lied = CLAIMS.some(
+      (c) => c.words.test(first) && !c.tools.some((t) => ran.includes(t)) && !(rideOn && c.tools.includes("ride_request")),
+    );
     if (lied && model !== SMART) {
       console.log("[agent] fast model claimed an action without the tool, rerunning on", SMART, JSON.stringify(first));
       ctx.actions.length = 0;
@@ -572,6 +609,12 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
       spoken = safeLine(ran);
     }
     if (spoken.length >= 4) say = EN ? fixGreeting(twoSentences(spoken), now) : spoken;
+    // Never contradict the taxi's real state ("I have not booked it yet" after booking).
+    const ride = recentRide(now);
+    if (ride?.status === "booked" && !ran.includes("ride_request") && /\b(not|haven'?t|have not|didn'?t|did not)\b.{0,25}\b(book|booked|call|called|order)|mix-?up|아직 안 불|안 불렀/i.test(say)) {
+      console.warn("[agent] reply contradicted the booked taxi, replaced:", JSON.stringify(say));
+      say = rideLine(ride);
+    }
     if (EN) sayEn = say;
     else sayEn = tag(raw, "en") ? clean(tag(raw, "en")!) : undefined;
     heardEn = heardEn ?? (tag(raw, "heard") ? clean(tag(raw, "heard")!) || undefined : undefined);
