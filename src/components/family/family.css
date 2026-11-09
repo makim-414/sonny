@@ -708,6 +708,49 @@
   font-size: var(--t-xs);
   color: var(--text-muted);
 }
+/* Signals this week: three rows; a count that went up from last week turns flat warning */
+.wd-signals {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  padding: var(--sp-3);
+  display: grid;
+  gap: var(--sp-2);
+}
+.wd-sig-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.wd-sig {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+  border-top: 1px solid var(--border-soft);
+  font-size: var(--t-sm);
+}
+.wd-sig:first-child {
+  border-top: 0;
+}
+.wd-sig-label {
+  min-width: 0;
+}
+.wd-sig-value {
+  font-weight: var(--w-semi);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.wd-sig-last {
+  font-weight: var(--w-reg);
+  color: var(--text-muted);
+}
+.wd-sig.is-up .wd-sig-label,
+.wd-sig.is-up .wd-sig-value {
+  color: var(--warning);
+}
 @media (min-width: 768px) {
   .wd-charts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
