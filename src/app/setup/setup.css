@@ -1,0 +1,158 @@
+/* Hidden family setup. Tokens and the light theme come from family.css and src/styles.
+   Text scales with the "Text size" setting so the family sees what grandma will see. */
+.st {
+  --st-scale: 1.15;
+}
+.st.st-scale-large {
+  --st-scale: 1.3;
+}
+.st.st-scale-xlarge {
+  --st-scale: 1.5;
+}
+.st .fa-header {
+  align-items: center;
+}
+.st-back-link {
+  min-height: var(--hit);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--sp-2);
+  color: var(--text);
+  font-size: var(--t-sm);
+  font-weight: var(--w-semi);
+  text-decoration: underline;
+  text-underline-offset: var(--sp-1);
+}
+.st-list {
+  display: grid;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-4) var(--sp-8);
+}
+.st-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: var(--sp-4);
+  display: grid;
+  gap: var(--sp-3);
+}
+.st-card > * {
+  min-width: 0;
+}
+.st-pin {
+  margin: var(--sp-4);
+}
+.st-label {
+  font-size: calc(var(--t-title) * var(--st-scale));
+  font-weight: var(--w-semi);
+  line-height: var(--lh-snug);
+}
+.st-hint {
+  font-size: calc(var(--t-sm) * var(--st-scale));
+  color: var(--text-muted);
+}
+.st-error {
+  font-size: calc(var(--t-sm) * var(--st-scale));
+  color: var(--danger);
+  font-weight: var(--w-med);
+}
+.st-pin-input {
+  width: 100%;
+  min-height: calc(var(--hit-lg) + var(--sp-2));
+  border-radius: var(--r-card);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--t-h1);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  letter-spacing: var(--sp-3);
+}
+.st-pin-input:focus {
+  outline: 2px solid var(--brand);
+  outline-offset: -1px;
+}
+.st-seg {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--sp-1);
+  background: var(--bg-sunken);
+  border-radius: var(--r-card);
+  padding: var(--sp-1);
+}
+.st-seg-btn {
+  min-height: var(--hit-lg);
+  border: 0;
+  border-radius: var(--r-md);
+  background: none;
+  color: var(--text-muted);
+  font-size: calc(var(--t-body) * var(--st-scale));
+  font-weight: var(--w-med);
+  cursor: pointer;
+}
+.st-seg-btn.is-on {
+  background: var(--bg-elev);
+  color: var(--text);
+  font-weight: var(--w-semi);
+  box-shadow: var(--sh-card);
+}
+.st-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.st-row .fa-btn {
+  min-width: 0;
+}
+.st-range {
+  width: 100%;
+  accent-color: var(--brand);
+  min-height: var(--hit);
+}
+.st-value {
+  font-size: calc(var(--t-body) * var(--st-scale));
+  font-weight: var(--w-semi);
+  font-variant-numeric: tabular-nums;
+}
+.st-meter {
+  height: var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--bg-sunken);
+  overflow: hidden;
+}
+.st-meter-fill {
+  display: block;
+  height: 100%;
+  background: var(--text);
+  transform-origin: left center;
+  transition: transform var(--dur-press) var(--ease-out);
+}
+.st-heard {
+  font-size: calc(var(--t-body) * var(--st-scale));
+}
+.st-heard span {
+  display: block;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+  font-weight: var(--w-semi);
+}
+.st-wide {
+  width: 100%;
+  font-size: calc(var(--t-body) * var(--st-scale));
+}
+.st .fa-btn {
+  min-height: var(--hit-lg);
+}
+.st-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.st-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  margin-top: var(--sp-2);
+}
