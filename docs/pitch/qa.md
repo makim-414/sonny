@@ -22,6 +22,8 @@ Say the first sentence; add the second only if they lean in. Numbers are sourced
 
 ## If they push further
 
+- **"Why is it called Sonny?"** Sonny sounds like Sunny, a classic name for a little yellow bird, and 'sonny' is what grandmas call a grandkid. One word, both ideas: a parrot that learns, and the grandkid who's always home.
+
 - **"What's the goal?"** "Sonny handles the errands, so family can just be family." Families don't want to be caretakers; they want to be family.
 - **"Doesn't this replace family?"** The opposite: Sonny nudges mom to call, with something to talk about. It takes the errands, so the call home is just a call home.
 - **"Where does this go?"** "The easiest first step into AI for the oldest generation. Then health check-ins, then the rest of their daily life." (No gambling or betting, ever.)
