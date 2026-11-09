@@ -2,6 +2,7 @@ import { APP_LANG } from "@/lib/brand";
 import { kstClock, kstParts } from "@/lib/scheduler";
 import { logEvent, store } from "@/lib/store";
 import type { GuardianCall, TvAction } from "@/lib/types";
+import { recordSlip, ringNoAnswer } from "./wellness";
 
 // Sonny keeps an eye out between turns: a task grandma gets stuck on, long silences,
 // and days when mom should check in. All decisions here are rules, not model calls,
@@ -62,6 +63,8 @@ export function struggleCheck(now: Date): Quick | null {
   if (task.confused < 2 && now.getTime() - task.startedAt < STRUGGLE_MS) return null;
   task.called = true;
   const at = now.toISOString();
+  // A weekly signal for mom: she couldn't come up with where she was going (the clinic).
+  if (task.confused >= 2) recordSlip("forgot_name", now, EN ? "the clinic's name" : "병원 이름");
   const why = task.confused >= 2 ? "seems stuck on where to go" : "can't seem to finish it";
   const script = `Hi Sarah, it's Sonny. June has been trying to book a taxi${minutes >= 1 ? ` for ${minutes} minutes` : ""} and ${why}. Want me to book it to Riverside Family Clinic, or will you call her?`;
   const call = ring("struggle", script, at, EN ? "Sonny called Sarah: June seems stuck booking a taxi" : "Sonny 가 따님께 전화: 할머니가 택시 부르기에서 막히심");
@@ -88,7 +91,9 @@ export function onIdle(now: Date, attempt = 1): Quick | "ask-model" {
   const since = kstClock(new Date(watch.lastVoiceAt ?? watch.idleSince));
   const msg = EN ? `No answer from grandma since ${since}` : `${since} 이후로 할머니 대답이 없어요`;
   logEvent("alert", `[warn] ${msg}`, now.toISOString(), { visibility: "family" });
-  return { say: "", actions: [{ type: "notifyFamily", message: msg, level: "warn" }], note: "idle alert" };
+  // Sonny's check-in rang and nobody answered, twice: ring mom too.
+  const call = ringNoAnswer(new Date(watch.idleSince), now, now);
+  return { say: "", actions: [{ type: "notifyFamily", message: msg, level: "warn" }], note: `idle alert, no_answer call ${call.id}` };
 }
 
 /** "family-nudge": pick one reason from today's log and ring mom, or do nothing. */

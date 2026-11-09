@@ -103,6 +103,20 @@ export async function POST(request: Request) {
     return Response.json({ ok: true, call });
   }
 
+  if (call.reason === "no_answer") {
+    // Grandma missed two check-ins. approve: mom calls her; decline: Sonny asks the neighbor.
+    const text =
+      call.status === "approved"
+        ? `${who} approved call ${call.id}: ${who} is calling grandma now.`
+        : call.status === "declined"
+          ? `${who} declined call ${call.id}: ask grandma's neighbor to check on her.`
+          : `${who} missed call ${call.id}: keep trying grandma.`;
+    store.tvInbox.push({ id: randomUUID(), at, from: who, text });
+    const log = call.status === "approved" ? `${who} is calling grandma` : call.status === "declined" ? `${who} asked Sonny to call the neighbor` : `${who} missed Sonny's call`;
+    logEvent("call", `${log}: ${call.script}`, at, { visibility: "family", familyText: log });
+    return Response.json({ ok: true, call });
+  }
+
   store.tvInbox.push({ id: randomUUID(), at, from: who, text: `${who} ${verb} call ${call.id}` });
   logEvent("call", `${T.callLog(verb)}: ${call.script}`, at, { visibility: "family", familyText: T.callLog(verb) });
   return Response.json({ ok: true, call });
