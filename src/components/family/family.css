@@ -30,6 +30,7 @@
   --tone-urgent: var(--danger);
   /* type */
   --font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", system-ui, sans-serif;
+  --t-display: 34px;
   --t-h2: 22px;
   --t-title: 17px;
   --t-body: 15px;
@@ -82,19 +83,13 @@
   box-sizing: border-box;
 }
 
-.fa h1,
-.fa h2,
-.fa h3,
-.fa p,
-.fa dl,
-.fa dd,
-.fa ol {
+.fa :where(h1, h2, h3, p, dl, dd, ol) {
   margin: 0;
   padding: 0;
 }
 
-.fa button,
-.fa input {
+/* :where keeps this reset weaker than any component class below */
+.fa :where(button, input) {
   font: inherit;
   color: inherit;
 }

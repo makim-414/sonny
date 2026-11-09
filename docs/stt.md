@@ -36,3 +36,40 @@ Test clip: 3.0 s English sentence, "Remind me to take my pills at eight tomorrow
 | `/api/stt` with STT server stopped | wav | 503 with reason | immediate |
 
 Expect about 1.2 to 1.5 s per short turn. Real speech from an older speaker in a noisy room is not measured yet.
+
+# Turn end detection (smart-turn)
+
+Why: older speakers pause mid-sentence ("I want to... um..."). A loudness-only VAD ends the turn at that pause. `/api/turn` asks a small audio model whether the speaker has actually finished, so the screen can keep listening.
+
+Model: [pipecat-ai/smart-turn](https://github.com/pipecat-ai/smart-turn) v3.2, CPU int8 ONNX (`pipecat-ai/smart-turn-v3` on Hugging Face, file `smart-turn-v3.2-cpu.onnx`, 8.7 MB, BSD-2). Downloaded once by `hf_hub_download` into the local HF cache, then loaded by the same `scripts/stt-server.py` (no extra process). Preprocessing follows smart-turn `inference.py`: last 8 s of 16 kHz mono, zero-pad at the start, zero-mean unit-variance normalize, Whisper log-mel 80 x 800. The mel step is reimplemented in numpy (same Slaney filters as Whisper) so `transformers` is not needed.
+
+## API
+
+`POST /api/turn` with the current turn's audio as the body (`audio/wav` or `audio/webm`, 16 kHz preferred, any length; the last 8 s are used, minimum 0.25 s).
+
+| Case | Status | Body |
+|---|---|---|
+| OK | 200 | `{ "complete": true, "prob": 0.98, "ms": 63 }` (complete = prob > 0.5, ms = round trip) |
+| Empty body | 400 | `{ "error": "empty audio" }` |
+| STT server not running | 503 | `{ "error": "turn server unavailable", "reason": "..." }` |
+| Too short or undecodable | 422 | `{ "error": "..." }` |
+
+Threshold override: `TURN_THRESHOLD` (default 0.5). Model override: `TURN_MODEL_FILE`.
+
+Screen side (TV session): when the VAD hears about 0.7 s of silence, post the whole turn so far to `/api/turn`; if `complete` is false keep listening up to 4 s more, then re-ask with the longer audio.
+
+## Measured (2026-11-09, this Mac, CPU)
+
+Test clips: macOS `say` (Samantha), 16 kHz mono. "Incomplete" clips end with a 0.9 s silence after the filler.
+
+| Clip | Format | complete | prob | Time |
+|---|---|---|---|---|
+| "I can't seem to find the return label for my package." | wav | true | 0.9801 | 63 ms (server), 57 to 82 ms via `/api/turn` |
+| "What is the weather like today?" | wav | true | 0.9619 | 56 ms |
+| "Remind me to take my pills at eight tomorrow morning." | wav | true | 0.9836 | 69 ms |
+| "I can't seem to, um..." | wav | false | 0.0059 | 67 ms |
+| "I want to... um..." | wav | false | 0.0064 | 72 ms (server), 62 ms via `/api/turn` |
+| "I want to... um..." | webm (opus) | false | 0.0075 | 64 ms via `/api/turn` |
+| STT server stopped | wav | 503 with reason | | immediate |
+
+All clips were synthetic speech. Real older speakers, Korean, and room noise are not measured yet.

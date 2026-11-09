@@ -1,0 +1,79 @@
+/* Login and device screens. Tokens come from the .fa scope in family.css. */
+.lg {
+  justify-content: center;
+  padding: var(--sp-6) var(--sp-4);
+}
+.lg-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-card);
+  padding: var(--sp-6) var(--sp-5);
+  display: grid;
+  gap: var(--sp-4);
+}
+.lg-title {
+  font-size: var(--t-h2);
+  font-weight: var(--w-semi);
+  line-height: var(--lh-snug);
+}
+.lg-sub,
+.lg-body {
+  color: var(--text-muted);
+}
+.lg-form {
+  display: grid;
+  gap: var(--sp-3);
+}
+.lg-field {
+  display: grid;
+  gap: var(--sp-1);
+  font-size: var(--t-sm);
+  color: var(--text-muted);
+}
+.lg-field input {
+  min-height: var(--hit);
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-card);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: var(--t-input);
+  color: var(--text);
+}
+.lg-field input:focus {
+  outline: 2px solid var(--brand);
+  outline-offset: -1px;
+}
+.lg-error {
+  color: var(--danger);
+  font-size: var(--t-sm);
+  font-weight: var(--w-med);
+}
+.lg-submit {
+  min-height: var(--hit-lg);
+  border-radius: var(--r-card);
+  border: 1px solid var(--brand);
+  background: var(--brand);
+  color: var(--brand-fg);
+  font-size: var(--t-title);
+  font-weight: var(--w-semi);
+  cursor: pointer;
+}
+.lg-submit:disabled {
+  opacity: 0.6;
+}
+.lg-demo {
+  display: grid;
+  gap: var(--sp-1);
+  font-size: var(--t-sm);
+  color: var(--text-subtle);
+  text-align: center;
+}
+.lg-demo a {
+  color: var(--brand);
+  font-weight: var(--w-semi);
+  min-height: var(--hit);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
