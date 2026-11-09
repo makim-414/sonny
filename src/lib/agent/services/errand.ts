@@ -2,6 +2,7 @@ import { APP_LANG } from "@/lib/brand";
 
 // Demo prices in US cents for the allowance wallet.
 const PRICES_USD: Record<string, number> = {
+  burger: 200, burgers: 200, pizza: 1200,
   milk: 399, eggs: 449, bread: 349, water: 599, "toilet paper": 1299, bananas: 199, apples: 499, coffee: 899,
   tofu: 299, rice: 1499, soup: 249, tea: 499, butter: 549, cheese: 599, chicken: 899, juice: 449,
   두부: 299, 계란: 449, 우유: 399, 쌀: 1499, 휴지: 1299, 생수: 599, 물: 599, 사과: 499, 바나나: 199,

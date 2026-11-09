@@ -11,6 +11,8 @@ export async function POST() {
   shared.health.length = 0;
   shared.requests.length = 0;
   shared.lastLater = undefined;
+  shared.confirmOrder = undefined;
+  store.calls.length = 0;
   store.pending.length = 0;
   store.currentChannel = null;
   // Wallet back to the demo seed ($80, family OK above $30), same as store.ts.
