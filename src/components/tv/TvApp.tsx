@@ -7,6 +7,7 @@ import { speak, splitSentences, stopSpeaking, unlockSpeech } from "@/lib/voice/s
 import { callAgent } from "./agent-client";
 import { Avatar, type AvatarMood } from "./Avatar";
 import { BroadcastScreen } from "./BroadcastScreen";
+import { APP_LANG } from "@/lib/brand";
 import { ASSISTANT_NAME, PRODUCT_NAME, PRODUCT_NAME_EN, USER_TITLE } from "./brand";
 import { CHANNELS, channelForNumber, programTitle } from "./channels";
 import { fetchGuide, programAt, sceneFor, surfChannels, type Guide } from "./epg-client";
@@ -730,8 +731,9 @@ export function TvApp() {
         <div className="tv-boot" aria-live="polite">
           <Avatar mood="speaking" />
           <span className="tv-boot-title">
-            TV에 {ASSISTANT_NAME}
-            {subjectParticle(ASSISTANT_NAME)} 연결됐어요
+            {APP_LANG === "en"
+              ? `${ASSISTANT_NAME} is here`
+              : `TV에 ${ASSISTANT_NAME}${subjectParticle(ASSISTANT_NAME)} 연결됐어요`}
           </span>
           <span className="tv-boot-sub">
             {english ? `${PRODUCT_NAME_EN} is now on this TV` : PRODUCT_NAME}
