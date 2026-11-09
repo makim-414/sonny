@@ -5,7 +5,8 @@ Follow this at the 13:30 fallback recording and again for the final take. Each c
 - `[NAME]` is the product name from `src/lib/brand.ts`.
 - `<SITE>` is the on-site tunnel address from the integration session. It changes on every tunnel restart, so look it up right before recording.
 - Grandma's screen is `/` (one particle, no buttons). Mom's screen is `/family`. `/tv` appears only in the roadmap close.
-- Language: `APP_LANG` in `src/lib/brand.ts` decides what the agent speaks. If it is `"en"`, say grandma's lines in English (use the subtitle lines from the demo script) and skip the subtitle burn-in for those lines. If it is `"ko"`, say the Korean lines and burn in the English subtitles.
+- Language: English. `APP_LANG = "en"` in `src/lib/brand.ts`, so the agent speaks English and `/family` shows English. Grandma's lines below are what to say, word for word.
+- Numbers: never script a lesson count. Film whatever the real counter shows (it reads the lesson count from memory and is tagged "demo count").
 
 ## Check before recording (12:30, after the feature freeze)
 
@@ -30,7 +31,7 @@ Hide the dock and notifications (Do Not Disturb). Close other tabs.
 
 ## Before the first take
 
-1. Integration session restarts the server so the activity log starts empty (`/family` shows "아직 기록이 없어요").
+1. Integration session restarts the server so the activity log starts empty (`/family` shows "Nothing yet...").
 2. Open both windows. On `/family` the three big buttons are visible without scrolling.
 3. Test the mic on `/` once with a throwaway line, then restart the server again to clear it.
 4. Start the recordings.
@@ -44,71 +45,72 @@ Hide the dock and notifications (Do Not Disturb). Close other tabs.
 ### Cut 2. One icon (0:08 to 0:17)
 - Record: Phone G screen recording.
 1. Start on the home screen with `[NAME]` placed next to the phone app.
-2. Tap the icon once. The particle blooms and greets: "할머니, 안녕히 주무셨어요?" (or "Good morning, Grandma" in English).
+2. Tap the icon once. The particle blooms and greets: "Good morning, grandma. Did you sleep well?"
 3. Hold 3 seconds on the rippling particle.
-- Edit: clock overlay 07:50. Narration: "No buttons. No menus. One icon, like the call button she already knows."
+- Edit: clock overlay 7:50 AM. Narration: "No buttons. No menus. One icon, like the call button she already knows."
 
 ### Cut 3. Pills and weather (0:17 to 0:27)
 - Screen A (or Phone G for grandma's side).
 1. Let the agent finish the pills and weather line (it continues from the greeting).
-2. Start talking (gesture from the check above). Grandma: "응, 방금 먹었어."
-3. Hold until mom's window turns green: "오늘은 전화 안 하셔도 괜찮아요", "약: 드셨어요".
+2. Start talking (gesture from the check above). Grandma: "Yes, I just took them."
+3. Hold until mom's window turns green: "No need to call today." and "Pills: Taken".
 - Fallback if it does not turn green within 5 seconds:
 
 ```bash
-curl -s -X POST <SITE>/api/events -H 'content-type: application/json' -d '{"kind":"memory","text":"건강 기록: 아침 약 먹음","visibility":"family"}'
+curl -s -X POST <SITE>/api/events -H 'content-type: application/json' -d '{"kind":"memory","text":"Health record: took her morning pills","visibility":"family"}'
 ```
 
 ### Cut 4. Hospital taxi (0:27 to 0:39)
-1. Grandma: "오늘 병원 가는 날인데, 택시 좀 불러 줘."
-2. If the agent asks where or when: "동네 내과, 지금 바로."
-3. Hold 3 seconds on the plate number on grandma's side and the "택시 요청" card on mom's side.
-- Edit: clock overlay 09:40, lower third about mom booking Kakao T this morning, label "ride service mocked".
+1. Grandma: "I have a doctor's appointment today. Can you call me a taxi?"
+2. If the agent asks where or when: "Dr. Kim's clinic, right now."
+3. Hold 3 seconds on the plate number on grandma's side and the "Taxi" card on mom's side.
+- Edit: clock overlay 9:40 AM, lower third about mom booking the ride this morning, label "ride service mocked".
 
 ### Cut 5. Grandma teaches (0:39 to 0:50)
-1. Grandma: "내가 하나 가르쳐 줄게. 우리 딸은 사흘에 한 번 와서 자고 가. 그날은 저녁을 두 사람 몫 해야 돼."
+1. Grandma: "Let me teach you something. My daughter comes every third day and stays the night. On those days, dinner is for two."
 2. Hold on the thank-you line and the lesson counter.
-- If `/` has no counter: film it on `/tv` with the `L` key (it counts lessons from memory, falls back to 37) and cut it in, or add a "37" overlay in the edit. Label "demo count" either way.
-- Edit: clock overlay 13:10.
+- The counter is real: it is the number of `category: "lesson"` facts in memory (GBrain), shown with a "demo count" tag. Whatever it shows is what we film.
+- If `/` does not show the counter: open `<SITE>/tv?noqr` on the second window, press `L` (the TV fetches the lesson count from `GET /api/agent/memory`, shows the big counter card and thanks her out loud), and cut that in. The card closes after about 4.5 seconds, so press `L` right after you start recording. If the memory API is down the TV falls back to a placeholder number; do not use that take.
+- Edit: clock overlay 1:10 PM.
 
 ### Cut 6. "Don't tell my daughter" (0:50 to 0:56)
-1. Right after cut 5. Grandma: "이건 딸한테 말하지 마. 딸 생일 선물로 목도리 뜨고 있어."
-2. Scroll mom's window to the bottom of the feed: only "할머니의 사적인 대화 N건은 표시하지 않았어요" changes. Hold 2 seconds.
+1. Right after cut 5. Grandma: "Don't tell my daughter. I'm knitting her a scarf for her birthday."
+2. Scroll mom's window to the bottom of the feed: only "N private conversations not shown. They're grandma's." changes. Hold 2 seconds.
 
 ### Cut 7. Mom's message, grandma's answer (0:56 to 1:08)
-1. In mom's window, scroll to the top and tap "오늘 저녁 7시에 갈게요".
+1. In mom's window, scroll to the top and tap "I'll be there at 7 tonight".
 2. Within about 3 seconds grandma's side reads it out.
-3. Grandma: "그래, 조심해서 와. 김치 다 익었으니까 가져가라고 해."
-4. Hold until mom's reply card fills: "할머니 답 ...".
+3. Grandma: "Good. Tell her to drive safe, and to take some kimchi home. It's ready."
+4. Hold until mom's reply card fills: "Grandma's reply ...".
 - Fallback if no reply within 10 seconds:
 
 ```bash
-curl -s -X POST <SITE>/api/events -H 'content-type: application/json' -d '{"kind":"family","text":"할머니 답 요약: 7시 좋다고 하셨어요. 익은 김치 가져가래요","visibility":"family"}'
+curl -s -X POST <SITE>/api/events -H 'content-type: application/json' -d '{"kind":"family","text":"Grandma'"'"'s reply: 7 is fine. Take the kimchi home.","visibility":"family"}'
 ```
 
-- Edit: clock overlay 17:30.
+- Edit: clock overlay 5:30 PM.
 
 ### Cut 8. The rest of her day in 10 seconds (1:08 to 1:18)
 Record each as a 3 second clip; the edit keeps about 2 seconds each. Label "demo data" on all.
-1. Groceries: grandma, "두부, 애호박, 계란 좀 주문해 줘." Then tap "승인" on mom's "주문 요청" card.
-2. Temple: grandma, "내일 절 가는 날이야. 아침에 알려 줘."
-3. Her show: grandma, "임영웅 나오는 거 언제 해?"
-4. Evening pills: title card in the edit ("저녁 약 드실 시간이에요").
+1. Groceries: grandma, "Can you order tofu, zucchini and eggs?" Then tap "Approve" on mom's "Order" card.
+2. Temple: grandma, "Tomorrow is my temple day. Remind me in the morning."
+3. Her show: grandma, "When is my favorite singer on?"
+4. Evening pills: title card in the edit ("Time for your evening pills").
 5. Safety: run the command below and film mom's window.
 
 ```bash
-curl -s -X POST <SITE>/api/events -H 'content-type: application/json' -d '{"kind":"alert","text":"[warn] 평소 시간에 할머니 대화가 없어요","visibility":"family"}'
+curl -s -X POST <SITE>/api/events -H 'content-type: application/json' -d '{"kind":"alert","text":"[warn] Grandma has not talked at her usual time","visibility":"family"}'
 ```
 
 ### Cut 9. Phone today, her TV next (1:18 to 1:30)
-1. Camera B: a hand plugs an HDMI stick (or the laptop's HDMI cable) into a TV that shows `<SITE>/tv?boot&noqr`. The boot screen "TV에 손주가 연결됐어요" plays, then the agent on the big screen.
+1. Camera B: a hand plugs an HDMI stick (or the laptop's HDMI cable) into a TV. On the laptop, open `<SITE>/tv?boot&noqr` just before plugging in: `?boot` forces the 3 second "connected" boot screen even if this browser has seen it before, then the agent appears on the big screen. To film it again, reload the same URL.
 2. Screen A: two QR codes side by side, "Be grandma" (`<SITE>/`) and "Be her daughter" (`<SITE>/family`). Use the printed card for the judging table or the `/tv` QR overlay (`Q`) if it already points to `/`.
-- Edit: the five-step strip (0 Phone icon today, 1 HDMI stick, 2 Android and Google TV app, 3 Pass-through box, 4 The TV itself), narration, end card with `[NAME]`, GitHub URL and "Built in 5 hours at c0mpiled-17 Seoul with Claude, GBrain and gstack".
+- Edit: the five-step strip (0 Phone icon today, 1 HDMI stick, 2 Android and Google TV app, 3 Pass-through box, 4 The TV itself), narration, end card with `[NAME]`, GitHub URL and "Built in 5 hours at c0mpiled-17 Seoul on open source: Kokoro, Silero VAD, three.js, GBrain, gstack".
 
 ## Edit checklist
 
 - [ ] Total 1:30 or less in the exported file.
-- [ ] English subtitles on every Korean line.
+- [ ] Captions on every spoken line (English).
 - [ ] Clock overlays per cut.
 - [ ] Labels: "ride service mocked" (cut 4), "demo count" (cut 5), "demo data" (cut 8).
 - [ ] No real names, addresses, phone numbers or faces. Blur the address bar if it shows anything personal.

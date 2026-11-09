@@ -18,7 +18,7 @@ git grep -n -I -E 'sk-ant-[A-Za-z0-9_-]{10,}|ANTHROPIC_API_KEY=[^\\"$]' $(git re
 Prints nothing when clean (checked 12:30 across all branches: clean).
 
 - [ ] No `.env*` files committed: `git ls-files | grep -i env` should print nothing.
-- [ ] No personal data about grandma: no real name, address, phone number, clinic name or face in code, seed data, screenshots or docs. The demo uses "서울내과" as a made-up clinic.
+- [ ] No personal data about grandma: no real name, address, phone number, clinic name or face in code, seed data, screenshots or docs. The demo uses "Dr. Kim's clinic" as a made-up clinic.
 - [ ] Check the first commit time is after 10:00 KST: `git log --reverse --format='%ci %s' | head -1`.
 - [ ] Every commit is on `build`; nothing important is left only on a session branch.
 
@@ -43,6 +43,8 @@ The current README has the one-liner and run steps. Before submitting, make sure
 - [ ] What it does in 5 bullets: speaks first (medicine, weather), taxi to the hospital, learns from grandma (memory, lesson counter), groceries with family approval, family messages both ways, favorite show (one tool among many).
 - [ ] Distribution in five steps: 0 phone web app on the home screen (today), 1 HDMI stick or USB app, 2 Android and Google TV app, 3 HDMI pass-through box over the set-top box (CEC or IR), 4 the TV itself.
 - [ ] Screenshot or GIF: TV screen next to mom's phone.
+- [ ] Open source, near the top: "Everything runs on open source you can self-host: Kokoro voice, Silero VAD, GBrain memory." Link `docs/OPEN_SOURCE.md` (every project 1,000+ stars, with license and how we use it).
+- [ ] Market line: launches in English for English-speaking seniors first; the founder's Korean grandmother is the origin story. The app language is one switch, `APP_LANG` in `src/lib/brand.ts`.
 - [ ] How it works: one Claude agent with tools (memory, schedule, ride, order, EPG search, tune, family notify), TV web app, family web app, shared activity log. Link `docs/ARCHITECTURE.md`.
 - [ ] Run: `pnpm install`, then `pnpm dev`, open `/` (grandma), `/family` (mom), `/tv` (TV mode). Explain the key comes from the keychain item `anthropic-hackathon-key`, or set `ANTHROPIC_API_KEY` yourself.
 - [ ] Honest notes: ride and grocery services are mocked; TV guide is seed data cut from a real Korean listing; voice uses the browser's Web Speech API (Chrome).
@@ -53,9 +55,10 @@ The current README has the one-liner and run steps. Before submitting, make sure
 
 ## 4. Demo video
 
-- [ ] Recorded following `docs/pitch/shot-list.md` and `docs/pitch/demo-script.md` (grandma's phone on the left, mom's phone on the right, English subtitles on Korean lines).
+- [ ] Recorded following `docs/pitch/shot-list.md` and `docs/pitch/demo-script.md` (grandma's phone on the left, mom's phone on the right, all lines in English with captions).
+- [ ] The lesson counter shows the real count from memory with its "demo count" tag. No fixed or padded number.
 - [ ] Length 1:30 or less. Check the exported file, not the editor timeline.
-- [ ] Audio: Korean voices audible, English subtitles readable on a phone screen.
+- [ ] Audio: voices clear, captions readable on a phone screen.
 - [ ] Labels for anything mocked are visible on screen.
 - [ ] No real personal data visible (names, addresses, phone numbers, faces).
 - [ ] Uploaded to YouTube as **Unlisted** (or Loom with public link). Open the link logged out to confirm it plays.
@@ -73,7 +76,7 @@ The current README has the one-liner and run steps. Before submitting, make sure
 - [ ] Two QR codes the judges can scan, on a printed card or a screen: "Be grandma" opens `/`, "Be her daughter" opens `/family`. Both use the on-site tunnel address (it changes on every restart, so generate or check them right before judging). Scan both with a phone on mobile data.
 - [ ] The presenter's phone has the `[NAME]` icon on its home screen, signed in, as the backup grandma.
 - [ ] Reset the store just before judging so the judges see a clean feed.
-- [ ] Rehearse the judge loop three times: judge one scans "Be grandma" and talks, judge two scans "Be her daughter" and taps "오늘 저녁 7시에 갈게요", grandma's phone reads it, judge one answers, the reply card fills on judge two's phone.
+- [ ] Rehearse the judge loop three times: judge one scans "Be grandma" and talks, judge two scans "Be her daughter" and taps "I'll be there at 7 tonight", grandma's phone reads it, judge one answers, the reply card fills on judge two's phone.
 - [ ] Mic permission: iOS Safari asks on first use; have the judge tap Allow. If a phone blocks the mic, hand over the presenter's phone.
 - [ ] Optional: `/tv` on a monitor over HDMI to show "next, her TV" (boot screen with `?boot`).
 - [ ] Fallbacks: typed input on `/` if the mic fails, phone hotspot if Wi-Fi fails, the 90 second video on the desktop if both fail.
