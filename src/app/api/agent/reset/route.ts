@@ -2,6 +2,7 @@ import { familyState } from "@/app/api/family/state";
 import { resetSession } from "@/lib/agent/session";
 import { shared } from "@/lib/agent/tools";
 import { resetWatch } from "@/lib/agent/watch";
+import { resetConnections } from "@/lib/agent/connections";
 import { getMemory, resetMemory } from "@/lib/memory";
 import { store } from "@/lib/store";
 
@@ -22,6 +23,7 @@ export async function POST() {
   // Family app approvals from the last run. Paired devices and routines stay.
   familyState.approvedIds.length = 0;
   resetWatch();
+  resetConnections();
   store.calls.length = 0;
   store.pending.length = 0;
   store.currentChannel = null;

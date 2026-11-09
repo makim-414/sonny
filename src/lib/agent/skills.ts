@@ -5,7 +5,7 @@ import type { MemoryFact } from "@/lib/memory";
 //   Sunday groceries (errand): milk; a dozen eggs; the small rye bread; store: Green Market
 //   call Martha (message): to: Martha; say: I'm fine; ask: how is her knee
 
-export type SkillAction = "errand" | "message" | "other";
+export type SkillAction = "errand" | "message" | "ride" | "other";
 export type Skill = { id: string; name: string; action: SkillAction; steps: string[]; at: string; provenance?: string };
 
 export function encodeSkill(name: string, action: SkillAction, steps: string[]): string {
@@ -13,7 +13,7 @@ export function encodeSkill(name: string, action: SkillAction, steps: string[]):
 }
 
 export function parseSkill(f: MemoryFact): Skill | null {
-  const m = f.text.match(/^(.+?) \((errand|message|other)\): (.+)$/);
+  const m = f.text.match(/^(.+?) \((errand|message|ride|other)\): (.+)$/);
   if (!m) return null;
   return { id: f.id, name: m[1], action: m[2] as SkillAction, steps: m[3].split(/;\s*/).filter(Boolean), at: f.at, provenance: f.provenance };
 }
