@@ -1,4 +1,4 @@
-import type { ActivityEvent, TvAction, Wallet } from "./types";
+import type { ActivityEvent, GuardianCall, TvAction, Wallet } from "./types";
 
 // In-memory state for the demo. One grandma, one TV, one process.
 // Kept on globalThis so Next.js dev reloads do not wipe it.
@@ -9,6 +9,7 @@ type Store = {
   // Messages or commands from the family app, waiting for the TV to pick up.
   tvInbox: { id: string; at: string; from: string; text: string }[];
   wallet: Wallet;
+  calls: GuardianCall[];
 };
 
 // Demo seed: $80 allowance, anything over $30 needs the family's OK.
@@ -31,10 +32,11 @@ const seedWallet = (): Wallet => ({
 const g = globalThis as unknown as { __hyodoStore?: Store };
 
 export const store: Store =
-  g.__hyodoStore ?? (g.__hyodoStore = { events: [], pending: [], currentChannel: null, tvInbox: [], wallet: seedWallet() });
+  g.__hyodoStore ?? (g.__hyodoStore = { events: [], pending: [], currentChannel: null, tvInbox: [], wallet: seedWallet(), calls: [] });
 
 // Older hot-reloaded stores may predate the wallet.
 store.wallet ??= seedWallet();
+store.calls ??= [];
 
 export function logEvent(
   kind: ActivityEvent["kind"],

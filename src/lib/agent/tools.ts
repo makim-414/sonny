@@ -25,7 +25,8 @@ export type PendingRequest =
   | { kind: "order"; at: string; order: ErrandOrder };
 
 type HealthRecord = { at: string; medicineTaken?: boolean; feeling: string; severity: string; symptoms: string[] };
-type Shared = { health: HealthRecord[]; requests: PendingRequest[] };
+type LaterShow = { channel: number; channelName: string; title: string; startISO: string; startsAt: string; startsInMin: number };
+type Shared = { health: HealthRecord[]; requests: PendingRequest[]; lastLater?: LaterShow[] };
 const g = globalThis as unknown as { __hyodoAgent?: Shared };
 export const shared: Shared = g.__hyodoAgent ?? (g.__hyodoAgent = { health: [], requests: [] });
 
@@ -140,14 +141,29 @@ export function createTools(ctx: AgentContext) {
         then: innerAction,
       }),
       execute: async ({ at, label, then }) => {
-        const ms = Date.parse(at);
+        let ms = Date.parse(at);
+        let channel = then.type === "tune" ? then.channel : 0;
+        if (then.type === "tune") {
+          // Trust the guide over the model: match the show by its label and use its
+          // real channel and start (the model once guessed "KBS1" meant channel 1).
+          const words = label.replace(/시작|틀기|알림|방송/g, " ").trim();
+          const hit =
+            searchEpg(words, ctx.now).find((h) => h.status === "later") ??
+            searchEpg(words.split(/\s+/)[0] ?? "", ctx.now).find((h) => h.status === "later" && words.includes(h.title.slice(0, 4)));
+          if (hit) {
+            channel = hit.channel;
+            ms = Date.parse(hit.start);
+          } else if (!channelName(channel)) {
+            return { ok: false, error: "편성표에서 그 프로그램을 못 찾았어요. tv_play 로 먼저 찾아 주세요." };
+          }
+        }
         if (!Number.isFinite(ms)) return { ok: false, error: "시간 형식이 틀렸어요. ISO로 다시." };
         const iso = new Date(ms).toISOString();
         const inner: TvAction =
-          then.type === "tune" ? { type: "tune", channel: then.channel, reason: label } : { type: "showCard", title: then.title, body: then.body };
+          then.type === "tune" ? { type: "tune", channel, reason: label } : { type: "showCard", title: then.title, body: then.body };
         ctx.actions.push(addSchedule(iso, label, inner));
         log(ctx, "scheduled", `${kstClock(new Date(ms))} ${label}`, { visibility: "family" });
-        return { ok: true, at: iso, spoken: kstClock(new Date(ms)) };
+        return { ok: true, at: iso, spoken: kstClock(new Date(ms)), channel: then.type === "tune" ? channel : undefined };
       },
     }),
 
@@ -278,6 +294,7 @@ export function createTools(ctx: AgentContext) {
           store.currentChannel = live.channel;
           log(ctx, "tuned", `${live.channel}번 ${live.channelName} "${live.title}"`, { visibility: "family" });
         }
+        shared.lastLater = later;
         return {
           tuned: live ? { channel: live.channel, channelName: live.channelName, title: live.title } : null,
           later,

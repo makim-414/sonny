@@ -55,11 +55,25 @@ export type Wallet = {
   ledger: WalletEntry[];
 };
 
+// When a spend is over the limit (or looks wrong), Sonny "calls" the guardian.
+// Demo: the family app shows an incoming call screen and Sonny's voice reads this
+// out; the guardian approves or declines by voice or button. Real phone calls are
+// the roadmap (telephony agent). The matching ActivityEvent has kind "call".
+export type GuardianCall = {
+  id: string;
+  at: string; // ISO time
+  walletEntryId: string; // the pending_approval entry this call is about
+  script: string; // what Sonny says to the guardian, plain English
+  amount: number; // cents
+  reason: "over_limit" | "unusual_quantity" | "low_balance";
+  status: "ringing" | "approved" | "declined" | "missed";
+};
+
 // One line in the shared activity log the family app reads.
 export type ActivityEvent = {
   id: string;
   at: string; // ISO time
-  kind: "heard" | "said" | "tuned" | "scheduled" | "alert" | "memory" | "family" | "task";
+  kind: "heard" | "said" | "tuned" | "scheduled" | "alert" | "memory" | "family" | "task" | "call";
   text: string;
   // Who may see this line. "family": tasks and safety (orders, rides, medicine, alerts)
   // shown to mom as-is. "summary": mom sees only `familyText`, never the raw words.

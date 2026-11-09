@@ -59,6 +59,9 @@ export function toFeedItem(e: ActivityEvent): FeedItem {
       return { event: e, label: T.lScheduled, text: e.text, tone: "tv", request };
     case "memory":
       return { event: e, label: T.lRecord, text: e.text.replace(MEMORY_PREFIX, ""), tone: "memory", request };
+    case "call":
+      // Placeholder until the family session draws the incoming-call screen.
+      return { event: e, label: requestLabel ?? T.lTask, text: e.familyText ?? e.text, tone: "warn", request };
     case "task":
       return {
         event: e,
