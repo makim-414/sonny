@@ -112,9 +112,15 @@ function rgb(el: HTMLElement, name: string): [number, number, number] {
   return [r / 255, g / 255, b / 255];
 }
 
-export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
+export function BuddyLook({ signal, ringing = false }: { signal: React.RefObject<OrbSignal>; ringing?: boolean }) {
   const ref = useRef<HTMLCanvasElement | null>(null);
   const [failed, setFailed] = useState(false);
+  // The 2D face shows at once and gives way when the first 3D frame is drawn.
+  const [ready, setReady] = useState(false);
+  const ringRef = useRef(ringing);
+  useEffect(() => {
+    ringRef.current = ringing;
+  }, [ringing]);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -213,6 +219,7 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
     window.addEventListener("pointercancel", onUp);
 
     const st = { yaw: 0, pitch: 0, roll: 0, wide: 0, look: 0, voice: 0, bounce: 0 };
+    let drawn = false;
     let learnAt = -1e9; // when Sonny last learned something (push up the glasses)
     let nextBlink = performance.now() + 3000 + Math.random() * 2000;
     let blinkUntil = 0;
@@ -232,6 +239,9 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
       st.pitch += (tPitch - st.pitch) * e(aim.active ? 10 : 2);
       if (!dragging) drag += (0 - drag) * e(4);
       const listening = s.mode === "listening" ? 1 : 0;
+      // Ringing: shake side to side in bursts, like a phone on vibrate.
+      const burst = ringRef.current && (t % 1.2) < 0.7 ? 1 : 0;
+      const shake = burst * Math.sin(t * 34) * 0.16;
       st.roll += (drag * 0.5 + listening * 0.14 - st.roll) * e(6);
       st.wide += (listening - st.wide) * e(6);
       st.look += ((s.mode === "thinking" ? 1 : 0) - st.look) * e(5);
@@ -251,9 +261,9 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
       }
       gl.uniform1f(U.Y, st.yaw);
       gl.uniform1f(U.X, st.pitch);
-      gl.uniform1f(U.T, st.roll);
+      gl.uniform1f(U.T, st.roll + shake);
       gl.uniform1f(U.S, Math.max(-0.25, Math.min(0.35, sq * 0.06)));
-      gl.uniform1f(U.B, st.bounce);
+      gl.uniform1f(U.B, st.bounce + burst * Math.abs(Math.sin(t * 9)) * 0.06);
       gl.uniform1f(U.Z, st.voice * 0.06);
       if ((s.learn ?? 0) > 0) {
         s.learn = 0;
@@ -270,6 +280,10 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
+      if (!drawn) {
+        drawn = true;
+        setReady(true);
+      }
       raf = requestAnimationFrame(frame);
     };
     const kick = () => {
@@ -300,5 +314,10 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
   }, [signal]);
 
   if (failed) return <FaceLook look="smiley" signal={signal} />;
-  return <canvas ref={ref} className="orb-canvas buddy-canvas" aria-label="Sonny" />;
+  return (
+    <>
+      {!ready && <FaceLook look="smiley" signal={signal} />}
+      <canvas ref={ref} className="orb-canvas buddy-canvas" aria-label="Sonny" />
+    </>
+  );
 }

@@ -297,6 +297,9 @@
 }
 .orb-call-waves > i:nth-child(2) { animation-delay: 0.8s; }
 .orb-call-waves > i:nth-child(3) { animation-delay: 1.6s; }
+/* The glasses buddy rings inside the waves (2D face until WebGL is ready). */
+.orb-call-buddy { position: absolute; inset: 0; }
+.orb-call-buddy .face-look { width: 62%; height: 62%; }
 @keyframes orb-wave { from { transform: scale(0.7); opacity: 0.9; } to { transform: scale(1.5); opacity: 0; } }
 .orb-call-title { margin: 0; font-size: var(--t-call-title); font-weight: 700; line-height: 1.15; }
 .orb-call-sub { margin: 0; font-size: var(--t-call-sub); color: var(--text-faint); }
