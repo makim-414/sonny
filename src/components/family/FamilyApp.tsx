@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ActivityEvent } from "@/lib/types";
 import { clock, toFeedItem, type FeedItem, type Summary } from "./derive";
+import HealthCard from "./HealthCard";
 import IncomingCall from "./IncomingCall";
 import LightPage from "./LightPage";
 import { T } from "./strings";
@@ -17,6 +18,10 @@ type FamilyData = {
   summary: Summary | null;
   approvedIds: string[];
 };
+
+// A skill grandma taught that needs an account mom connects once (see lib/agent/connections.ts).
+const CONNECTION_TAG = /\s*\(connection [\w-]+\)/;
+const isConnect = (text: string) => CONNECTION_TAG.test(text) || /Connect her \w+ account\?/i.test(text);
 
 const EMPTY: FamilyData = { events: [], hiddenCount: 0, summary: null, approvedIds: [] };
 
@@ -100,7 +105,7 @@ export default function FamilyApp({ embedded = false }: { embedded?: boolean }) 
     setBusyId(item.event.id);
     try {
       await post({ approve: item.event.id });
-      setNotice(item.request === "taxi" ? T.approvedTaxi : T.approvedOrder);
+      setNotice(isConnect(item.event.text) ? T.connected : item.request === "taxi" ? T.approvedTaxi : T.approvedOrder);
       refresh();
     } catch {
       setNotice(T.approveFail);
@@ -144,18 +149,20 @@ export default function FamilyApp({ embedded = false }: { embedded?: boolean }) 
         </dl>
       </section>
 
+      <HealthCard />
+
       {pending.length > 0 && (
         <section className="fa-approvals" aria-label={T.approvalsLabel}>
           {pending.map((p) => (
             <article key={p.event.id} className="fa-approval">
               <div className="fa-approval-head">
-                <h3>{p.label}</h3>
+                <h3>{isConnect(p.event.text) ? T.lSkill : p.label}</h3>
                 <time>{clock(p.event.at)}</time>
               </div>
-              <p>{p.text}</p>
+              <p>{p.text.replace(CONNECTION_TAG, "")}</p>
               <div className="fa-approval-actions">
                 <button className="fa-btn fa-btn-primary" disabled={busyId === p.event.id} onClick={() => approve(p)}>
-                  {busyId === p.event.id ? T.approving : T.approve}
+                  {busyId === p.event.id ? T.approving : isConnect(p.event.text) ? T.connect : T.approve}
                 </button>
                 <button className="fa-btn" onClick={() => setDismissed((d) => [...d, p.event.id])}>
                   {T.later}
@@ -230,7 +237,7 @@ export default function FamilyApp({ embedded = false }: { embedded?: boolean }) 
                     <span className="fa-item-label">{f.label}</span>
                     <time>{clock(f.event.at)}</time>
                   </div>
-                  <p className="fa-item-text">{f.text}</p>
+                  <p className="fa-item-text">{f.text.replace(CONNECTION_TAG, "")}</p>
                   {approved && <p className="fa-item-note">{T.approved}</p>}
                 </li>
               );

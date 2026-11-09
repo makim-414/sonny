@@ -118,6 +118,22 @@
 - 데모 시계로 날짜가 바뀌면 대화 기록을 비운다. 아침의 "Yes, please" 가 전날 택시 질문의 대답으로 읽힌 적이 있다.
 - 헤맴 감지는 시작 후 2시간 안에만 본다. 전날 미완료 택시 때문에 아침에 헤맴 전화가 걸린 적이 있다.
 
+## 전화로 하는 건강 체크 (13:06 실행)
+
+규칙으로 진행하며 모델은 부르지 않는다(0s). 시작은 `POST /api/agent/health-check {kind}` 나 proactive `health-check:bp|mind` 로 한다. 기억 체크는 우리가 만든 단어 3개와 일상 질문만 쓰고, 상표가 붙은 검사 이름이나 문항은 쓰지 않는다. 모든 리포트 끝에 "Wellness check, not a diagnosis. Share with her doctor." 가 붙는다.
+
+| 흐름 | 결과 |
+|---|---|
+| 혈압 시작 | "Good morning, June. Time for your blood pressure. Put the cuff on, and read me the numbers when it beeps." |
+| "128 over 82, pulse 70" (또는 "one twenty eight over eighty two, pulse seventy") | "Thank you, June. 128 over 82, all written down." 엄마 피드에 "Blood pressure 128/82, pulse 70, in her usual range." |
+| 못 알아들음 → "168 over 102, pulse 88" | 한 번만 다시 묻는다. 범위를 넘으면 health 전화를 건다: "Hi Sarah, it's Sonny. June's blood pressure just now was 168 over 102, pulse 88, which is outside her usual range. Do you want to call her, or her doctor?" `[warn]` 경고도 간다. 할머니께는 "That's a little high, so I'm letting Sarah know. Please sit and rest." |
+| 기억 체크 (월 10:00): 단어 3개 → 요일 → 계절 → 아침 식사 이야기 → 단어 다시 | 할머니께는 점수를 말하지 않는다: "Thank you, June. I always enjoy our chats." 엄마 피드에는 "Weekly memory check: recalled 3 of 3, knew the day and the season, same as last week." |
+| 회상 1/3, 요일과 계절 모두 틀림 | "recalled 1 of 3, was not sure of the day or the season, down from 3 last week." 지난주보다 2개 이상 줄면 `[warn]` 이 간다 |
+
+- 설정은 `GET/POST /api/agent/health-plan` (보호자만)이다. 기본값은 둘 다 켜짐이고, 끄면 그 체크를 시작하지 않는다.
+- 주간 묶음은 `GET /api/agent/health-report` (보호자만)이다. 혈압 기록과 평균, 범위 밖 횟수, 기억 체크 기록이 들어 있다. 첫 비교를 위해 지난 기록 몇 개를 demo 로 시드했다.
+- "stop", "not now" 라고 하면 언제든 부드럽게 멈춘다. reset 은 기록을 시드로 되돌린다.
+
 ## 안전장치
 
 - Haiku 가 도구를 부르지 않고 행동을 말하면 같은 턴을 Sonnet 으로 다시 돌린다(`meta.rerun`). 예: "ordered", "on the way", "I'll remember", "turned it on".

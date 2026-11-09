@@ -14,6 +14,7 @@ import { createTools, DEMO, lessonsThisMonth, shared, type AgentContext } from "
 import { settle, spend } from "./wallet";
 import { connect, connections } from "./connections";
 import { findSkill, skillsOf } from "./skills";
+import { onVoiceWellness, startCheck } from "./wellness";
 import { onIdle, onNudge, onVoice, struggleCheck, taskDone, type Quick } from "./watch";
 import { requestRide } from "./services/ride";
 
@@ -388,6 +389,9 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   // Sonny's own watch: a stuck task, long silences, nudges for mom. Rules, no model.
   if (req.source === "voice") {
     logEvent("heard", req.text, nowIso, { visibility: "private" });
+    // A wellness check in progress (blood pressure, weekly memory chat) takes the turn.
+    const w = onVoiceWellness(req.text, now);
+    if (w) return { ...quickReply(w, req.text, nowIso), heardEn: EN ? req.text : undefined };
     const q = onVoice(req.text, now);
     if (q) return { ...quickReply(q, req.text, nowIso), heardEn: EN ? req.text : undefined };
     // "what?" right after a taxi: the same facts again, shorter, never a different story.
@@ -398,6 +402,11 @@ export async function runAgent(req: AgentRequest, opts: { model?: string } = {})
   } else {
     const q = struggleCheck(now);
     if (q) return quickReply(q, `[${req.source}] ${req.text}`, nowIso);
+  }
+  const hc = req.source === "proactive" ? req.text.trim().match(/^(?:health-check|routine):(bp|mind|blood-pressure|memory)$/) : null;
+  if (hc) {
+    const kind = hc[1] === "bp" || hc[1] === "blood-pressure" ? "bp" : "mind";
+    return quickReply(startCheck(kind, now), `[health-check:${kind}]`, nowIso);
   }
   if (req.source === "proactive" && req.text.trim() === "family-nudge") {
     return quickReply(onNudge(now, (t) => SECRET_TEXT.test(t)), "[family-nudge]", nowIso);

@@ -463,3 +463,72 @@
 .fa-call-btn.is-later {
   background: color-mix(in oklch, var(--call-fg) 18%, var(--call-bg));
 }
+
+/* Health card: readings in ink; out-of-range values in the flat danger color */
+.fa-health {
+  margin: var(--sp-4) var(--sp-4) 0;
+  padding: var(--sp-4);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  display: grid;
+  gap: var(--sp-3);
+}
+.fa-health .fa-section-title {
+  margin-bottom: 0;
+}
+.fa-health-empty {
+  color: var(--text-muted);
+  font-size: var(--t-sm);
+}
+.fa-health-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(calc(var(--sp-16) * 2), 1fr));
+  gap: var(--sp-3);
+}
+.fa-health-block {
+  background: var(--bg-sunken);
+  border-radius: var(--r-md);
+  padding: var(--sp-3);
+  display: grid;
+  gap: var(--sp-1);
+  align-content: start;
+}
+.fa-health-label {
+  font-size: var(--t-xs);
+  font-weight: var(--w-semi);
+  color: var(--text-muted);
+}
+.fa-health-list {
+  list-style: none;
+  display: grid;
+  gap: var(--sp-1);
+}
+.fa-health-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-2);
+}
+.fa-health-value {
+  font-size: var(--t-title);
+  font-weight: var(--w-semi);
+  font-variant-numeric: tabular-nums;
+}
+.fa-health-row.is-out .fa-health-value {
+  color: var(--danger);
+}
+.fa-health-flag {
+  margin-left: var(--sp-2);
+  font-size: var(--t-xs);
+  font-weight: var(--w-semi);
+}
+.fa-health-time {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.fa-health-note {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}

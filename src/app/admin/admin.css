@@ -263,3 +263,43 @@
   font-weight: var(--w-med);
   font-variant-numeric: tabular-nums;
 }
+
+/* health check-ins */
+.ad-health-row {
+  gap: var(--sp-3);
+}
+.ad-health-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.ad-switch {
+  min-height: var(--hit);
+  min-width: calc(var(--sp-16) + var(--sp-2));
+  border-radius: var(--r-card);
+  border: 1px solid var(--border);
+  background: var(--bg-sunken);
+  color: var(--text-muted);
+  font-weight: var(--w-semi);
+  cursor: pointer;
+}
+.ad-switch.is-on {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--brand-fg);
+}
+.ad-switch:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.ad-field select {
+  min-height: var(--hit);
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-card);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--t-input);
+  width: 100%;
+}

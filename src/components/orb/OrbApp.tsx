@@ -205,6 +205,7 @@ export function OrbApp() {
   const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const { now, getNow, forward, jumpTo } = useDemoClock();
   const signal = useRef<OrbSignal>({ mode: "idle", pulse: 0, level: voiceLevel });
+  const callSignal = useRef<OrbSignal>({ mode: "idle", pulse: 0 }); // the buddy on the ringing screen
   const [mode, setModeState] = useState<OrbMode>("idle");
   const [started, setStarted] = useState(false);
   const [line, setLine] = useState<Line | null>(null);
@@ -350,6 +351,7 @@ export function OrbApp() {
       // A happy moment (thanks, something learned): the orb hops once and brightens.
       const happy = `${reply.say} ${reply.actions.map((a) => (a.type === "showCard" ? a.title : "")).join(" ")}`;
       if (/thank|learned|taught|고마|배웠|가르쳐/i.test(happy)) signal.current.joy = 1;
+      if (/learned|taught|remember|배웠|가르쳐|기억/i.test(happy)) signal.current.learn = 1;
       await say(reply.say, reply.sayEn);
     },
     [getNow, runActions, say, setMode, showToast],
@@ -874,7 +876,9 @@ export function OrbApp() {
               <i />
               <i />
               <i />
-              <span className="orb-call-orb" />
+              <span className="orb-call-buddy">
+                <BuddyLook signal={callSignal} ringing />
+              </span>
             </span>
             <h2 className="orb-call-title">{copy().calling}</h2>
           </div>
@@ -917,7 +921,9 @@ export function OrbApp() {
               <i />
               <i />
               <i />
-              <span className="orb-call-orb" />
+              <span className="orb-call-buddy">
+                <BuddyLook signal={callSignal} ringing />
+              </span>
             </span>
             <h2 className="orb-call-title">{copy().calling}</h2>
             <p className="orb-call-sub">{copy().callSub}</p>

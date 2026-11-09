@@ -65,7 +65,8 @@
 /* Resting (no talk for a while): very dim breathing orb that slowly wanders, so a phone
    left on its charger does not burn the same pixels in. */
 .orb-root .orb-canvas { transition: opacity 3s var(--ease-out); }
-.orb-root.is-resting .orb-canvas { opacity: 0.3; animation: orb-drift 240s ease-in-out infinite alternate; }
+/* Not the buddy: it already floats and moves, and dimming turned its yellow a muddy olive. */
+.orb-root.is-resting .orb-canvas:not(.buddy-canvas) { opacity: 0.3; animation: orb-drift 240s ease-in-out infinite alternate; }
 
 .orb-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 /* The WebGL orb draws points only; its soft glow is this gradient behind them. */
@@ -297,6 +298,9 @@
 }
 .orb-call-waves > i:nth-child(2) { animation-delay: 0.8s; }
 .orb-call-waves > i:nth-child(3) { animation-delay: 1.6s; }
+/* The glasses buddy rings inside the waves (2D face until WebGL is ready). */
+.orb-call-buddy { position: absolute; inset: 0; }
+.orb-call-buddy .face-look { width: 62%; height: 62%; }
 @keyframes orb-wave { from { transform: scale(0.7); opacity: 0.9; } to { transform: scale(1.5); opacity: 0; } }
 .orb-call-title { margin: 0; font-size: var(--t-call-title); font-weight: 700; line-height: 1.15; }
 .orb-call-sub { margin: 0; font-size: var(--t-call-sub); color: var(--text-faint); }

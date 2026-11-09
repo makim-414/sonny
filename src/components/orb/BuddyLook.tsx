@@ -22,7 +22,7 @@ const FRAG = `
 precision mediump float;
 uniform vec2 R;
 uniform vec3 C, K, Q, A, P; // brand, light gold, ink, amber, blush
-uniform float Y, X, T, S, B, Bl, W, H, M, L, D, Z; // yaw pitch roll squash height blink wide happy mouth look-up drag grow
+uniform float Y, X, T, S, B, Bl, W, H, M, L, D, Z, G, N; // yaw pitch roll squash height blink wide happy mouth look-up drag grow glasses-lift glasses-on
 mat3 rx(float a){float c=cos(a),s=sin(a);return mat3(1.,0.,0.,0.,c,s,0.,-s,c);}
 mat3 ry(float a){float c=cos(a),s=sin(a);return mat3(c,0.,-s,0.,1.,0.,s,0.,c);}
 mat3 rz(float a){float c=cos(a),s=sin(a);return mat3(c,s,0.,-s,c,0.,0.,0.,1.);}
@@ -45,6 +45,17 @@ float mouth(vec2 q){
   float dShape=soft(length(m)-.045,.005)*dTop;
   float idle=smile*(1.-step(.05,M));
   return mix(max(idle,o),dShape,H);
+}
+// Round reading glasses: two thin gold rims around the eyes and a bridge. Returns rim, shine.
+vec2 glasses(vec2 q){
+  vec2 g=q-vec2(0.,G);
+  float r=.1, w=.011;
+  float rims=max(soft(abs(length(g-vec2(-.15,.05))-r)-w,.005),soft(abs(length(g-vec2(.15,.05))-r)-w,.005));
+  float bridge=soft(abs(g.y-(.07-.25*g.x*g.x))-w*.8,.005)*step(abs(g.x),.05);
+  vec2 s1=g-vec2(-.19,.1), s2=g-vec2(.11,.1);
+  float shine=soft(abs(length(s1)-.055)-.006,.004)*step(s1.x,0.)*step(0.,s1.y)
+             +soft(abs(length(s2)-.055)-.006,.004)*step(s2.x,0.)*step(0.,s2.y);
+  return vec2(max(rims,bridge),shine)*N;
 }
 void main(){
   vec2 uv=(gl_FragCoord.xy-.5*R)/min(R.x,R.y);
@@ -78,7 +89,16 @@ void main(){
     base=mix(base,P,blush*.35*face);
     // eyes close together (spacing 15% of the diameter), a little above the middle
     float ink=max(max(eye(f,vec2(-.15,.05)),eye(f,vec2(.15,.05))),mouth(f))*face;
-    col=vec4(mix(base,Q,ink*.94),1.);
+    vec3 shade=mix(base,Q,ink*.94);
+    vec2 gl=glasses(f)*face;
+    float drop=glasses(f+vec2(-.012,.018)).x*face*(1.-gl.x); // soft shadow: the frame floats off the skin
+    shade=mix(shade,A*.7,drop*.35);
+    // metal frame: dark gold, with a bright line where the rim faces the light
+    float metal=smoothstep(.2,.9,dot(normalize(vec2(abs(f.x)-.15,f.y-.05)+1e-4),vec2(-.6,.8)));
+    vec3 rimCol=mix(mix(A,Q,.45),K,metal*.85);
+    shade=mix(shade,rimCol,gl.x);
+    shade=mix(shade,K,gl.y*.5);                            // glassy lens shine
+    col=vec4(shade,1.);
   }
   gl_FragColor=vec4(col.rgb*col.a,col.a);
 }`;
@@ -92,9 +112,15 @@ function rgb(el: HTMLElement, name: string): [number, number, number] {
   return [r / 255, g / 255, b / 255];
 }
 
-export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
+export function BuddyLook({ signal, ringing = false }: { signal: React.RefObject<OrbSignal>; ringing?: boolean }) {
   const ref = useRef<HTMLCanvasElement | null>(null);
   const [failed, setFailed] = useState(false);
+  // The 2D face shows at once and gives way when the first 3D frame is drawn.
+  const [ready, setReady] = useState(false);
+  const ringRef = useRef(ringing);
+  useEffect(() => {
+    ringRef.current = ringing;
+  }, [ringing]);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -131,7 +157,9 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     const U: Record<string, WebGLUniformLocation | null> = {};
-    for (const n of ["R", "C", "K", "Q", "A", "P", "Y", "X", "T", "S", "B", "Bl", "W", "H", "M", "L", "D", "Z"]) U[n] = gl.getUniformLocation(prog, n);
+    for (const n of ["R", "C", "K", "Q", "A", "P", "Y", "X", "T", "S", "B", "Bl", "W", "H", "M", "L", "D", "Z", "G", "N"]) U[n] = gl.getUniformLocation(prog, n);
+    // Reading glasses are part of the default look (owner, 11/9); ?acc=none takes them off.
+    gl.uniform1f(U.N, new URLSearchParams(window.location.search).get("acc") === "none" ? 0 : 1);
     gl.uniform3fv(U.C, rgb(canvas, "--brand"));
     gl.uniform3fv(U.K, rgb(canvas, "--chart-1"));
     gl.uniform3fv(U.Q, rgb(canvas, "--dark"));
@@ -141,7 +169,8 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      // Every pixel runs the shader, so cap the density: 1.5x is sharp enough for a soft ball.
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       canvas.width = Math.round(canvas.clientWidth * dpr);
       canvas.height = Math.round(canvas.clientHeight * dpr);
       gl.viewport(0, 0, canvas.width, canvas.height);
@@ -190,6 +219,8 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
     window.addEventListener("pointercancel", onUp);
 
     const st = { yaw: 0, pitch: 0, roll: 0, wide: 0, look: 0, voice: 0, bounce: 0 };
+    let drawn = false;
+    let learnAt = -1e9; // when Sonny last learned something (push up the glasses)
     let nextBlink = performance.now() + 3000 + Math.random() * 2000;
     let blinkUntil = 0;
     let last = performance.now();
@@ -208,6 +239,9 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
       st.pitch += (tPitch - st.pitch) * e(aim.active ? 10 : 2);
       if (!dragging) drag += (0 - drag) * e(4);
       const listening = s.mode === "listening" ? 1 : 0;
+      // Ringing: shake side to side in bursts, like a phone on vibrate.
+      const burst = ringRef.current && (t % 1.2) < 0.7 ? 1 : 0;
+      const shake = burst * Math.sin(t * 34) * 0.16;
       st.roll += (drag * 0.5 + listening * 0.14 - st.roll) * e(6);
       st.wide += (listening - st.wide) * e(6);
       st.look += ((s.mode === "thinking" ? 1 : 0) - st.look) * e(5);
@@ -227,10 +261,16 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
       }
       gl.uniform1f(U.Y, st.yaw);
       gl.uniform1f(U.X, st.pitch);
-      gl.uniform1f(U.T, st.roll);
+      gl.uniform1f(U.T, st.roll + shake);
       gl.uniform1f(U.S, Math.max(-0.25, Math.min(0.35, sq * 0.06)));
-      gl.uniform1f(U.B, st.bounce);
+      gl.uniform1f(U.B, st.bounce + burst * Math.abs(Math.sin(t * 9)) * 0.06);
       gl.uniform1f(U.Z, st.voice * 0.06);
+      if ((s.learn ?? 0) > 0) {
+        s.learn = 0;
+        learnAt = now;
+      }
+      const lp = (now - learnAt) / 200; // 200 ms push up and back
+      gl.uniform1f(U.G, lp >= 0 && lp <= 1 ? Math.sin(lp * Math.PI) * 0.03 : 0);
       gl.uniform1f(U.Bl, now < blinkUntil ? 1 : 0);
       gl.uniform1f(U.W, Math.min(1.4, st.wide + st.voice * 0.6)); // eyes open with the voice
       gl.uniform1f(U.H, Math.min(1, happy * 1.4));
@@ -240,6 +280,10 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
+      if (!drawn) {
+        drawn = true;
+        setReady(true);
+      }
       raf = requestAnimationFrame(frame);
     };
     const kick = () => {
@@ -270,5 +314,10 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
   }, [signal]);
 
   if (failed) return <FaceLook look="smiley" signal={signal} />;
-  return <canvas ref={ref} className="orb-canvas buddy-canvas" aria-label="Sonny" />;
+  return (
+    <>
+      {!ready && <FaceLook look="smiley" signal={signal} />}
+      <canvas ref={ref} className="orb-canvas buddy-canvas" aria-label="Sonny" />
+    </>
+  );
 }
