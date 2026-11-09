@@ -91,8 +91,13 @@ void main(){
     float ink=max(max(eye(f,vec2(-.15,.05)),eye(f,vec2(.15,.05))),mouth(f))*face;
     vec3 shade=mix(base,Q,ink*.94);
     vec2 gl=glasses(f)*face;
-    shade=mix(shade,mix(A,Q,.45),gl.x);                    // dark gold rims
-    shade=mix(shade,K,gl.y*.45);                           // one faint lens shine
+    float drop=glasses(f+vec2(-.012,.018)).x*face*(1.-gl.x); // soft shadow: the frame floats off the skin
+    shade=mix(shade,A*.7,drop*.35);
+    // metal frame: dark gold, with a bright line where the rim faces the light
+    float metal=smoothstep(.2,.9,dot(normalize(vec2(abs(f.x)-.15,f.y-.05)+1e-4),vec2(-.6,.8)));
+    vec3 rimCol=mix(mix(A,Q,.45),K,metal*.85);
+    shade=mix(shade,rimCol,gl.x);
+    shade=mix(shade,K,gl.y*.5);                            // glassy lens shine
     col=vec4(shade,1.);
   }
   gl_FragColor=vec4(col.rgb*col.a,col.a);
@@ -147,8 +152,8 @@ export function BuddyLook({ signal }: { signal: React.RefObject<OrbSignal> }) {
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     const U: Record<string, WebGLUniformLocation | null> = {};
     for (const n of ["R", "C", "K", "Q", "A", "P", "Y", "X", "T", "S", "B", "Bl", "W", "H", "M", "L", "D", "Z", "G", "N"]) U[n] = gl.getUniformLocation(prog, n);
-    // Reading glasses were cancelled (owner, 11/9): off by default, ?acc=glasses puts them on.
-    gl.uniform1f(U.N, new URLSearchParams(window.location.search).get("acc") === "glasses" ? 1 : 0);
+    // Reading glasses are part of the default look (owner, 11/9); ?acc=none takes them off.
+    gl.uniform1f(U.N, new URLSearchParams(window.location.search).get("acc") === "none" ? 0 : 1);
     gl.uniform3fv(U.C, rgb(canvas, "--brand"));
     gl.uniform3fv(U.K, rgb(canvas, "--chart-1"));
     gl.uniform3fv(U.Q, rgb(canvas, "--dark"));
