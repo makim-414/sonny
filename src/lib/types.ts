@@ -33,6 +33,7 @@ export type AgentReply = {
   say: string; // spoken out loud on the TV, Korean
   sayEn?: string; // English subtitle for the judges (E key on the TV)
   heardEn?: string; // English translation of what grandma said
+  private?: boolean; // true when this turn was kept from the family (TV shows a lock)
   actions: TvAction[];
 };
 
