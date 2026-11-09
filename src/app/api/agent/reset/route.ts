@@ -1,11 +1,11 @@
 import { resetSession } from "@/lib/agent/session";
-import { resetJsonMemory } from "@/lib/memory/json-store";
+import { getMemory, resetMemory } from "@/lib/memory";
 import { store } from "@/lib/store";
 
 // POST /api/agent/reset : demo reset (memory back to seed, conversation cleared, timers dropped).
 export async function POST() {
   resetSession();
-  await resetJsonMemory();
+  await resetMemory();
   store.pending.length = 0;
-  return Response.json({ ok: true });
+  return Response.json({ ok: true, memory: (await getMemory()).backend });
 }
