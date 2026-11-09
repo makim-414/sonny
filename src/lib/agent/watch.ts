@@ -9,6 +9,7 @@ import type { GuardianCall, TvAction } from "@/lib/types";
 
 const EN = APP_LANG === "en";
 export const STRUGGLE_MS = 10 * 60_000; // demo default; the demo clock can fast-forward
+const STALE_MS = 2 * 60 * 60_000;
 const CONFUSED = /\b(i )?(don'?t|do not) (know|remember)\b|\bwhat\??\s*$|\bhuh\b|\bi forgot\b|\bnot sure\b|\b(uh+|um+|hmm+)\b|\bconfus|모르겠|기억이 안|뭐라고|어\?$/i;
 const RIDE_INTENT = /\b(taxi|cab|ride)\b|택시/i;
 
@@ -52,6 +53,11 @@ export function onVoice(text: string, now: Date): Quick | null {
 export function struggleCheck(now: Date): Quick | null {
   const task = watch.task;
   if (!task || task.called) return null;
+  // An old unfinished task (yesterday's taxi) is dropped, not reported.
+  if (now.getTime() - task.startedAt > STALE_MS) {
+    watch.task = undefined;
+    return null;
+  }
   const minutes = Math.round((now.getTime() - task.startedAt) / 60_000);
   if (task.confused < 2 && now.getTime() - task.startedAt < STRUGGLE_MS) return null;
   task.called = true;
