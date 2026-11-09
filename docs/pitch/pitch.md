@@ -2,57 +2,58 @@
 
 Product name: `[NAME]` (from `PRODUCT_NAME_EN` in `src/lib/brand.ts` once the owner decides). The spoken script does not need it.
 
-Spoken script first, about 300 words (about 1:55 at 160 words per minute; rehearse with a timer and drop the multiplayer sentence if it runs over). Then the judging map, answers to the hard questions, sources and the evidence for the gstack and GBrain prize.
+Spoken script first, about 300 words (about 1:55 at 160 words per minute; rehearse with a timer and drop the gallery sentence if it runs over). Multiplayer vision is in the Q&A, not the spoken script. Then the judging map, answers to the hard questions, sources and the evidence for the gstack and GBrain prize.
 
 ## Spoken script
 
 **Hook (0:00)**
-Pickle covers your whole workday through Zoom. We cover grandma's whole day through her TV.
+Pickle covers your whole workday through Zoom. We cover grandma's whole day.
 
-**Problem (0:07)**
+**Problem (0:06)**
 My grandmother lives alone. My mom sleeps over every third night. Her only outing is the temple. The rest of the day, the TV is on.
 In Korea, more than one in five people is 65 or older, and 38 percent of senior households are one person, alone.
 
-**Pillar one: she hands things off (0:22)**
-So we put a full AI assistant inside her TV. It speaks first: "Did you take your pills? Take an umbrella to the temple." This morning my mom booked grandma a taxi to the hospital from her own phone. Now grandma just says "call me a taxi", and the plate number shows up in huge letters. Groceries, her favorite show, all by voice.
+**One icon (0:20)**
+She will never learn a new app. So we built a screen with nothing to learn. No buttons. No menus. One icon, like the call button she already knows. She taps it, and her assistant is already talking: "Did you take your pills? Take an umbrella to the temple."
 
-**Pillar two: mom stops calling (0:45)**
+**Pillar one: she hands things off (0:35)**
+This morning my mom booked grandma a taxi to the hospital from her own phone. Now grandma just says "call me a taxi", and the plate number shows up in huge letters. Groceries, her favorite show, all by voice.
+
+**Pillar two: mom stops calling (0:48)**
 Mom sees what got done, not what was said. Pills taken, taxi on its way, groceries waiting for her one-tap approval. When grandma says "don't tell my daughter", it doesn't.
 
-**Why she keeps it on (1:00)**
-I ran an art gallery for years. Most of my regulars were retired, and what they loved most was teaching me. Care devices get unplugged because they say "you're old". Ours says "teach me". Grandma is the teacher. Everything she teaches becomes its memory, and with her consent, anonymized, it helps make AI better for everyone.
+**Why she keeps using it (1:00)**
+I ran an art gallery for years. Most of my regulars were retired, and what they loved most was teaching me. Care devices get abandoned because they say "you're old". Ours says "teach me". Everything she teaches becomes its memory, and with her consent, anonymized, it helps make AI better for everyone.
 
-**Why TV, why now (1:20)**
-She will never install an app, but she watches one screen all day. And for the first time, what seniors know is worth teaching to AI.
+**How, and what's next (1:20)**
+One Claude agent with real tools, GBrain as her long-term memory, built today with gstack. Today, one icon on her phone. Next, the same agent on the TV she watches all day: a stick, a box, then the TV itself.
 
-**How (1:30)**
-One Claude agent with real tools, GBrain as her long-term memory, built today with gstack. Today an HDMI stick on the TV she has. Next, the TV itself. Then multiplayer: seniors meeting each other by voice, through their TVs.
-
-**Invite (1:45)**
-Scan this, and be grandma's daughter for 30 seconds.
+**Invite (1:42)**
+Scan the first code and be grandma. Scan the second and be her daughter.
 
 ## How this maps to the three judging criteria
 
 | Criterion | What we say | What we show |
 |---|---|---|
-| Clarity of problem and solution | One real person, one real day. She hands things off; mom sees the results without calling. | The 90 second video follows her day. At the table, the judge becomes mom on their own phone. |
-| Technical implementation | One agent, many real tools (memory, schedule, ride, order, TV guide search, tune, family message), proactive triggers on a fast-forwarding clock, privacy enforced on the server. | Judge's phone to TV and back in seconds. Private lines never reach the phone, not even in the network panel. |
-| Creativity | Three inversions. The interface is the TV she has, not a new device. She is the teacher, not the patient. Mom gets outcomes, not transcripts. | Grandma teaches at 1 pm; the agent uses it unprompted at 3 pm. "Don't tell my daughter" stays off mom's phone. |
+| Clarity of problem and solution | One real person, one real day. A screen with nothing to learn: one icon. She hands things off; mom sees the results without calling. | The 90 second video follows her day. At the table, one judge becomes grandma and another becomes mom, each on their own phone. |
+| Technical implementation | One agent, many real tools (memory, schedule, ride, order, TV guide search, tune, family message), the same agent on phone and TV, privacy enforced on the server. | Grandma's phone to mom's phone and back in seconds. Private lines never reach the phone, not even in the network panel. |
+| Creativity | Three inversions. The interface is one icon and a particle, nothing to learn. She is the teacher, not the patient. Mom gets outcomes, not transcripts. | Grandma teaches at 1 pm; the agent uses it unprompted at 3 pm. "Don't tell my daughter" stays off mom's phone. |
 
 ## One-line answers
 
-- **Why TV?** It is the one screen she already watches all day, so there is nothing new to learn, and it is big enough for a taxi plate number she can actually read.
+- **Why one icon?** She already knows exactly one gesture on her phone: tap a picture to call someone. Our whole interface is that gesture, then her voice. The family installs the icon and signs in once.
+- **Why TV next?** It is the one screen she watches all day, so the agent can speak first even when the phone is in a drawer, and it is big enough for a plate number she can actually read.
 - **Why now?** For the first time, what seniors know (recipes, how a neighborhood works, how to talk to people) is worth teaching to AI, so being taught by grandma is a contribution she can be proud of, not a service she has to accept.
-- **How are we different from Ato?** Ato is a screen-free speaker that talks and relays messages; we live on the screen she already watches, we act for her (rides, groceries, shows) with the family approving anything that costs money, and she is the teacher, not the patient.
+- **How are we different from Ato?** Ato is a screen-free speaker that talks and relays messages; we start from the phone she already has and move onto the TV she already watches, we act for her (rides, groceries, shows) with the family approving anything that costs money, and she is the teacher, not the patient.
 
 ## The three hard questions (office hours) and who pays
 
-1. **"This is a web page. How does it get onto grandma's TV?"**
-   We overlay the TV she already has, in four steps. One: an HDMI stick or USB app, which is what the laptop is doing in this demo. Two: an app on Android TV and Google TV. Three: a pass-through box between the set-top box and the TV that draws the agent over live broadcasts and controls the set-top box over HDMI-CEC or IR. Four: the TV itself.
-2. **"Seniors don't talk to devices, and the TV is loud."**
-   She doesn't have to start. The TV speaks first, by name, at the times she already watches, and she just answers. When she talks, the TV lowers its own volume. And she keeps it on because it asks to be taught, not to take care of her.
+1. **"This is a web page. How does grandma even get to it?"**
+   The family adds it to her home screen as one icon and signs in once. She taps it like the call button. Then the same agent moves onto the TV she already has, in steps. Zero: the phone icon, today. One: an HDMI stick or USB app. Two: an app on Android TV and Google TV. Three: a pass-through box between the set-top box and the TV that draws the agent over live broadcasts and controls the set-top box over HDMI-CEC or IR. Four: the TV itself.
+2. **"Seniors don't talk to devices."**
+   She talks into a phone every day; tapping the icon feels like a call, and the agent speaks first, by name. There is nothing on the screen to get wrong: one particle that gathers in when it listens and ripples when it talks. And she keeps using it because it asks to be taught, not to take care of her.
 3. **"How is this different from Ato, Alexa or the voice remote she already has?"**
-   Those take commands or make check-in calls. Ours lives on her screen all day, acts for her, learns from her, and closes the loop with the family without exposing what she said in private.
+   Those take commands or make check-in calls. Ours needs no new device, starts with one tap, acts for her, learns from her, and closes the loop with the family without exposing what she said in private.
 4. **"Who pays?"**
    The adult child, as a monthly family subscription, because the pain we remove is theirs: the calls to check. Later, bundled by pay-TV operators with their set-top box. (Price not validated yet. If mom gives us a number today, use it here.)
 
@@ -90,4 +91,5 @@ Do not use:
 
 - **"Isn't an agent ordering things for an 80-year-old dangerous?"** Anything that spends money goes to the family first. In the demo, the grocery order waits for mom's tap.
 - **"Will she really talk to a TV?"** This is our riskiest assumption and we have not tested it with her yet. Our bet: she answers when it speaks first, and she keeps it on because it asks to be taught.
+- **"What is the long-term vision?"** Multiplayer: seniors meeting each other by voice through their TVs, with the agent as host.
 - **"What does multiplayer AI mean here?"** Seniors meeting each other by voice on their TVs, with the agent as host: introducing temple friends, keeping the conversation going. No betting or gambling.
