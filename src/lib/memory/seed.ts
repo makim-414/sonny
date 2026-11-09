@@ -1,7 +1,8 @@
+import { APP_LANG } from "@/lib/brand";
 import type { MemoryFact } from "./types";
 
 // Demo grandma. Addresses and names are fake.
-export const SEED_FACTS: Omit<MemoryFact, "id" | "at">[] = [
+const SEED_FACTS_KO: Omit<MemoryFact, "id" | "at">[] = [
   { text: "할머니 성함은 김순자, 연세는 여든둘이시다", category: "family", source: "seed" },
   { text: "가수 임영웅을 아주 좋아하신다. 임영웅 나오는 프로그램은 꼭 보신다", category: "likes", source: "seed" },
   { text: "절에는 매주 화요일과 금요일 아침에 가신다 (집 근처 보현사)", category: "routine", source: "seed" },
@@ -15,7 +16,7 @@ export const SEED_FACTS: Omit<MemoryFact, "id" | "at">[] = [
 
 // Lessons grandma taught earlier this month (demo data). They count toward
 // "이번 달 할머니께 배운 것 N개" and are framed as public-good AI teaching data.
-export const SEED_LESSONS: { text: string; at: string }[] = [
+const SEED_LESSONS_KO: { text: string; at: string }[] = [
   { text: "식혜는 엿기름물을 밥과 함께 보온밥솥에 다섯 시간 두면 밥알이 동동 뜬다", at: "2026-11-01T19:30:00+09:00" },
   { text: "무생채는 고춧가루로 먼저 색을 입힌 뒤 소금을 넣어야 빛깔이 곱다", at: "2026-11-01T19:30:00+09:00" },
   { text: "된장찌개는 멸치 육수에 된장을 체에 걸러 풀어야 텁텁하지 않다", at: "2026-11-02T19:30:00+09:00" },
@@ -47,3 +48,54 @@ export const SEED_LESSONS: { text: string; at: string }[] = [
   { text: "부침개는 반죽에 얼음물을 쓰면 바삭하다", at: "2026-11-08T19:30:00+09:00" },
   { text: "명절 전 시장은 사흘 전에 가야 값이 덜 오른다", at: "2026-11-08T19:30:00+09:00" },
 ];
+
+const SEED_FACTS_EN: Omit<MemoryFact, "id" | "at">[] = [
+  { text: "Grandma's name is Margaret Collins, she is 82 and lives alone", category: "family", source: "seed" },
+  { text: "She is a big Dustin Hoffman fan and never misses a show he is on", category: "likes", source: "seed" },
+  { text: "She plays bingo at the Maple Grove senior center every Tuesday and Friday morning", category: "routine", source: "seed" },
+  { text: "She takes her blood pressure pill every morning at 8", category: "health", source: "seed" },
+  { text: "Her daughter Sarah visits every three days and stays the night", category: "family", source: "seed" },
+  { text: "Her doctor is at Riverside Family Clinic, 45 Oak Avenue (fake address)", category: "place", source: "seed" },
+  { text: "Her home is 12 Maple Street, apartment 2B (fake address)", category: "place", source: "seed" },
+  { text: "Her knees are weak, so long walks are hard for her", category: "health", source: "seed" },
+  { text: "She loves morning talk shows and old movies", category: "likes", source: "seed" },
+];
+
+const SEED_LESSONS_EN: { text: string; at: string }[] = [
+  { text: "Pie crust stays flaky if the butter and the water are ice cold", at: "2026-11-01T19:30:00+09:00" },
+  { text: "A spoon of vinegar in the water keeps poached eggs together", at: "2026-11-01T19:30:00+09:00" },
+  { text: "Chicken soup tastes better the next day, so make it the night before", at: "2026-11-02T19:30:00+09:00" },
+  { text: "Rub a cut onion on a bee sting to ease it", at: "2026-11-02T19:30:00+09:00" },
+  { text: "Put a slice of bread in the cookie jar to keep cookies soft", at: "2026-11-02T19:30:00+09:00" },
+  { text: "Iron shirts while they are still a little damp", at: "2026-11-03T19:30:00+09:00" },
+  { text: "Baking soda and water take the smell out of a cutting board", at: "2026-11-03T19:30:00+09:00" },
+  { text: "Let bread dough rise in a warm oven with only the light on", at: "2026-11-03T19:30:00+09:00" },
+  { text: "Brown the meat in small batches or it steams instead of browning", at: "2026-11-04T19:30:00+09:00" },
+  { text: "A raw potato soaks up extra salt in a soup", at: "2026-11-04T19:30:00+09:00" },
+  { text: "Store tomatoes on the counter, not in the fridge", at: "2026-11-04T19:30:00+09:00" },
+  { text: "Wrap celery in foil and it stays crisp for weeks", at: "2026-11-05T19:30:00+09:00" },
+  { text: "The farmers market on Saturday has the best peaches before 9", at: "2026-11-05T19:30:00+09:00" },
+  { text: "Lemon and salt clean a copper pot", at: "2026-11-05T19:30:00+09:00" },
+  { text: "Warm milk with honey helps you fall asleep", at: "2026-11-05T19:30:00+09:00" },
+  { text: "Keep a wooden spoon across a pot so it does not boil over", at: "2026-11-06T19:30:00+09:00" },
+  { text: "Old newspaper cleans windows without streaks", at: "2026-11-06T19:30:00+09:00" },
+  { text: "Freeze grapes for a cool summer snack", at: "2026-11-06T19:30:00+09:00" },
+  { text: "Write the date on every jar of jam you make", at: "2026-11-06T19:30:00+09:00" },
+  { text: "Put rice in the salt shaker so the salt does not clump", at: "2026-11-07T19:30:00+09:00" },
+  { text: "Soak beans overnight and they cook in half the time", at: "2026-11-07T19:30:00+09:00" },
+  { text: "A cold spoon on puffy eyes in the morning helps", at: "2026-11-07T19:30:00+09:00" },
+  { text: "Mashed potatoes are fluffier with warm milk", at: "2026-11-07T19:30:00+09:00" },
+  { text: "Coffee grounds keep slugs away from the garden", at: "2026-11-07T19:30:00+09:00" },
+  { text: "When you feel dizzy, sit down and put your head toward your knees", at: "2026-11-08T19:30:00+09:00" },
+  { text: "Plant tulip bulbs in the fall before the first frost", at: "2026-11-08T19:30:00+09:00" },
+  { text: "Cast iron pans should be dried on the stove so they do not rust", at: "2026-11-08T19:30:00+09:00" },
+  { text: "Hang a sock of cedar chips in the closet to keep moths away", at: "2026-11-08T19:30:00+09:00" },
+  { text: "Sweep the porch before guests come, it makes the house look loved", at: "2026-11-08T19:30:00+09:00" },
+  { text: "Call the pharmacy a week before the pills run out", at: "2026-11-08T19:30:00+09:00" },
+];
+
+export const SEED_FACTS = APP_LANG === "en" ? SEED_FACTS_EN : SEED_FACTS_KO;
+export const SEED_LESSONS = APP_LANG === "en" ? SEED_LESSONS_EN : SEED_LESSONS_KO;
+export const SEED_PROVENANCE = APP_LANG === "en" ? "seed: Margaret taught this in a talk with Sonny (demo data)" : "seed: 김순자 할머니가 TV 대화에서 가르침 (demo data)";
+export const TAUGHT_BY = APP_LANG === "en" ? "Margaret taught this in a talk with Sonny" : "김순자 할머니가 TV 대화에서 가르침";
+export const CORRECTED_BY = APP_LANG === "en" ? "Margaret corrected this" : "김순자 할머니가 정정함";
