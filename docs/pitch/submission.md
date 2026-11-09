@@ -70,7 +70,7 @@ The current README has the one-liner and run steps. Before submitting, make sure
 
 - [ ] Rehearse `docs/pitch/pitch.md` with a timer (target 1:55, hard stop 2:00).
 - [ ] The TV runs full screen on a real monitor or TV over HDMI, not on the laptop screen.
-- [ ] QR on the TV points to `/family` on a URL the judges' phones can reach. Current tunnel (changes if the tunnel restarts): https://implemented-articles-industrial-engines.trycloudflare.com/family . Scan it with a phone on mobile data to confirm right before judging.
+- [ ] QR on the TV points to `/family` on the on-site tunnel address (the TV builds the QR from its current address; the tunnel URL changes on every restart, so never hard-code it). Scan it with a phone on mobile data to confirm right before judging.
 - [ ] Reset the store just before judging so the judge sees a clean feed.
 - [ ] Rehearse the judge loop three times: scan, tap "오늘 저녁 7시에 갈게요", TV reads it, presenter answers as grandma, the reply card fills on the judge's phone.
 - [ ] Fallbacks ready: TV text input if the mic fails, phone hotspot if Wi-Fi fails, the 90 second video on the desktop if both fail.
