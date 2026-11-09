@@ -2,11 +2,12 @@
 
 Deliverables: a 90 second demo video (Loom or YouTube) and a public GitHub repo URL. Judging starts at 15:00. Presentation in English.
 
-State when this list was written (10:30): repo `makim-414/hyodo-tv` is **private**, default branch `build`, rename pending. First commit 10:03:48 KST (after the 10:00 start, so the repo is eligible).
+State when this list was written (10:30): repo `makim-414/hyodo-tv` is **private**, default branch `build`, rename pending (repo name and product name `[NAME]` both come from the owner; the product name lives in `src/lib/brand.ts`). First commit 10:03:48 KST (after the 10:00 start, so the repo is eligible).
 
 ## 1. Repo, before making it public
 
 - [ ] All session branches merged into `build` by the integration session (TV screen, agent brain, family app and pitch).
+- [ ] Final product name set in `src/lib/brand.ts` (`PRODUCT_NAME`, `PRODUCT_NAME_EN`), and `[NAME]` filled in across `docs/pitch/`.
 - [ ] Final repo name decided. If renamed, update the GitHub URL in the README, the video end card and the submission form.
 - [ ] No secrets. The API key lives only in the macOS keychain (`anthropic-hackathon-key`) and `package.json` only reads it. Check before going public:
 
@@ -69,7 +70,7 @@ The current README has the one-liner and run steps. Before submitting, make sure
 
 - [ ] Rehearse `docs/pitch/pitch.md` with a timer (target 1:55, hard stop 2:00).
 - [ ] The TV runs full screen on a real monitor or TV over HDMI, not on the laptop screen.
-- [ ] QR on the TV points to `/family` on a URL the judges' phones can reach (the integration session's tunnel, or the venue Wi-Fi IP). Scan it with a phone on mobile data to confirm before judging.
+- [ ] QR on the TV points to `/family` on a URL the judges' phones can reach. Current tunnel (changes if the tunnel restarts): https://implemented-articles-industrial-engines.trycloudflare.com/family . Scan it with a phone on mobile data to confirm right before judging.
 - [ ] Reset the store just before judging so the judge sees a clean feed.
 - [ ] Rehearse the judge loop three times: scan, tap "오늘 저녁 7시에 갈게요", TV reads it, presenter answers as grandma, the reply card fills on the judge's phone.
 - [ ] Fallbacks ready: TV text input if the mic fails, phone hotspot if Wi-Fi fails, the 90 second video on the desktop if both fail.

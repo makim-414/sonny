@@ -1,5 +1,7 @@
 # Pitch (under 2 minutes, English)
 
+Product name: `[NAME]` (from `PRODUCT_NAME_EN` in `src/lib/brand.ts` once the owner decides). The spoken script does not need it.
+
 Spoken script first, about 300 words (about 1:55 at 160 words per minute; rehearse with a timer and drop the multiplayer sentence if it runs over). Then the judging map, answers to the hard questions, sources and the evidence for the gstack and GBrain prize.
 
 ## Spoken script

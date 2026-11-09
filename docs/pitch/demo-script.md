@@ -2,6 +2,8 @@
 
 One day in grandma's life, told through her TV and mom's phone.
 
+Product name: `[NAME]` everywhere in this file. The name lives in one place, `PRODUCT_NAME_EN` in `src/lib/brand.ts`; fill it in from there when the owner decides.
+
 Two rules shape this cut:
 - **Narrow beats wide** (gstack office hours): one loop is shown for real and in depth. Grandma speaks, the TV acts, she teaches it, mom's phone gets the result.
 - **Her whole day** (owner): everything else she gets help with is shown as a fast, clearly labelled card montage that follows the clock.
@@ -114,7 +116,7 @@ Fast cards, each about 2 seconds, the clock jumping forward. Corner label on all
 
 - Screen: a four-step strip: "1. HDMI stick" / "2. Android and Google TV app" / "3. Pass-through box over the set-top box" / "4. The TV itself". Then the TV shows a big QR code.
 - Narration: "Pickle covers your whole workday through Zoom. We cover grandma's whole day through her TV. Today a stick, next the TV itself. Scan this, and be grandma's daughter for 30 seconds."
-- End card: product name, GitHub URL, "Built in 5 hours at c0mpiled-17 Seoul with Claude, GBrain and gstack".
+- End card: `[NAME]`, GitHub URL, "Built in 5 hours at c0mpiled-17 Seoul with Claude, GBrain and gstack".
 
 ## Live demo at the judging table (not the video)
 
