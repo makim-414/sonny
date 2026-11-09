@@ -4,17 +4,19 @@ The form asks for three things: the 90 second demo video, the GitHub repo (https
 
 ## Short description (paste into the form)
 
-**Tagline (6 words):** Sonny: the grandkid who's always home.
+Words: use the language of authority and money (errand runner, orders, allowance, funds, veto). Avoid the usual elder-care words (care, companion, help, assist).
 
-Backup taglines: "Grandma just talks. Mom stops worrying." / "A voice agent for parents who live alone."
+**Tagline (1st choice):** Grandma isn't the patient. She's the boss.
 
-**About 50 words (52):**
+Other taglines: "Sonny: the grandkid who's always home." / "Grandma gives the orders. Sonny gets them done."
 
-Sonny is the grandkid who's always home: a voice agent for parents who live alone. Grandma taps one icon and talks. Sonny handles pills, rides and groceries from an allowance mom tops up, calls mom before anything big, and learns what grandma teaches. Mom sees what got done, never what was said.
+**About 50 words (45):**
 
-**About 150 words (147):**
+Sonny is an AI errand runner for parents who live alone. Grandma isn't the patient, she's the boss: she gives the orders out loud, Sonny gets them done with the allowance mom sets, and calls mom only when something is big, strange, or she's stuck.
 
-Sonny is the grandkid who's always home: a voice agent for parents who live alone, paid for by their worried adult children. Today those children are already their parent's remote agent: this morning my mom booked my grandmother's taxi from her own phone, then called to check. Sonny takes that job. Grandma taps one icon, nothing to learn, and Sonny speaks first: pills, weather, the day ahead. She asks for a ride or groceries and it's paid from an allowance mom tops up; anything big or strange, Sonny calls mom first. Grandma teaches Sonny her recipes and routines, and it remembers. Mom sees what got done, never what was said. Built with a Claude agent calling real tools, GBrain for long-term memory, Kokoro for the voice and Silero VAD for hands-free listening, all self-hostable open source. Next: a TV dongle for the screen she watches all day.
+**About 150 words (146):**
+
+Grandma isn't the patient. She's the boss. Every elder-care app watches grandma; Sonny works for her. It is an AI errand runner for parents who live alone: she taps one icon and gives the orders out loud, and Sonny books the taxi, orders the groceries and keeps her schedule, paid from an allowance her daughter funds. Mom holds the veto: anything big or strange, or a task grandma is stuck on, and Sonny calls mom first. Today the daughter does these errands herself; this morning my mom booked my grandmother's taxi from her own phone. Sonny takes that job. Mom sees what got done, never what was said. Built with a Claude agent calling real tools, GBrain for long-term memory, Kokoro for the voice and Silero VAD for hands-free listening, all self-hostable open source. Next: the same errand runner on the TV she watches all day.
 
 ## Checklist
 
@@ -56,7 +58,7 @@ gh repo edit makim-414/sonny --visibility public --accept-visibility-change-cons
 
 The current README has the one-liner and run steps. Before submitting, make sure it has, in this order:
 
-- [ ] One-line pitch: "Pickle covers your whole workday through Zoom. We cover grandma's whole day through her TV."
+- [ ] One-line pitch: "Grandma isn't the patient. She's the boss." Then: "Every elder-care app watches grandma. Sonny works for her: she gives the orders out loud, mom funds it and holds the veto."
 - [ ] The demo video link at the top (YouTube or Loom).
 - [ ] The core message first: a screen with nothing to learn. "No buttons. No menus. One icon, like the call button she already knows." A GIF of the tap and the particle.
 - [ ] Two pillars: grandma hands things off to the agent; mom sees what got done, not what was said.

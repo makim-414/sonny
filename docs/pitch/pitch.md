@@ -1,6 +1,6 @@
 # Sonny: pitch (under 2 minutes, English)
 
-Spoken script first (v3, matches `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V3.md`), about 220 words (about 1:25 at 160 words per minute, leaving room for pauses; rehearse with a timer; the gallery story is in the Q&A now). Then the judging map, answers to the hard questions, sources, and the evidence for the gstack and GBrain prize. Ten judge questions with two-sentence answers: `docs/pitch/qa.md`.
+Spoken script first (v3, matches `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V3.md`), about 250 words (about 1:35 at 160 words per minute, leaving room for pauses; rehearse with a timer; the gallery story is in the Q&A now). Then the judging map, answers to the hard questions, sources, and the evidence for the gstack and GBrain prize. Ten judge questions with two-sentence answers: `docs/pitch/qa.md`.
 
 - **Customer:** the daughter (45 to 60) of a parent who lives alone pays. Grandma uses it. Speak to mom, and to every judge who has an aging parent.
 - **Insight:** "Mom is already grandma's assistant. Sonny takes the job."
@@ -8,7 +8,7 @@ Spoken script first (v3, matches `/Users/makim/_sessions/c0mpiled-17/video/DEMO-
 
 ## Spoken script
 
-Motif: the phone rings. Sentence to leave behind: "Mom is already grandma's assistant. Sonny takes the job."
+Motif: the phone rings. Killer line: "Grandma isn't the patient. She's the boss." Sentence to leave behind: "Mom is already grandma's assistant. Sonny takes the job."
 
 **Hook (0:00)**
 Sonny is the grandkid who's always home. Grandma just talks. Mom stops worrying.
@@ -16,7 +16,10 @@ Sonny is the grandkid who's always home. Grandma just talks. Mom stops worrying.
 **The insight (0:06)**
 My grandmother lives alone. This morning at 8:04, my mom booked her a taxi from her own phone. Mom is already grandma's assistant. Sonny takes the job. She is one of 63 million family caregivers in America, one in four adults.
 
-**Sonny calls first (0:22)**
+**She's the boss (0:20)**
+Grandma isn't the patient. She's the boss. Every elder-care app watches grandma. Sonny works for her: she gives the orders out loud, mom funds it and holds the veto.
+
+**Sonny calls first (0:30)**
 Most seniors own a phone; apps and setup are the barrier. So Sonny is one icon, and Sonny calls first: "Morning, June. Sarah's staying tonight. Groceries for two?" Paid from an allowance mom tops up.
 
 **When she gets stuck (0:38)**

@@ -3,6 +3,7 @@
 Source of truth for the cut: `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V3.md` (main session, 11:50). This file is the line-by-line version.
 
 - **The one image to remember: the phone rings.** Sonny opens every moment as a call, on grandma's phone and on mom's. The last shot is both phones ringing together.
+- **Killer line (owner's pick):** "Grandma isn't the patient. She's the boss." It opens the solution, right after the problem (scene 3).
 - **The one sentence to remember:** "Mom is already grandma's assistant. Sonny takes the job."
 - **Comparison line:** "Companions talk. Sonny gets things done, and calls mom."
 - **Business line:** "Paid by the family, monthly." (Add mom's price when we have it.)
@@ -28,7 +29,7 @@ Source of truth for the cut: `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V3.m
 |---|---|---|---|---|
 | 1 | 0:00 to 0:04 | The founder facing camera; behind them, grandma's back and the TV (or a selfie, or a title card) | "This is my grandma. She lives alone, and this morning my mom booked her taxi." | |
 | 2 | 0:04 to 0:10 | The blurred taxi receipt (`docs/pitch/assets/taxi-receipt-blurred.jpg`), zoom to 8:04 AM; then a globe turning to the U.S. in gold: "63 million · 1 in 4 U.S. adults" (source small: NAC and AARP, 2025) | | "Mom is grandma's assistant." |
-| 3 | 0:10 to 0:13 | A plain Android home screen, one Sonny icon; the particle blooms | | "One icon. No app to learn." |
+| 3 | 0:10 to 0:13 | A plain Android home screen, one Sonny icon; the particle blooms | "Grandma isn't the patient. She's the boss." | "One icon. No app to learn." |
 | 4 | 0:13 to 0:24 | Grandma's phone: "Sonny is calling". She answers. Sonny: "Morning, June. Sarah's staying tonight. Groceries for two?" June: "Yes, please." An allowance payment card. Right side, mom's phone feed: "Groceries ordered, $18 from allowance" | | "Sonny calls first." |
 | 5 | 0:24 to 0:40 | June tries to book a taxi and can't name the clinic. Sonny: "No rush, June. I'll ask Sarah to help." Mom's phone: "Sonny is calling", the Kokoro voice reads the request, mom taps "Book it for her". Grandma's screen: the taxi card with the plate in huge letters | "When grandma gets stuck, Sonny doesn't make her feel slow. It quietly calls mom." | "Stuck? Sonny quietly calls mom." |
 | 6 | 0:40 to 0:48 | June: "Order 2000 burgers." Sonny: "Did you mean 2, or 2,000?" Fast: over the limit, mom's phone rings | | "Anything strange waits for mom." |
