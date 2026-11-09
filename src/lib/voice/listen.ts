@@ -1,4 +1,4 @@
-// Speech to text with the browser Web Speech API (ko-KR).
+// Speech to text with the browser Web Speech API (ko-KR by default).
 // Chrome exposes it as webkitSpeechRecognition. No keys needed.
 
 type RecognitionAlternative = { transcript: string };
@@ -42,14 +42,14 @@ export type ListenHandlers = {
 export type Listener = { stop(): void; abort(): void };
 
 // Starts one listening turn. Ends by itself after the speaker pauses.
-export function listenOnce(handlers: ListenHandlers): Listener | null {
+export function listenOnce(handlers: ListenHandlers, lang = "ko-KR"): Listener | null {
   const Ctor = getCtor();
   if (!Ctor) {
     handlers.onError?.("unsupported");
     return null;
   }
   const rec = new Ctor();
-  rec.lang = "ko-KR";
+  rec.lang = lang;
   rec.continuous = false;
   rec.interimResults = true;
   rec.maxAlternatives = 1;
