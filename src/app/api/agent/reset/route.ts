@@ -1,3 +1,4 @@
+import { syncShared } from "@/lib/shared-state";
 import { familyState } from "@/app/api/family/state";
 import { resetSession } from "@/lib/agent/session";
 import { shared } from "@/lib/agent/tools";
@@ -11,6 +12,7 @@ import { store } from "@/lib/store";
 // GBrain run entity); conversation, health log, pending approvals, calls, the TV inbox,
 // TV timers, mom's feed and her approvals cleared; wallet back to $80.
 export async function POST() {
+  await syncShared();
   resetSession();
   await resetMemory();
   shared.health.length = 0;

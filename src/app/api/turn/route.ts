@@ -1,3 +1,4 @@
+import { syncShared } from "@/lib/shared-state";
 // POST /api/turn
 // "Has grandma finished talking?" Older speakers pause mid-sentence ("um... so..."),
 // and a loudness-only VAD cuts them off. The screen sends the recent audio of the
@@ -9,6 +10,7 @@ const STT_URL = process.env.STT_URL ?? "http://127.0.0.1:3201";
 const MAX_BYTES = 10 * 1024 * 1024;
 
 export async function POST(request: Request) {
+  await syncShared();
   const contentType = request.headers.get("content-type") ?? "application/octet-stream";
   const audio = await request.arrayBuffer();
   if (audio.byteLength === 0) {

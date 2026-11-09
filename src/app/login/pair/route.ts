@@ -1,3 +1,4 @@
+import { syncShared } from "@/lib/shared-state";
 import { randomUUID } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { familyState } from "@/app/api/family/state";
@@ -6,6 +7,7 @@ import { DEVICE_COOKIE, DEVICE_TTL, cookieOptions, deviceToken, readPair } from 
 // GET /login/pair?token=... : grandma's phone opened the pairing QR from the admin.
 // The phone gets a long-lived device cookie and lands on her one-icon screen.
 export async function GET(request: NextRequest) {
+  await syncShared();
   const ticket = readPair(request.nextUrl.searchParams.get("token"));
   if (!ticket) return NextResponse.redirect(new URL("/login/device?expired=1", request.url));
 

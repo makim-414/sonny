@@ -1,9 +1,11 @@
+import { syncShared } from "@/lib/shared-state";
 import { runAgent } from "@/lib/agent/run";
 import { warmLiveGuide } from "@/lib/epg/live";
 import type { AgentRequest } from "@/lib/types";
 
 // POST /api/agent: AgentRequest in, AgentReply out (+ meta for debugging).
 export async function POST(request: Request) {
+  await syncShared();
   let body: Partial<AgentRequest>;
   try {
     body = (await request.json()) as Partial<AgentRequest>;
@@ -24,6 +26,7 @@ export async function POST(request: Request) {
 // GET /api/agent : start (or check) the background TVmaze cache fill for the English
 // demo. It lives here because the cache is per module copy and POST reads it.
 export async function GET() {
+  await syncShared();
   const s = warmLiveGuide();
   return Response.json(
     s

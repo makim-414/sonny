@@ -506,9 +506,10 @@
 }
 .fa-health-row {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: baseline;
-  gap: var(--sp-2);
+  gap: 0 var(--sp-2);
 }
 .fa-health-value {
   font-size: var(--t-title);
@@ -531,4 +532,190 @@
 .fa-health-note {
   font-size: var(--t-xs);
   color: var(--text-muted);
+}
+
+/* signed-in family member and the demo switch */
+.fa-member {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 0 var(--sp-4) var(--sp-3);
+}
+.fa-member-name {
+  font-size: var(--t-sm);
+  font-weight: var(--w-semi);
+}
+.fa-member-switch {
+  min-height: var(--hit);
+  max-width: 50%;
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-card);
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--text);
+  font-size: var(--t-sm);
+}
+
+/* grandma's allowance on mom's phone */
+.fa-allowance {
+  margin: var(--sp-4) var(--sp-4) 0;
+  padding: var(--sp-4);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  display: grid;
+  gap: var(--sp-3);
+}
+.fa-allowance-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+.fa-allowance-balance {
+  font-size: var(--t-h2);
+  font-weight: var(--w-semi);
+  font-variant-numeric: tabular-nums;
+}
+.fa-stats.fa-stats-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.fa-allowance-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+.fa-allowance-actions .fa-btn {
+  padding: 0 var(--sp-2);
+  min-width: 0;
+}
+.fa-allowance-demo {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+
+/* This week dashboard: KPI cards and two small chart panels, ink only, danger for out of range */
+.wd {
+  margin: var(--sp-4) var(--sp-4) 0;
+  display: grid;
+  gap: var(--sp-3);
+}
+.wd .fa-section-title {
+  margin-bottom: 0;
+}
+.wd-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+.wd-kpi {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  padding: var(--sp-3);
+  display: grid;
+  gap: var(--sp-1);
+  align-content: start;
+  min-width: 0;
+}
+.wd-kpi-label {
+  font-size: var(--t-xs);
+  font-weight: var(--w-semi);
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-2);
+}
+.wd-demo {
+  font-weight: var(--w-reg);
+  color: var(--text-muted);
+}
+.wd-kpi-value {
+  font-size: var(--t-h2);
+  font-weight: var(--w-semi);
+  line-height: var(--lh-snug);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.wd-kpi-sub {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.wd-charts {
+  display: grid;
+  gap: var(--sp-2);
+}
+.wd-panel {
+  margin: 0;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  padding: var(--sp-3);
+  display: grid;
+  gap: var(--sp-2);
+}
+.wd-panel-title {
+  font-size: var(--t-xs);
+  font-weight: var(--w-semi);
+  color: var(--text-muted);
+}
+.wd-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.wd-axis {
+  font-size: var(--t-micro);
+  fill: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.wd-ref {
+  stroke: var(--danger);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0.6;
+}
+.wd-line-sys,
+.wd-line-dia {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+.wd-line-sys {
+  stroke: var(--text);
+}
+.wd-line-dia {
+  stroke: var(--text-muted);
+}
+.wd-pt {
+  fill: var(--text);
+}
+.wd-pt-dia {
+  fill: var(--text-muted);
+}
+.wd-pt.is-out {
+  fill: var(--danger);
+}
+.wd-bar {
+  fill: var(--text-muted);
+}
+.wd-out {
+  fill: var(--text);
+}
+.wd-note {
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+@media (min-width: 768px) {
+  .wd-charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+/* the admin places it wide: four KPIs in one row */
+@media (min-width: 1024px) {
+  .wd-wide .wd-kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }

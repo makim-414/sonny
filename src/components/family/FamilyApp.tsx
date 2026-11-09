@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ActivityEvent } from "@/lib/types";
 import { clock, toFeedItem, type FeedItem, type Summary } from "./derive";
+import { switchMember } from "@/app/family/actions";
+import AllowanceCard, { type Me, type WalletSummary } from "./AllowanceCard";
 import HealthCard from "./HealthCard";
+import WeekDashboard from "./WeekDashboard";
 import IncomingCall from "./IncomingCall";
 import LightPage from "./LightPage";
 import { T } from "./strings";
@@ -17,6 +20,9 @@ type FamilyData = {
   hiddenCount: number;
   summary: Summary | null;
   approvedIds: string[];
+  me?: Me | null;
+  members?: { email: string; name: string; relation: string; role: "admin" | "member" }[];
+  wallet?: WalletSummary;
 };
 
 // A skill grandma taught that needs an account mom connects once (see lib/agent/connections.ts).
@@ -128,6 +134,27 @@ export default function FamilyApp({ embedded = false }: { embedded?: boolean }) 
         </div>
         <span className={online ? "fa-live" : "fa-live fa-live-off"} aria-hidden />
       </header>
+      {!embedded && data.me && (
+        <div className="fa-member">
+          <p className="fa-member-name">
+            {data.me.name} · {data.me.relation}
+          </p>
+          {data.members && data.members.length > 1 && (
+            <select
+              className="fa-member-switch"
+              aria-label={T.switchMember}
+              value={data.me.email}
+              onChange={(e) => void switchMember(e.target.value).then(() => refresh())}
+            >
+              {data.members.map((m) => (
+                <option key={m.email} value={m.email}>
+                  {m.name} · {m.relation}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
 
       <section className="fa-summary" aria-label={T.todayTitle}>
         <h2 className="fa-summary-title">{T.todayTitle}</h2>
@@ -148,6 +175,10 @@ export default function FamilyApp({ embedded = false }: { embedded?: boolean }) 
           </div>
         </dl>
       </section>
+
+      <AllowanceCard wallet={data.wallet ?? null} onChanged={() => void refresh()} />
+
+      <WeekDashboard />
 
       <HealthCard />
 

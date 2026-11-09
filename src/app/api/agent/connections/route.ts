@@ -1,3 +1,4 @@
+import { syncShared } from "@/lib/shared-state";
 import { connect, connections } from "@/lib/agent/connections";
 import { currentGuardian } from "@/lib/auth/server";
 import { logEvent, store } from "@/lib/store";
@@ -5,10 +6,12 @@ import { logEvent, store } from "@/lib/store";
 // GET  /api/agent/connections        -> "Connected for grandma" list (masked, demo)
 // POST /api/agent/connections { id } -> the guardian connects one (guardian only)
 export async function GET() {
+  await syncShared();
   return Response.json({ connections });
 }
 
 export async function POST(request: Request) {
+  await syncShared();
   const who = await currentGuardian();
   if (!who) return Response.json({ error: "only the guardian can connect accounts" }, { status: 403 });
   const body = (await request.json().catch(() => null)) as { id?: string } | null;
