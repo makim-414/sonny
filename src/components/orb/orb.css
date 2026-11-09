@@ -1,42 +1,41 @@
 /* Phone orb screen. All colors and sizes are tokens in this block. */
 
 .orb-root {
-  --bg: #05060a;
-  --text: #f4f1ea;
-  --text-faint: rgba(244, 241, 234, 0.55);
-  --text-ink: #111216;
-  --user-text: rgba(159, 224, 255, 0.75);
-  --card-bg: rgba(22, 24, 30, 0.92);
-  --card-border: rgba(255, 231, 176, 0.35);
-  --highlight: #ffd84a;
-  --start-bg: rgba(255, 231, 176, 0.14);
-  --start-glow: rgba(255, 205, 130, 0.35);
+  /* Colors only from the DS core (tokens.css) and the Sonny theme (theme-sonny.css). */
+  --dark: var(--background);
+  --light: var(--foreground);
+  --bg: var(--dark);
+  --text: var(--light);
+  /* Faint but readable: about 7:1 on the dark background (WCAG AA needs 4.5:1). */
+  --text-faint: color-mix(in oklab, var(--light) 62%, var(--dark));
+  --text-ink: var(--accent-fg);
+  --user-text: color-mix(in oklab, var(--chart-2) 85%, var(--dark));
+  --card-bg: color-mix(in oklab, var(--popover) 92%, transparent);
+  --card-border: color-mix(in oklab, var(--chart-1) 35%, transparent);
+  --highlight: var(--brand);
+  --start-bg: color-mix(in oklab, var(--chart-1) 16%, var(--dark));
+  --start-glow: color-mix(in oklab, var(--brand) 35%, transparent);
   --start-size: clamp(96px, 26vw, 128px);
   --t-start: clamp(24px, 6vw, 30px);
-  --orb-core: #ffe7b0;
-  --orb-edge: #8cbcff;
-  --orb-glow: rgba(255, 205, 130, 0.16);
+  --orb-core: var(--chart-1);
+  --orb-edge: var(--chart-2);
+  --orb-glow: var(--brand);
   --t-hint: 18px;
   --t-line: clamp(15px, 1.6vw, 20px);
   --t-card-title: clamp(30px, 4.4vw, 56px);
   --t-card-body: clamp(22px, 2.8vw, 36px);
   --t-card-num: clamp(88px, 12vw, 160px);
-  --sp-2: 8px;
-  --sp-3: 12px;
-  --sp-4: 16px;
-  --sp-6: 24px;
-  --sp-8: 32px;
-  --r-md: 14px;
-  --r-card: 28px;
-  --dur: 420ms;
-  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --r-md: var(--r-xl);
+  --r-card: var(--r-4xl);
+  --dur: var(--dur-modal);
 
   position: fixed;
   inset: 0;
   overflow: hidden;
   background: var(--bg);
   color: var(--text);
-  font-family: "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  font-family: var(--font-geist-sans), "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
   word-break: keep-all;
   user-select: none;
   -webkit-user-select: none;

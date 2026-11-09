@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { OrbApp } from "@/components/orb/OrbApp";
 import { PRODUCT_NAME } from "@/lib/brand";
+import { THEME_COLOR } from "./manifest";
+import "@/styles/theme-sonny.css";
 import "@/components/orb/orb.css";
 
 // Grandma's phone home-screen app: one particle orb, no buttons.
@@ -22,7 +24,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#05060a",
+  themeColor: THEME_COLOR,
 };
 
 export default function Home() {

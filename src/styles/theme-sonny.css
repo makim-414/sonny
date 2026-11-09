@@ -1,0 +1,29 @@
+/* Sonny product theme: the one place for colors the neutral DS core does not have
+   (the warm gold of the orb and captions, the fake channel pictures, the character).
+   Per the DS rule it only overrides --brand and --chart-*; screens derive shades and
+   transparency from these with color-mix(). Scoped to the Sonny screens so the family
+   app keeps the plain core. */
+
+.tv-root,
+.orb-root,
+.rm-root {
+  --brand: #ffd84a; /* warm gold: highlights, Start glow, captions labels */
+
+  --chart-1: #ffe7b0; /* light gold: orb core, suns, sparkles */
+  --chart-2: #8cbcff; /* sky blue: orb edge, grandma's words, river */
+  --chart-3: #0b2a5b; /* night navy: news studio */
+  --chart-4: #c8102e; /* signal red: news ticker, temple door */
+  --chart-5: #3a0b58; /* stage purple */
+  --chart-6: #a0157a; /* stage magenta */
+  --chart-7: #ff9a5a; /* sunset orange, lantern */
+  --chart-8: #a8406a; /* dusk rose */
+  --chart-9: #3a1b2e; /* plum shadow: houses, people */
+  --chart-10: #4f9a6a; /* hill green */
+  --chart-11: #8fd3ff; /* daytime sky */
+  --chart-12: #b48a5e; /* temple earth */
+  --chart-13: #0f8f8a; /* exercise teal */
+  --chart-14: #ff6f7d; /* lantern pink, cheeks */
+  --chart-15: #b9a6ff; /* private lavender (lock toast) */
+  --chart-16: #ffd9b8; /* character skin */
+  --chart-17: #3b2a22; /* character hair */
+}

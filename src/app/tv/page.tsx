@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { TvApp } from "@/components/tv/TvApp";
 import { PRODUCT_NAME } from "@/components/tv/brand";
+import "@/styles/theme-sonny.css";
 import "./tv.css";
 
 export const metadata: Metadata = {

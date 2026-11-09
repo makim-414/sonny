@@ -1,30 +1,24 @@
 /* Phone remote styles. Colors and sizes live in the token block below. */
 
 .rm-root {
-  --bg: #000000;
-  --bg-elev: #1a1c22;
-  --bg-press: #2b2e36;
-  --border: #4a4e58;
-  --text: #ffffff;
-  --text-muted: #b9bdc6;
-  --text-ink: #111216;
-  --highlight: #ffd84a;
-  --danger: #ff6b5e;
+  /* Colors only from the DS core (tokens.css) and the Sonny theme (theme-sonny.css). */
+  --bg: var(--background);
+  --bg-elev: var(--popover);
+  --bg-press: var(--secondary);
+  --border: var(--ring);
+  --text: var(--foreground);
+  --text-muted: var(--muted-foreground);
+  --text-ink: var(--accent-fg);
+  --highlight: var(--brand);
   --t-h1: 28px;
   --t-big: 30px;
   --t-body: 22px;
   --t-sm: 18px;
   --w-semi: 700;
   --w-bold: 800;
-  --sp-2: 8px;
-  --sp-3: 12px;
-  --sp-4: 16px;
-  --sp-6: 24px;
-  --r-md: 14px;
-  --r-card: 28px;
-  --r-pill: 999px;
-  --dur-fast: 140ms;
-  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --r-md: var(--r-xl);
+  --r-card: var(--r-4xl);
+  --dur-fast: var(--dur-press);
 
   min-height: 100dvh;
   width: 100%;
@@ -36,13 +30,14 @@
   gap: var(--sp-4);
   background: var(--bg);
   color: var(--text);
-  font-family: "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  font-family: var(--font-geist-sans), "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
   word-break: keep-all;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 
-html:has(.rm-root), body:has(.rm-root) { background: var(--bg, #000000); }
+body:has(.rm-root) { background: var(--background); }
 
 .rm-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
 .rm-title { margin: 0; font-size: var(--t-h1); font-weight: var(--w-bold); }

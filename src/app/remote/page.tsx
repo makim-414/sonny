@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { ASSISTANT_NAME } from "@/components/tv/brand";
 import { RemoteApp } from "./RemoteApp";
+import { THEME_COLOR } from "../manifest";
+import "@/styles/theme-sonny.css";
 import "./remote.css";
 
 export const metadata: Metadata = {
@@ -10,7 +12,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#000000",
+  themeColor: THEME_COLOR,
 };
 
 export default function RemotePage() {
