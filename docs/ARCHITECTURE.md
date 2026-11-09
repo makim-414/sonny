@@ -11,7 +11,13 @@ Changing channels is one tool, not the product.
 | `/family` | Mom, on her phone | Live activity feed, alerts, send a message or command to the TV |
 | `POST /api/agent` | The TV | `AgentRequest` in, `AgentReply` out (see `src/lib/types.ts`) |
 | `GET /api/events` | Family app | Activity log |
-| `POST /api/family` | Family app | Mom sends a message or a command to the TV |
+| `POST /api/family` | Family app | Mom sends a message or a command to the TV (goes into `store.tvInbox`) |
+| `GET /api/family/inbox` | The TV | TV polls every 3 s, takes and clears `store.tvInbox`, then sends each item to `/api/agent` with `source: "family"` |
+
+Scheduling runs on the TV side: when the agent returns a `schedule` action, the TV keeps the timer against its own demo clock (which can fast-forward) and runs the inner action when due.
+Every route that does something writes one line with `logEvent` so the family feed shows it.
+
+Dev ports: TV screen session 3101, agent brain session 3102, family session 3103, integration 3000.
 
 ## Agent tools (inside `src/lib/agent`)
 

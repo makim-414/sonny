@@ -6,12 +6,14 @@ type Store = {
   events: ActivityEvent[];
   pending: { at: string; action: TvAction; label: string }[];
   currentChannel: number | null;
+  // Messages or commands from the family app, waiting for the TV to pick up.
+  tvInbox: { id: string; at: string; from: string; text: string }[];
 };
 
 const g = globalThis as unknown as { __hyodoStore?: Store };
 
 export const store: Store =
-  g.__hyodoStore ?? (g.__hyodoStore = { events: [], pending: [], currentChannel: null });
+  g.__hyodoStore ?? (g.__hyodoStore = { events: [], pending: [], currentChannel: null, tvInbox: [] });
 
 export function logEvent(kind: ActivityEvent["kind"], text: string, at = new Date().toISOString()) {
   const event: ActivityEvent = { id: crypto.randomUUID(), at, kind, text };
