@@ -24,8 +24,6 @@ export async function POST() {
   resetWatch();
   store.calls.length = 0;
   store.pending.length = 0;
-  store.events.length = 0; // mom's feed starts empty for each demo take
-
   store.currentChannel = null;
   // Wallet back to the demo seed ($80, family OK above $30), same as store.ts.
   store.wallet = {
