@@ -41,10 +41,12 @@ export function todaysPrograms(now: Date = new Date()): Program[] {
     }
   }
 
-  // Guaranteed 임영웅 shows: one on now, one starting about 30 minutes later.
-  const t = now.getTime();
-  const nowStart = t - 20 * 60_000;
-  const laterStart = Math.ceil((t + 25 * 60_000) / (5 * 60_000)) * 5 * 60_000;
+  // Guaranteed 임영웅 shows: one on now, one starting at the next half hour.
+  // Anchored to the half-hour so repeated calls inside one window agree.
+  const HALF = 30 * 60_000;
+  const anchor = Math.floor(now.getTime() / HALF) * HALF;
+  const nowStart = anchor - 15 * 60_000;
+  const laterStart = anchor + HALF;
   const heroes: Program[] = [
     {
       channel: HERO_NOW_CHANNEL,
