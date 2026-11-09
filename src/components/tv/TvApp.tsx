@@ -733,8 +733,9 @@ export function TvApp() {
         </aside>
       )}
 
+      {/* Sonny lives in the bottom-right corner; the caption is its speech bubble. */}
+      <TvBuddy mood={mood} className="is-corner" />
       <section className={`tv-caption ${captionVisible ? "is-open" : ""} ${userTurn ? "is-user" : ""}`} aria-live="polite">
-        <TvBuddy mood={mood} />
         <div className="tv-caption-bubble">
           <span className="tv-caption-who">{userTurn ? COPY.userSays : ASSISTANT_NAME}</span>
           <p className="tv-caption-text">

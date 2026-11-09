@@ -43,6 +43,8 @@
   /* layout */
   --mic-size: clamp(150px, 12vw, 230px);
   --avatar-size: clamp(170px, 15vw, 290px);
+  /* the ball is about half its box, so this makes Sonny about 14% of the screen width */
+  --corner-size: clamp(280px, 26vw, 480px);
 
   /* avatar */
   --av-skin: var(--chart-16);
@@ -322,8 +324,8 @@
 
 .tv-caption {
   position: absolute;
-  left: var(--gutter);
-  right: calc(var(--gutter) * 2 + var(--mic-size));
+  left: calc(var(--gutter) * 2 + var(--mic-size));
+  right: calc(var(--corner-size) * 0.72);
   bottom: var(--gutter);
   display: flex;
   align-items: flex-end;
@@ -407,6 +409,27 @@
 /* ---------- 3D buddy (same look as the phone) ---------- */
 
 .tv-buddy { position: relative; flex: none; width: var(--avatar-size); height: var(--avatar-size); }
+/* Always on screen, bottom right, about 14% of the width; no frame, only a soft shadow. */
+.tv-buddy.is-corner {
+  position: absolute;
+  right: calc(var(--corner-size) * -0.12);
+  bottom: calc(var(--corner-size) * -0.08);
+  width: var(--corner-size);
+  height: var(--corner-size);
+  filter: drop-shadow(0 12px 24px color-mix(in oklab, var(--dark) 70%, transparent));
+  z-index: 2;
+}
+/* Speech bubble tail pointing at Sonny */
+.tv-caption:not(.is-user) .tv-caption-bubble { position: relative; }
+.tv-caption:not(.is-user) .tv-caption-bubble::after {
+  content: "";
+  position: absolute;
+  right: calc(var(--sp-6) * -1);
+  bottom: var(--sp-8);
+  border: var(--sp-3) solid transparent;
+  border-left-color: var(--bg-caption);
+  border-left-width: var(--sp-6);
+}
 .tv-buddy.is-boot { width: clamp(220px, 22vw, 380px); height: clamp(220px, 22vw, 380px); }
 .tv-buddy canvas, .tv-buddy svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 /* 2D fallback face when WebGL is missing */
@@ -420,7 +443,7 @@
 
 .tv-mic {
   position: absolute;
-  right: var(--gutter);
+  left: var(--gutter); /* Sonny holds the bottom-right corner */
   bottom: var(--gutter);
   width: var(--mic-size);
   height: var(--mic-size);
@@ -524,7 +547,7 @@
 .tv-qr {
   position: absolute;
   right: var(--gutter);
-  bottom: calc(var(--gutter) * 2 + var(--mic-size));
+  bottom: calc(var(--corner-size) * 0.8);
   display: flex;
   gap: var(--sp-3);
 }
