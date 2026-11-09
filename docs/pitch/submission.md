@@ -38,12 +38,13 @@ The current README has the one-liner and run steps. Before submitting, make sure
 
 - [ ] One-line pitch: "Pickle covers your whole workday through Zoom. We cover grandma's whole day through her TV."
 - [ ] The demo video link at the top (YouTube or Loom).
-- [ ] Two pillars first: grandma hands things off to the agent; mom sees what got done, not what was said.
+- [ ] The core message first: a screen with nothing to learn. "No buttons. No menus. One icon, like the call button she already knows." A GIF of the tap and the particle.
+- [ ] Two pillars: grandma hands things off to the agent; mom sees what got done, not what was said.
 - [ ] What it does in 5 bullets: speaks first (medicine, weather), taxi to the hospital, learns from grandma (memory, lesson counter), groceries with family approval, family messages both ways, favorite show (one tool among many).
-- [ ] Distribution in four steps: HDMI stick or USB app, Android and Google TV app, HDMI pass-through box over the set-top box (CEC or IR), the TV itself.
+- [ ] Distribution in five steps: 0 phone web app on the home screen (today), 1 HDMI stick or USB app, 2 Android and Google TV app, 3 HDMI pass-through box over the set-top box (CEC or IR), 4 the TV itself.
 - [ ] Screenshot or GIF: TV screen next to mom's phone.
 - [ ] How it works: one Claude agent with tools (memory, schedule, ride, order, EPG search, tune, family notify), TV web app, family web app, shared activity log. Link `docs/ARCHITECTURE.md`.
-- [ ] Run: `pnpm install`, then `pnpm dev`, open `/tv` and `/family`. Explain the key comes from the keychain item `anthropic-hackathon-key`, or set `ANTHROPIC_API_KEY` yourself.
+- [ ] Run: `pnpm install`, then `pnpm dev`, open `/` (grandma), `/family` (mom), `/tv` (TV mode). Explain the key comes from the keychain item `anthropic-hackathon-key`, or set `ANTHROPIC_API_KEY` yourself.
 - [ ] Honest notes: ride and grocery services are mocked; TV guide is seed data cut from a real Korean listing; voice uses the browser's Web Speech API (Chrome).
 - [ ] Built at c0mpiled-17 Seoul, 2026-11-09, YC Fall 2026 RFS "AI for the Aging Population" (not in the Winter 2027 list; do not claim it is).
 - [ ] A clear line for the gstack and GBrain side prize: "Built with GBrain (grandma's long-term memory, with provenance and corrections) and gstack (office hours, review)." Link `docs/gstack/` as evidence.
@@ -52,7 +53,7 @@ The current README has the one-liner and run steps. Before submitting, make sure
 
 ## 4. Demo video
 
-- [ ] Recorded following `docs/pitch/demo-script.md` (TV on the left, phone on the right, English subtitles burned in).
+- [ ] Recorded following `docs/pitch/shot-list.md` and `docs/pitch/demo-script.md` (grandma's phone on the left, mom's phone on the right, English subtitles on Korean lines).
 - [ ] Length 1:30 or less. Check the exported file, not the editor timeline.
 - [ ] Audio: Korean voices audible, English subtitles readable on a phone screen.
 - [ ] Labels for anything mocked are visible on screen.
@@ -69,12 +70,13 @@ The current README has the one-liner and run steps. Before submitting, make sure
 ## 6. Live presentation and the QR demo
 
 - [ ] Rehearse `docs/pitch/pitch.md` with a timer (target 1:55, hard stop 2:00).
-- [ ] The TV runs full screen on a real monitor or TV over HDMI, not on the laptop screen.
-- [ ] QR on the TV points to `/family` on the on-site tunnel address (the TV builds the QR from its current address; the tunnel URL changes on every restart, so never hard-code it). Scan it with a phone on mobile data to confirm right before judging.
-- [ ] Reset the store just before judging so the judge sees a clean feed.
-- [ ] Rehearse the judge loop three times: scan, tap "오늘 저녁 7시에 갈게요", TV reads it, presenter answers as grandma, the reply card fills on the judge's phone.
-- [ ] Fallbacks ready: TV text input if the mic fails, phone hotspot if Wi-Fi fails, the 90 second video on the desktop if both fail.
-- [ ] Second phone with `/family` open as "mom" for the approval tap.
+- [ ] Two QR codes the judges can scan, on a printed card or a screen: "Be grandma" opens `/`, "Be her daughter" opens `/family`. Both use the on-site tunnel address (it changes on every restart, so generate or check them right before judging). Scan both with a phone on mobile data.
+- [ ] The presenter's phone has the `[NAME]` icon on its home screen, signed in, as the backup grandma.
+- [ ] Reset the store just before judging so the judges see a clean feed.
+- [ ] Rehearse the judge loop three times: judge one scans "Be grandma" and talks, judge two scans "Be her daughter" and taps "오늘 저녁 7시에 갈게요", grandma's phone reads it, judge one answers, the reply card fills on judge two's phone.
+- [ ] Mic permission: iOS Safari asks on first use; have the judge tap Allow. If a phone blocks the mic, hand over the presenter's phone.
+- [ ] Optional: `/tv` on a monitor over HDMI to show "next, her TV" (boot screen with `?boot`).
+- [ ] Fallbacks: typed input on `/` if the mic fails, phone hotspot if Wi-Fi fails, the 90 second video on the desktop if both fail.
 
 ## Timeline (from STATUS.md and office hours)
 

@@ -18,7 +18,7 @@ Two pillars to land:
 ## Recording setup
 
 - Left half: grandma's phone (`/`, the particle screen). Right half: mom's phone (`/family`). Both at phone size, side by side.
-- English subtitles burned in. Korean audio stays.
+- Language follows `APP_LANG` in `src/lib/brand.ts`. With `"ko"`: Korean audio, English subtitles burned in. With `"en"`: grandma and the agent speak the subtitle lines in English, and no subtitles are needed for them.
 - The time of day is an edit overlay in the top corner (07:50, 09:40, ...), not something the app has to show.
 - Grandma's lines: recorded by a family member or read by the presenter. No real face, name or address on screen.
 - Anything not live gets a small corner label: "demo data", "ride service mocked", "demo count".
