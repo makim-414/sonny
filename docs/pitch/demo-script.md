@@ -5,7 +5,7 @@ Source of truth for the cut: `/Users/makim/_sessions/c0mpiled-17/video/DEMO-V4.m
 Order: my scene → the numbers → the product (allowance, agent, calls mom when grandma is stuck) → the goal → going to market (phone → TV → device) → the vision.
 
 - **Motif: the phone rings.** Sonny opens every moment as a call; the last shot is both phones ringing together.
-- **Killer line:** "Grandma isn't the patient. She's the boss."
+- **Character:** "Sonny is a little yellow cockatiel. Parrots learn by repeating what you teach them, and so does Sonny." (the yellow parrot on grandma's screen; `docs/screens/00-sonny.png`)
 - **Goal line:** "Sonny handles the errands, so family can just be family."
 - **Core message (owner):** "Families don't want to be caretakers. They want to be family. Grandma wants mom to call and say hi, not to manage her errands. Sonny takes the errands, so mom can live her day with peace of mind, and the call home is just a call home." (narration or captions around scenes 3 and 9)
 - **Vision line:** "The easiest first step into AI for the oldest generation. Then health check-ins, then the rest of their daily life."
@@ -21,7 +21,7 @@ Order: my scene → the numbers → the product (allowance, agent, calls mom whe
 | 1 | 0:00 to 0:07 | The founder centered on a couch facing camera; behind them on the sofa, grandma and the TV in profile | "This morning, I saw my mom calling a taxi for my grandmother, to the hospital." | | Seedance live action 1 (intro); fallback a title card |
 | 2 | 0:07 to 0:10 | The blurred taxi receipt (`docs/pitch/assets/taxi-receipt-blurred.jpg`), zoom to 8:04 | | "Mom is grandma's assistant." | Photo |
 | 3 | 0:10 to 0:16 | Two number cards, one per screen | "63 million Americans care for family. 1 in 4 adults." then "27 hours a week." (source small: NAC and AARP, 2025) | | Motion |
-| 4 | 0:16 to 0:19 | A plain phone home screen, one Sonny icon, "Sonny is calling" | | "Grandma isn't the patient. She's the boss." | Real screen |
+| 4 | 0:16 to 0:19 | A plain phone home screen, one Sonny icon, "Sonny is calling" | | "One icon. No app to learn." | Real screen |
 | 5 | 0:19 to 0:32 | Grandma's phone: answer, greeting and offer, June: "Do my Sunday groceries." Sonny runs the list she taught once; allowance payment card. Mom's phone: "Groceries ordered, from allowance" | | "Mom loads the allowance. Grandma just says it." | Real screen |
 | 6 | 0:32 to 0:37 | Grandma's hand hesitating over the phone | (captions only) | | Seedance live action 2 (B-roll A) |
 | 7 | 0:37 to 0:50 | June tries to book a taxi and gets lost. Sonny: "No rush, June. I'll ask Sarah to help." Mom's phone: "Sonny is calling", the request read aloud, "Book it for her". The taxi card on grandma's screen | "When grandma gets stuck, Sonny doesn't make her feel slow. It quietly calls mom." | "Stuck? Sonny quietly calls mom." | Real screen |

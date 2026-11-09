@@ -1,13 +1,13 @@
 # Sonny: judge Q&A (thirteen questions, two sentences each)
 
-Killer line, use it once early: "Grandma isn't the patient. She's the boss."
+Character line, use it once early: "Sonny is a little yellow cockatiel. Parrots learn by repeating what you teach them, and so does Sonny."
 
 Say the first sentence; add the second only if they lean in. Numbers are sourced in `docs/pitch/pitch.md` ("Numbers we use"); anything marked estimate is ours.
 
 | # | Question | Answer |
 |---|---|---|
 | 1 | **What is it?** | Sonny is an AI errand runner for parents who live alone: grandma taps one icon and gives the orders out loud, and Sonny gets them done (rides, groceries, reminders) with the allowance mom funds. When something is big, strange, or she gets stuck, Sonny calls her daughter first, so mom stops calling all day to check. |
-| 2 | **Isn't this just another elder-care app?** | Every elder-care app watches grandma. Sonny works for her: grandma isn't the patient, she's the boss, giving the orders out loud while mom funds the allowance and holds the veto. |
+| 2 | **Isn't this just another elder-care app?** | Every elder-care app watches grandma. Sonny works for her: she gives the orders out loud, while mom funds the allowance and holds the veto. |
 | 3 | **How is this an agent, not a chatbot?** | Grandma programs it by teaching: she says how she does her Sunday groceries once, and Sonny runs that procedure with her allowance. Teach it once, and it is done her way from then on, with mom's veto on anything big or strange. |
 | 4 | **Who needs this most?** | The daughter, 45 to 60, whose parent lives alone; she pays, and today she is already her mom's remote assistant, booking rides from her own phone and calling to check. There are 63 million family caregivers in the U.S., one in four adults, up 45% since 2015 (NAC and AARP, 2025). |
 | 5 | **How do you know?** | This morning at 8:04 my mom booked my grandmother's taxi from her own phone; we have the receipt, and that is the job Sonny takes over. Caregivers average 27 hours a week and 84% handle three or more everyday tasks (NAC and AARP, 2025); we have not yet tested Sonny with my grandmother herself, which is our next step. |

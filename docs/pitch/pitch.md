@@ -8,7 +8,7 @@ Spoken script first (v4, matches `/Users/makim/_sessions/c0mpiled-17/video/DEMO-
 
 ## Spoken script (v4 order)
 
-Order: my scene, the numbers, the product, the goal, going to market, the vision. Motif: the phone rings. Killer line: "Grandma isn't the patient. She's the boss."
+Order: my scene, the numbers, the product, the goal, going to market, the vision. Motif: the phone rings. Character: "Sonny is a little yellow cockatiel. Parrots learn by repeating what you teach them, and so does Sonny."
 
 **My scene (0:00)**
 This morning, I saw my mom calling a taxi for my grandmother, to the hospital. Mom is already grandma's assistant.
@@ -17,7 +17,7 @@ This morning, I saw my mom calling a taxi for my grandmother, to the hospital. M
 She is one of 63 million Americans who care for family, one in four adults, giving 27 hours a week. Families don't want to be caretakers. They want to be family. Grandma wants mom to call and say hi, not to manage her errands. Sonny takes the errands, so mom can live her day with peace of mind, and the call home is just a call home.
 
 **The product (0:30)**
-So we built Sonny, the grandkid who's always home. Grandma isn't the patient. She's the boss. One icon on her phone, and Sonny calls first. Mom loads the allowance; grandma just says it: "Do my Sunday groceries." She teaches Sonny how she likes things done, once, and Sonny does it that way from then on. When she gets stuck, Sonny doesn't make her feel slow. It quietly calls mom. Anything big or strange waits for mom's OK, and mom sees what got done, not what was said.
+So we built Sonny, the grandkid who's always home. Sonny is a little yellow cockatiel. Parrots learn by repeating what you teach them, and so does Sonny. One icon on her phone, and Sonny calls first. Mom loads the allowance; grandma just says it: "Do my Sunday groceries." She teaches Sonny how she likes things done, once, and Sonny does it that way from then on. When she gets stuck, Sonny doesn't make her feel slow. It quietly calls mom. Anything big or strange waits for mom's OK, and mom sees what got done, not what was said.
 
 **The goal (1:12)**
 Sonny handles the errands, so family can just be family.
@@ -67,14 +67,14 @@ Why the TV is worth it (confirmed numbers, one at a time, never added together):
 |---|---|---|
 | Clarity of problem and solution | Mom is already grandma's agent (this morning's taxi receipt). Sonny takes that job: grandma just talks, mom stops worrying. | The video follows one day. At the table, one judge is grandma and another is mom, each on their own phone. |
 | Technical implementation | One agent with real tools (memory, schedule, ride, order, allowance, call the guardian, TV guide, family message). Signed sessions, one-QR device pairing, privacy enforced on the server. Self-hostable open source, every project 1,000+ stars (`docs/OPEN_SOURCE.md`). | Grandma's order rings mom's phone in seconds; mom's "no" reaches grandma. Private lines never reach mom's phone, not even in the network panel. |
-| Creativity | Three inversions. The interface is one icon, nothing to learn. Grandma is the teacher, not the patient. Mom gets outcomes, not transcripts, and the veto on anything big. | Grandma teaches at 1 PM; Sonny uses it unprompted the next morning. "Don't tell my daughter" stays off mom's phone. |
+| Creativity | Three inversions. The interface is one icon, nothing to learn. Grandma is the teacher. Mom gets outcomes, not transcripts, and the veto on anything big. | Grandma teaches at 1 PM; Sonny uses it unprompted the next morning. "Don't tell my daughter" stays off mom's phone. |
 
 ## One-line answers
 
 - **Why one icon?** She already knows exactly one gesture on her phone: tap a picture to call someone. Our whole interface is that gesture, then her voice; mom installs it and signs it in once.
 - **Why TV next?** It is the one screen she watches all day, so Sonny can speak first even when the phone is in a drawer, and it is big enough for a plate number she can actually read.
 - **Why now?** For the first time, what seniors know is worth teaching to AI, so being taught by grandma is a contribution she can be proud of, not a service she has to accept; and agents can finally act (book, pay, call) instead of just chat.
-- **How are we different from Ato?** "Companions talk. Sonny gets things done, and calls mom." Ato is a screen-free speaker that talks and relays messages; Sonny acts for her (rides, groceries, payments), calls mom when grandma is stuck or something is strange, and grandma is the teacher, not the patient.
+- **How are we different from Ato?** "Companions talk. Sonny gets things done, and calls mom." Ato is a screen-free speaker that talks and relays messages; Sonny acts for her (rides, groceries, payments), calls mom when grandma is stuck or something is strange, and grandma is the teacher.
 - **Business, one line:** "Paid by the family, monthly." (Add mom's number when we have it.)
 
 ## The hard questions (office hours) and who pays
