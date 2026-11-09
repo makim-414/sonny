@@ -1,9 +1,9 @@
 "use client";
 
 // Hands-free turn taking with Silero VAD (@ricky0123/vad-web). It only decides when grandma
-// starts and stops talking; the words still come from Web Speech. Assets come from /api/tts/vad/.
+// starts and stops talking; the words still come from Web Speech. Assets are static files in /vad/ (copied from node_modules by scripts/copy-vad.mjs).
 
-const ASSETS = "/api/tts/vad/";
+const ASSETS = "/vad/";
 
 export type Vad = { start(): void; pause(): void; destroy(): void; setSilenceMs(ms: number): void };
 

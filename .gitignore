@@ -42,3 +42,6 @@ next-env.d.ts
 
 # local Claude worktrees
 .claude/
+
+# VAD assets copied from node_modules at dev/build time
+/public/vad/
