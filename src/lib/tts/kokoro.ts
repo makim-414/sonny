@@ -12,7 +12,8 @@ const SAMPLE_RATE = 24_000;
 // A little slower than normal so older ears catch every word (owner, 11/9). Clients may pass speed.
 export const DEFAULT_SPEED = 0.85;
 
-env.cacheDir = process.env.TTS_CACHE_DIR || path.join(os.homedir(), ".cache", "hyodo-tts");
+// Vercel functions can only write to /tmp, so the model downloads there on a cold start.
+env.cacheDir = process.env.TTS_CACHE_DIR || (process.env.VERCEL ? "/tmp/hyodo-tts" : path.join(os.homedir(), ".cache", "hyodo-tts"));
 
 const g = globalThis as unknown as { __kokoro?: Promise<KokoroTTS> };
 

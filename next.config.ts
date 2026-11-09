@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   // kokoro-js reads its voice files from its own package folder, so it must not be bundled.
   serverExternalPackages: ["kokoro-js"],
+  // Its voice files are read at runtime, so the Vercel function bundle must carry them.
+  outputFileTracingIncludes: {
+    "/api/tts": ["./node_modules/kokoro-js/voices/**"],
+  },
   partialPrefetching: true,
   turbopack: {
     rules: {

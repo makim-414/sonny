@@ -57,7 +57,8 @@ export function proxy(request: NextRequest) {
   const isApi = path.startsWith("/api/") || path === "/remote/api" || path === "/admin/data";
 
   // Judges' QR codes: sign in as the demo account and continue, no form.
-  if (url.searchParams.get("demo") === "1") {
+  // On by default for the hackathon; DEMO_MODE=0 turns the shortcut off.
+  if (process.env.DEMO_MODE !== "0" && url.searchParams.get("demo") === "1") {
     const clean = new URL(url);
     clean.searchParams.delete("demo");
     const add: [string, string][] = [];
